@@ -543,6 +543,7 @@ styles:
       {
         padding-bottom   : 1em;
         border-left      : thick solid #F5F5F5;
+        _border-left     : none; /* for IE6 */
       }
 
       #toc li ul:hover
