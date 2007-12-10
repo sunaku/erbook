@@ -1,0 +1,2 @@
+desc: manual page for UNIX
+code: raise NotImplementedError, 'this format is not yet implemented'

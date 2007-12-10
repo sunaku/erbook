@@ -1,0 +1,607 @@
+<%
+  # parameters for Gerbil
+  $unindent = '  '
+
+  # parameters for the HTML format
+  $title   = "Gerbil #{GENERATOR[:version]} user guide"
+  $authors = {'Suraj N. Kurapati' => 'http://rassmalog.rubyforge.org/blog/'}
+  $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
+
+  # local variables for this document
+  mailing_list_url = 'http://rubyforge.org/mailman/listinfo/gerbil-talk'
+  mailing_list_link = link(mailing_list_url, "project mailing list")
+  download_url = 'http://rubyforge.org/frs/?group_id=4905'
+
+  # XXX: declare variables used below (due to binding / block scope trickery)
+  common_template_vars = nil
+%>
+
+<% chapter "Introduction" do %>
+  Gerbil is an *extensible document generator* based on "eRuby":http://www.ruby-doc.org/docs/ProgrammingRuby/html/web.html#S2 that outputs to any format you want: "plain text":http://en.wikipedia.org/wiki/Plain_text, "HTML (web page)":http://en.wikipedia.org/wiki/XHTML, "LaTeX":http://www.latex-project.org/, "UNIX man page":http://en.wikipedia.org/wiki/Man_page, your own custom format, and so on.
+
+  Gerbil is *lighter* and more *flexible* than "DocBook":http://www.docbook.org, "Deplate":http://deplate.sourceforge.net, and "SiSU":http://www.jus.uio.no/sisu/SiSU/ because it is small, fast, and lets you <%= xref "HelloWorld", "define your own custom format" %>. Furthermore, Gerbil is *scriptable* unlike raw text generators such as "AsciiDoc":http://www.methods.co.nz/asciidoc/, "txt2tags":http://txt2tags.sourceforge.net, and "Grutatxt":http://www.triptico.com/software/grutatxt.html because it lets you inject Ruby code directly into your documents for advanced data processing and dynamic document manipulation.
+
+  Gerbil is *open-source software* (see <%= xref "License" %>) so feel free to contribute your improvements and discuss your ideas in the <%= mailing_list_link %>.
+
+  <% section "Features" do %>
+    * Composed of *less than 200 lines* of code!
+    * Lets you <%= xref 'HelloWorld', '*define your own* document format' %>.
+    * Supports *any text-based output* format.
+    * Generates a *table of contents* automatically.
+  <% end %>
+
+  <% section "License" do %>
+    <%=h File.read('LICENSE') %>
+  <% end %>
+
+  <% section "Project links" do %>
+    * "Project website":<%= GENERATOR[:website] %> - official project home page.
+    * "Announcements":http://gerbil.rubyforge.org/rss.xml - project news feed. !http://gerbil.rubyforge.org/images/feed-icon-14x14.png!
+    * "Download area":<%= download_url %> - place to obtain release packages.
+    * "Mailing list":<%= mailing_list_url %> - ask questions, get help, discuss.
+  <% end %>
+<% end %>
+
+<% chapter "Setup" do %>
+  <% section "Requirements" do %>
+    Your system needs the following software in order to run Gerbil.
+
+    |_. Software                                            |_. Notes                                        |
+    | "Ruby":http://ruby-lang.org                           | version 1.8 or newer is required               |
+    | "RedCloth":http://whytheluckystiff.net/ruby/redcloth/ | required by the default *html* document format |
+    | "CodeRay":http://coderay.rubychan.de/                 | required by the default *html* document format |
+
+    If your system has "RubyGems":http://rubygems.org/, then you can install RedCloth, and CodeRay by running the following command:
+
+      gem install -y redcloth coderay
+  <% end %>
+
+  <% section "Installation" do %>
+    If your system has "RubyGems":http://rubygems.org/, then you can install Gerbil by running the following commands:
+
+      gem install -y gerbil
+      gerbil -v
+
+    Otherwise, follow these instructions:
+    # Download the newest release package from "RubyForge's file release system for Gerbil":<%= download_url %>.
+    # Extract the release package anywhere you want on your system.
+    # Go inside the extracted directory and run the following command:
+      <pre>ruby gerbil -v</pre>
+
+    If the installation was successful, then you will see output like this: <pre><%=h `ruby gerbil -v` %></pre>
+
+    Otherwise, you can ask for help in the <%= mailing_list_link %>.
+  <% end %>
+
+  <% section "Manifest" do %>
+    Now that Gerbil is installed on your system, let us examine its installation directory.
+    * If you installed Gerbil manually, then you already know the location of its installation directory.
+    * If you installed Gerbil using RubyGems, then run <pre>gerbil -v</pre> and pick out the right-most item in the output because that is the path of Gerbil's installation directory.
+
+    Inside Gerbil's installation directory, you will see (among other things) the following items:
+    * <tt>doc/</tt> - contains the user guide and other documentation.
+    * <tt>format/</tt> - contains the predefined set of format specification files. If you ever need to install your custom format specification file globally, put it inside this directory.
+    <% Dir.glob(File.join(GENERATOR[:home], 'format', '*.yaml')).each do |file|
+    %>
+    ** <tt><%= File.basename(file) %></tt> - <%= YAML.load_file(file)['desc'] %>
+    <% end %>
+    * <tt>gerbil</tt> - main source code of Gerbil. This file is executed when you run `gerbil` at the command-line.
+    * <tt>LICENSE</tt> - the project license and copyright notice.
+  <% end %>
+<% end %>
+
+<% chapter "Theory of operation" do %>
+  When you run Gerbil, it operates in the following order:
+  # loads the <%= xref "SpecFile", "format specification file" %>
+  # creates an *input document* by:
+  ** reading the input (the content of either the input file or the standard input stream) into memory
+  ** evaluating <%= xref "include", "include directives" %> in the input
+  # transforms the input document into a *processed document* by:
+  ** building a "document tree" data-structure from <%= xref "Nodes", "nodes" %> present in the input document
+  ** replacing every node in the input document with the result of its <%= xref "SpecFile.nodes.output", "node output template" %>
+  # transforms the processed document into an *output document* according to the <%= xref "SpecFile.output", "document output template" %>
+  # prints the output document to the standard output stream
+
+  Although there is only one document being processed here, we refer to it using three distinct terms (*input*, *processed*, and *output*). This distinction helps us talk about the document in a particular state because the content of the document changes radically with every transformation -- thus it would be ambiguous to say "the input document" all the time.
+
+  <% section "Nodes" do %>
+    A node is a block of text that appears like this:
+
+      <%% node_type node_argument1, node_argument2, ... do |node_object| %>
+        node_content
+      <%% end %>
+
+    Or like this:
+
+      <%% node_type node_argument1, node_argument2, ... do %>
+        node_content
+      <%% end %>
+
+    Or like this:
+
+      <%%= node_type node_argument1, node_argument2, ... %>
+
+    Technically, what you see above is really a method invocation made up of the following components:
+
+    |_. Component                         |_. Description                                                                      |
+    | node_type                           | name of the method being invoked                                                   |
+    | node_argument1, node_argument2, ... | arguments for the method invocation                                                |
+    | node_content                        | a block argument being passed to the method invocation                             |
+    | node_object                         | a @Node@ object (see <%= xref "Node.class" %>) representing this method invocation |
+
+    A <%= xref 'SpecFile', 'format specification file' %> defines what types of nodes an input document may use.
+
+    <% section "The @Node@ class", "Node.class" do %>
+      When Gerbil builds a document tree from nodes present in an input document, it stores information about these nodes into @Node@ objects. A @Node@ object has the following properties (methods):
+
+      |_. Property |_. Type          |_. Description |
+      | type       | String          | Name of the type of this node. |
+      | args       | Array           | Arguments passed to this node. |
+      | content    | String          | The block of text passed to this node. |
+      | digest     | String          | A unique identifier for the content of this node. |
+      | output     | String          | Result of the node output template for the content of this node. |
+      | depth      | Integer         | Distance from the root of the document tree to this node. |
+      | parent     | @Node@          | The @Node@ object which contains this node. The value of this property will be @nil@ if this node is a root of the document tree. |
+      | children   | Array of @Node@ | List of child nodes from the document tree. |
+      | index      | String          | A LaTeX-style section number for this node.  This property is only present if the "index" parameter is enabled in the definition of this type of node. |
+      | number     | Integer         | An order-of-occurrence number for this node.  This property is only present if the "number" parameter is enabled in the definition of this type of node. |
+      | trace      | Array           | A stack trace describing the location of this node in the input document. |
+
+      Furthermore, the @Node@ class is derived from "Ruby's @OpenStruct@ class":http://www.ruby-doc.org/stdlib/libdoc/ostruct/rdoc/classes/OpenStruct.html, so you can define new properties for @Node@ objects dynamically.
+    <% end %>
+  <% end %>
+
+  <% section "Format specification file", 'SpecFile' do %>
+    A format specification file is a plain-text file marked up in "YAML syntax":http://yaml4r.sourceforge.net/cookbook/. Through the following parameters, it defines (1) what types of nodes an input document may contain, (2) how the content of those nodes is transformed into output, and (3) how the processed document is transformed into the output document.
+
+    |_. Parameter |_. Type |_. Description |
+    | desc        | String | A short description of the output format. |
+    | code        | String | Ruby code that will be loaded before the input document is processed. This source code will be evaluated inside the main Gerbil executable, so any file-system or path-dependent portions of this source code should take appropriate precautions. |
+    | nodes       | Hash   | A listing of node definitions. See <%= xref "SpecFile.nodes" %>. |
+    | output      | String | An eRuby template for the final output document. See <%= xref "SpecFile.output" %>. |
+
+    <% section "Node definition", "SpecFile.nodes" do %>
+      A node definition is a mapping from a name (the "node type") to the following set of parameters:
+
+      |_. Parameter |_. Type  |_. Description |
+      | index       | Boolean | Assign a LaTeX-style section number to this node? |
+      | number      | Boolean | Assign an order-of-occurrence number to this node? |
+      | silent      | Boolean | Suppress the output of this node? |
+      | output      | String  | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>. |
+
+      You may define additional parameters in a node definition if you want.
+
+      <% section "Node output template", "SpecFile.nodes.output" do %>
+        A node output template (the *output* parameter in a node definition) is an eRuby template that transforms a node's content into output.  During the processing stage, Gerbil replaces all nodes in the input document with the result of this template _unless_ the *silent* parameter is enabled in this node's definition.
+
+        The following variables are available for use in this template:
+
+        |_. Variable |_. Type          |_. Description |
+        | @node      | @Node@          | the node for which this template is being evaluated |
+        <%= common_template_vars = %{
+        | @roots     | Array of @Node@ | All root nodes in the document tree. |
+        | @nodes     | Array of @Node@ | All nodes in the document tree. |
+        | @types     | Hash            | Mapping from node type (String) to array of @Node@ objects having that type. |
+        | @spec      | Hash            | Data from the format specification file. |
+
+        Gerbil also provides the following mappings inside the @@spec@ variable:
+
+        |_. Expression   |_. Type |_. Description |
+        | @@spec[:name]@ | String | Short-hand name of the current format. |
+        | @@spec[:file]@ | String | Path of the current format specification file. |
+        }.lstrip.gsub(/^ +/, '')
+        %>
+      <% end %>
+    <% end %>
+
+    <% section "Document output template", "SpecFile.output" do %>
+      A document output template (the *output* parameter in a format specification file) is an eRuby template that transforms a processed document into the final output document.
+
+      The following variables are available for use in this template:
+
+      |_. Variable |_. Type |_. Description                      |
+      | @content   | String | Content of the processed document. |
+      <%= common_template_vars %>
+    <% end %>
+
+    <% section "Creating your own custom format", "HelloWorld" do %>
+      Here is a working example to help you digest all that you've learned so far about format specification files. A few things to notice in this example are:
+      * We define a @generate_name()@ method in <%= xref "HelloWorld.spec" %> and make use of it in the <%= xref "HelloWorld.input" %>. This shows how to provide format-specific functionality to an input document.
+      * We define a @$style@ variable in <%= xref "HelloWorld.input" %> and make use of it in <%= xref "HelloWorld.spec" %>.  This shows how to make your format accept parameters from an input document.
+
+      To run this example, perform the following steps:
+      # Save the code shown in <%= xref "HelloWorld.spec" %> to a file named <tt>HelloWorld.spec</tt>
+      # Save the text shown in <%= xref "HelloWorld.input" %> to a file named <tt>HelloWorld.input</tt>
+      # Run this command: <pre>gerbil HelloWorld.spec HelloWorld.input > HelloWorld.output</pre>
+      # Examine the <tt>HelloWorld.output</tt> file until you are satisfied!
+
+      <% note "Author's note about documentation quality" do %>
+      Please excuse my lack of creativity for this example.  I tried different ideas but scrapped most of them because writing documentation is hard and mostly boring. (Although I did have fun reading the wacky names produced by the @generate_name()@ method!)
+
+      Instead, I just _really_ want to get the first release of Gerbil out the door and continue work on my other programming projects, but I cannot do so until I've written some documentation. Ah, the dilemma of an open-source developer who cares about documentation!
+
+      On the other hand, if you have ideas on how to improve this example, please speak up in the <%= mailing_list_link %>.  Thanks!
+      <% end %>
+
+      <% example "HelloWorld format specification file", "HelloWorld.spec" do |n| %>
+        <code lang="rhtml">
+        <%= h File.read('doc/HelloWorld.spec').gsub(/^/, $unindent * n.depth.next).lstrip %>
+        </code>
+      <% end %>
+
+      <% example "Input document for HelloWorld format", "HelloWorld.input" do |n| %>
+        <code lang="rhtml">
+        <%= h File.read('doc/HelloWorld.input').gsub(/^/, $unindent * n.depth.next).lstrip %>
+        </code>
+      <% end %>
+
+      <% example "Output of HelloWorld format", "HelloWorld.output" do %>
+        <%= `ruby gerbil doc/HelloWorld.spec doc/HelloWorld.input` %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% chapter "Usage" do %>
+  <pre><%=h "\n" << `ruby gerbil -h`.gsub(/^/, $unindent) %></pre>
+
+  Gerbil requires its _first_ command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>. Predefined formats are simply short-hand names of format specification files located in the <tt>format/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>).
+
+  <% section "The *include* directive", "include" do %>
+    The *include* directive allows you to insert the content of an arbitrary file at a certain place in the input document.  It is written like this:
+
+      <%%# include _path_ %>
+
+    Here, _path_ is the path of the file whose content you wish to insert into the input document.
+
+    You can divide a large document into separate files for easier editing and stitch them together, dynamically, into a single document using the *include* directive.
+  <% end %>
+
+  <% section "The @$unindent@ variable", "unindent" do %>
+    The @$unindent@ variable allows you to unindent the content of every node in the input document by a specified amount of whitespace (spaces, tabs, newlines, and so on).
+
+    Simply define this variable somewhere in your input document, like this (assuming you indent your node content using a TAB and two spaces):
+
+      <%% $unindent = "\t  " %>
+
+    and let Gerbil do it's magic!
+  <% end %>
+<% end %>
+
+<% part "Formats" do %>
+  This section describes the default formats provided along with Gerbil. The format specification files (see <%= xref "SpecFile" %>) for these formats can be found in the <tt>format/</tt> directory of the Gerbil installation directory (see <%= xref "Manifest" %>).
+
+  These formats are meant to serve as working examples. If you require more functionality from one of these formats, simply make a copy of the corresponding format specification file and edit the copy to suit your needs. If you would like to contribute or discuss your enhancements to these default formats, you can do so on the <%= mailing_list_link %>.
+
+  <% chapter "HTML" do %>
+    This format generates a _monolithic_ HTML (technically, it's XHTML 1.0 transitional, but who's counting?) document because it allows users to easily search for a particular topic using nothing more than their web browser's built-in text search mechanism. This facilitates offline reading, where an Internet search engine is not available.
+
+    In the HTML document, you will notice that the numbers of chapters, sections, figures, admonitions, etc. are hyperlinks that take you back to the corresponding place in the table of contents. These links make it easy to navigate this guide, especially for users of text-only web browsers.
+
+    Furthermore, the HTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of the "Mozilla":http://mozilla.org and "Opera":http://www.opera.com/ family of web browsers will be pleasantly surprised to notice that all hyperlinks have been expanded to include their target URL next to the link text. So try using the "print preview" function of a graphical web browser to see how the HTML document will appear when printed.
+
+
+    <% section "Text to HTML conversion" do %>
+      Inside the <tt>format/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>), you will see a <tt>html.rb</tt> file. This file defines a @String.to_html@ method which is used to transform text in an input document into HTML.
+
+      The default implementation of the @String.to_html@ method is based on the "Textile":http://whytheluckystiff.net/ruby/redcloth/ markup system. If you do not like Textile or wish to use a different markup system for text in your documents, then simply edit the <tt>html.rb</tt> file and adjust the source code of the default @String.to_html@ method accordingly.
+
+      For example, if you replace the entire <tt>html.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
+
+      <code>
+      class String
+        def to_html
+          '<p style="border: thin solid red">' + self + '</p>'
+        end
+      end
+      </code>
+
+      In addition to supporting Textile markup, the default implementation has some additional features which are described in the following subsections.
+
+      <% section "Syntax coloring for source code" do %>
+        Syntax coloring is _automatically added_ to source code found inside the *&lt;code&gt;* and *&lt;/code&gt;* HTML tags. Note that in Textile, any text enclosed within a pair of at-signs (&#64; and &#64;) is also considered to be source code.
+
+        The following programming languages are currently supported by "CodeRay":http://coderay.rubychan.de, the default syntax coloring software used in Rassmalog:
+        * Ruby
+        * C
+        * Delphi
+        * HTML
+        * RHTML (Rails)
+        * Nitro-XHTML
+
+        <% section "Specifying the programming language" do %>
+          Because different programming languages have different syntax coloring schemes, you can specify the language of your source code using the @lang@ attribute to ensure that only the appropriate coloring scheme is used. Note that unless the @lang@ attribute is specified, _Ruby_ is assumed to be the programming language of all source code by default.
+
+          <% sampleCode = %q{
+          # Ruby ###########################
+          def hello
+            puts "Hello world!"
+          end
+
+
+          /* C ****************************/
+          #include <stdio.h>
+          int main(int argc, char **argv) {
+            printf("Hello world!\n");
+            return 0;
+          }
+
+
+          <!-- HTML ----------------------->
+          <html>
+            <body>
+              Hello world!
+            <body>
+          </html>
+          } %>
+
+          For example, here is some source code _without_ the @lang@ attribute:
+
+          <code><%= sampleCode %></code>
+
+          And here is the same source code with a @lang="c"@ attribute:
+
+          <code lang="c"><%= sampleCode %></code>
+
+          And here is the same source code with a @lang="html"@ attribute:
+
+          <code lang="html"><%= sampleCode %></code>
+        <% end %>
+      <% end %>
+
+      <% section "Smart sizing of source code" do %>
+        Source code is _automatically sized_ to be displayed as either a line or paragraph of text, depending on whether it contains line breaks.
+
+        For example, here is a single line of code:
+
+        <code>life = true or false</code>
+
+        And here is a paragraph of code:
+
+        <code>life =
+        true or false</code>
+      <% end %>
+
+      <% section "Protecting verbatim text" do %>
+        Sometimes you just need to protect some text from being mangled by the text-to-HTML conversion process . In such cases, you can wrap the text you want to proctect within *&lt;noformat&gt;* and *&lt;/noformat&gt;* tags.
+      <% end %>
+    <% end %>
+
+    <% section "Parameters" do %>
+      The HTML format accepts the following document parameters.
+
+      |_. Parameter   |_. Type  |_. Default value                          |_. Description |
+      | @$logo@       | String  | @nil@                                    | Arbitrary content that goes above the document title in the default header. |
+      | @$title@      | String  | @"$title"@                               | Title of the document. |
+      | @$authors@    | Hash    | @{"$authors" => nil}@                    | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided @String.to_html_entities@ method like this:<br/>@{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_html_entities }@ |
+      | @$date@       | String  | @Time.now.strftime("%d %B %Y")@          | Date when the document was written. |
+      | @$use_icons@  | Boolean | @true@                                   | Use "Tango icons":http://tango.freedesktop.org/Tango_Icon_Library in admonitions (see <%= xref "Admonitions" %>)? |
+    <% end %>
+
+    <% chapter "Nodes", "html.nodes" do %>
+      Unless otherwise noted, all nodes defined by the HTML format accept two arguments, in this order:
+      # a title or name for the node
+      # a unique identifier for the node
+
+      The second argument is used by the cross-referencing nodes (see <%= xref "html.nodes.xref" %> and <%= xref "html.nodes.cite" %>), which allow you to refer to another node in the document by its unique identifier.
+
+      <% section "Structure" do %>
+        The nodes described in this section form the overall structure of the output document.
+
+        <% section "header", "html.nodes.header" do %>
+          This node overrides the logo, title, list of authors, and date when the document was written, all of which are shown at the top of the document.
+        <% end %>
+
+        <% section "footer", "html.nodes.footer" do %>
+          This node overrides (1) the date when this document was generated and (2) the hyperlink to the Gerbil website, shown at the bottom of the document. The hyperlink is there as a way of saying thanks for Gerbil, the _wonderful_ little utility you have grown so fond of! ;-)
+        <% end %>
+
+        <% section "abstract", "html.nodes.abstract" do %>
+          A summary of the entire document.  This is what most readers will _skim_ through, if you are lucky.  Alas, nobody reads entire documents these days! :-(
+        <% end %>
+
+        <% section "xref", "html.nodes.xref" do %>
+          A cross-reference; a hyperlink that takes you to any node in the document.
+
+          The first argument of this node is either the unique identifier of the node you wish to cross-reference. If no nodes in the document have the given identifier, then the titles of all nodes in the document are searched.  If even that fails, then an error will be raised.
+
+          The second argument of this node overrides the default link text of the cross-reference.
+
+          For example, this node in the input document:
+
+            <%%= xref "SpecFile" %>
+
+          appears in the output document like this: <%= xref "SpecFile" %>.
+
+          As another example, this node in the input document:
+
+            <%%= xref "SpecFile", "custom link text" %>
+
+          appears in the output document like this: <%= xref "SpecFile", "custom link text" %>.
+        <% end %>
+      <% end %>
+
+      <% section "Organization" do %>
+        The nodes described in this section are meant to help organize the document's content logically.
+
+        <% section "part", "html.nodes.part" do %>
+          A collection of chapters.
+
+          <% part "An example" do %>
+            This is what a *part* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "chapter", "html.nodes.chapter" do %>
+          A collection of sections.
+
+          <% chapter "An example" do %>
+            This is what a *chapter* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "section", "html.nodes.section" do %>
+          A collection of paragraphs about a particular topic.
+
+          <% section "An example" do %>
+            This is what a *section* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "paragraph", "html.nodes.paragraph" do %>
+          A collection of sentences about a particular idea.
+
+          <% paragraph "An example" do %>
+            This is what a *paragraph* node appears like.
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% section "Admonitions" do %>
+        An admonition is basically a box that is indented more deeply than the text surrounding it.  It is typically used to convey extraneous or pertinent information about the application of ideas discussed in the surrounding text.
+
+        I like to follow the KDE guidelines<%= cite "KDE.admonitions" %> when determining which admonition to use in my documents.
+
+        <% reference "KDE.admonitions" do %>
+          L. Watts, "Admonitions: Tips, hints, and Warnings", in _The KDE DocBook Authors guide_, Chapter 13, [Online document], 22 September 2004 (Revision 1.00.00), [cited 8 December 2007], Available at <%= link 'http://l10n.kde.org/docs/markup/tips-hints-etc.html' %>
+        <% end %>
+
+        <% section "warning", "html.nodes.warning" do %>
+          Use a *warning* node when "data loss could occur if you follow the procedure being described." <%= cite "KDE.admonitions" %>
+
+          <% warning "An example" do %>
+            This is what a *warning* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "caution", "html.nodes.caution" do %>
+          bq. A note of caution. Use this for example when the reader may lose easily recovered or replaceable information (e.g. user settings), or when they could cause data loss if they don't correctly follow the procedure being outlined. <%= cite "KDE.admonitions" %>
+
+          <% caution "An example" do %>
+            This is what a *caution* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "important", "html.nodes.important" do %>
+          Use an *important* node when:
+
+          bq. When there is no danger of data loss, but you wish to make clear to the reader a consequence that isn't immediately obvious (e.g. when changing the font for one instance of a program also changes the default setting, and this isn't clear from the GUI.) <%= cite "KDE.admonitions" %>
+
+          <% important "An example" do %>
+            This is what a *important* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "note", "html.nodes.note" do %>
+          Use a *note* node to convey:
+
+          bq. Information the user should be aware of, but is peripheral to the actual task being described. <%= cite "KDE.admonitions" %>
+
+          <% note "An example" do %>
+            This is what a *note* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "tip", "html.nodes.tip" do %>
+          Use a *tip* node when:
+
+          bq. When you're giving a hint to make things easier or more productive for the reader. <%= cite "KDE.admonitions" %>
+
+          <% tip "An example" do %>
+            This is what a *tip* node appears like.
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% section "Auxilary materials" do %>
+        <% section "figure", "html.nodes.figure" do %>
+          A diagram, sketch, image, or illustration; something that visually depicts an idea or thought.
+
+          <% figure "An example" do %>
+            This is what a *figure* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "table", "html.nodes.table" do %>
+          Information (typically measurement data) represented in tabular form for easy reading, comparison, and analysis.
+
+          <% table "An example" do %>
+            This is what a *table* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "example", "html.nodes.example" do %>
+          A sample application of an idea or thought.
+
+          <% example "An example" do %>
+            This is what a *example* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "equation", "html.nodes.equation" do %>
+          A mathematical equation or formula.
+
+          <% equation "An example" do %>
+            This is what a *equation* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "procedure", "html.nodes.procedure" do %>
+          An outline; a series of steps outlining some kind of process.
+
+          <% procedure "An example" do %>
+            This is what a *procedure* node appears like.
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% section "Bibliography" do %>
+        The nodes in this section deal with attribution of ideas -- an important weapon against plagiarism.
+
+        <% section "reference", "html.nodes.reference" do %>
+          This node stores bibliography information about an information source that is relevant to your document.
+
+          If you wish to cite a certain source in several places in your document, start by creating a *reference* node first and then use a *cite* node (see <%= xref "html.nodes.cite" %>) to perform the citation.
+
+          <% paragraph "An example" do %>
+            See <%= xref 'html.nodes.reference.example' %> for an example of what a *reference* node appears like.
+          <% end %>
+
+          <% reference 'html.nodes.reference.example' do %>
+            This is what a *reference* node appears like.
+          <% end %>
+        <% end %>
+
+        <% section "cite", "html.nodes.cite" do %>
+          A citation to a *reference* node (see <%= xref 'html.nodes.reference' %>) in the document's bibliography.
+
+          The first argument of this node is the unique identifier of the reference node you wish to cite. You can specify additional arguments to give more detail about the citation.
+
+          For example, this node in the input document:
+
+            <%%= cite "html.nodes.reference.example", "chapter 10", "page 53", "..." %>
+
+          appears in the output document like this: <%= cite "html.nodes.reference.example", "chapter 10", "page 53", "..." %>
+
+          As another example, this node in the input document:
+
+            <%%= cite "html.nodes.reference.example", "chapter 10", "page 53", "..." %>
+
+          appears in the output document like this: <%= cite "html.nodes.reference.example", "chapter 10", "page 53", "..." %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <% chapter "Plain text" do %>
+    This format is not yet implemented.
+  <% end %>
+
+  <% chapter "LaTeX" do %>
+    This format is not yet implemented.
+  <% end %>
+
+  <% chapter "UNIX man page" do %>
+    This format is not yet implemented.
+  <% end %>
+<% end %>

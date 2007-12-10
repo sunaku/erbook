@@ -1,0 +1,40 @@
+<% $style = "border-left: thick solid salmon; padding-left: 1em;" %>
+<% hello "1" do |node| %>
+  1
+
+  <% node.name = 'hard-coded ' + generate_name %>
+
+  <% hello "1.1" do %>
+    1.1
+
+    <% hello "1.1.1" do %>
+      1.1.1
+
+      <% hello "1.1.1.1" do %>
+        1.1.1.1
+      <% end %>
+    <% end %>
+
+    <% hello "1.1.2" do %>
+      1.1.2
+    <% end %>
+  <% end %>
+
+  <% hello "1.2" do %>
+    1.2
+
+    <% hello "1.2.1" do %>
+      1.2.1
+
+      <%= hello "1.2.1.1 (no block)" %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% hello "2" do %>
+  2, with extra newlines
+
+
+<% end %>
+
+<%= hello "3 (no block)" %>

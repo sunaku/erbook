@@ -1,0 +1,882 @@
+# Copyright 2007 Suraj N. Kurapati
+# See the file named LICENSE for details.
+
+desc: web page for the Internet
+
+code: |
+  # load the String#to_html method
+  require File.join(GENERATOR[:home], 'format', 'html.rb')
+
+  # load admonition icons
+    Icon = Struct.new(:path, :name, :format, :data)
+    class Icon
+      def to_html aAttributes = {}
+        atts = aAttributes.inject('') {|s,(k,v)| s << %( #{k}="#{v}") }
+        %{<img src="data:image/#{format};base64,#{data}" alt="#{name}"#{atts}/>}
+      end
+    end
+
+    ICONS = {}
+    Dir[File.join(GENERATOR[:home], 'format', 'html.icons', '*.*')].each \
+    do |path|
+      ext = File.extname(path)
+      name = File.basename(path, ext)
+      data = [File.read(path)].pack('m')
+
+      ICONS[name] = Icon.new(path, name, ext.sub('.', ''), data)
+    end
+
+  class String
+    # Transforms this UTF-8 string into HTML entities.
+    def to_html_entities
+      unpack('U*').map! {|c| "&##{c};"}.join
+    end
+
+    # Transforms this string into a valid URI fragment.
+    # See http://www.nmt.edu/tcc/help/pubs/xhtml/id-type.html
+    def to_uri_fragment
+      # remove HTML tags from the input
+      buf = gsub(/<.*?>/, '')
+
+      # The first or only character must be a letter.
+      buf.insert(0, 'a') unless buf[0,1] =~ /[[:alpha:]]/
+
+      # The remaining characters must be letters, digits, hyphens (-),
+      # underscores (_), colons (:), or periods (.) or Unicode characters
+      buf.unpack('U*').map! do |code|
+        if code > 0xFF or code.chr =~ /[[:alnum:]\-_:\.]/
+          code
+        else
+          ?\s
+        end
+      end.pack('U*').strip.gsub(/[[:space:]-]+/, '-')
+    end
+  end
+
+  class Node
+    # Returns the user-defined title for this node's content.
+    def title
+      @title ||= args[0]
+    end
+
+    # Returns the user-defined indentifer for this node.
+    def id
+      @id ||= args[1]
+    end
+
+    # Returns the URI fragment for this node.
+    def self_link
+      @self_link ||= (id || title || object_id).to_s.to_uri_fragment
+    end
+
+    # Returns the URI fragment for the location in the table
+    # of contents / list of figures that points this node.
+    def list_link
+      @list_link ||= args.object_id.to_s.to_uri_fragment
+    end
+  end
+
+  # Returns a hyperlink to the given URL of
+  # the given name and mouse-hover title.
+  def link aUrl, aName = aUrl, aTitle = nil
+    %{<a href="#{h aUrl}"#{%{ title="#{aTitle}"} if aTitle}>#{aName}</a>}
+  end
+
+
+nodes:
+  ##
+  # Structure
+
+  header: &header
+    toc: false
+    lof: false
+    index: false
+    number: false
+    silent: true
+    output: <%= @node.content %>
+
+  footer: *header
+
+  abstract:
+    toc: false
+    lof: false
+    index: false
+    number: false
+    silent: true
+    output: |
+      <div id="<%= @node.type %>">
+        <h1 class="title"><%= @node.type.capitalize %></h1>
+        <div class="content"><%= @node.content.to_s.to_html %></div>
+      </div>
+
+
+  ##
+  # Organization
+
+  part: &latex
+    toc: true
+    lof: false
+    index: true
+    number: true
+    output: |
+      <div class="<%= @node.type %>">
+        <h1 class="title">
+          <%= @node.type.capitalize %>
+          <a class="toc" id="<%= @node.self_link %>" href="#<%= @node.list_link %>"><%= @node.index %></a>
+
+          <br/>
+
+          <big><%= @node.title.to_s.to_html %></big>
+        </h1>
+
+        <div class="content"><%= @node.content.to_s.to_html %></div>
+      </div>
+
+  chapter: *latex
+
+  section:
+    toc: true
+    lof: false
+    index: true
+    number: true
+    output: |
+      <% level = [6, @node.depth + 1].min %>
+      <div class="<%= @node.type %>">
+        <h<%= level %> class="title">
+          <a class="toc" id="<%= @node.self_link %>" href="#<%= @node.list_link %>"><%= @node.index %></a>&nbsp;&nbsp;<%= @node.title.to_s.to_html %>
+        </h<%= level %>>
+        <div class="content"><%= @node.content.to_s.to_html %></div>
+      </div>
+
+  paragraph:
+    toc: false
+    lof: false
+    index: false
+    number: false
+    output: |
+      <div class="<%= @node.type %>">
+        <p class="title"><%= @node.title.to_s.to_html %></p>
+        <div class="content"><%= @node.content.to_s.to_html %></div>
+      </div>
+
+
+  ##
+  # Admonitions
+
+  tip: &admonition
+    toc: false
+    lof: true
+    index: false
+    number: true
+    output: |
+      <div class="<%= @node.type %>">
+        <p class="title"><a class="toc" id="<%= @node.self_link %>" href="#<%= @node.list_link %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<%= @node.title.to_s.to_html %></p>
+
+        <%
+          $use_icons = true unless defined? $use_icons
+
+          if $use_icons && icon = ICONS[@node.type]
+            ($icons_used ||= []) << icon
+            %><%= icon.to_html :class => :icon %><%
+          end
+        %>
+
+        <div class="content"><%= @node.content.to_s.to_html %></div>
+      </div>
+
+  note: *admonition
+  caution: *admonition
+  warning: *admonition
+  important: *admonition
+
+
+  ##
+  # Auxilary materials (formal blocks)
+  # see http://www.sagehill.net/docbookxsl/FormalTitles.html
+
+  figure: &formal
+    toc: false
+    lof: true
+    index: false
+    number: true
+    output: |
+      <div class="<%= @node.type %>">
+        <p class="title"><a class="toc" id="<%= @node.self_link %>" href="#<%= @node.list_link %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<%= @node.title.to_s.to_html %></p>
+        <div class="content"><%= @node.content.to_s.to_html %></div>
+      </div>
+
+  table: *formal
+  example: *formal
+  equation: *formal
+  procedure: *formal
+
+
+  ##
+  # cross-references
+
+  xref:
+    toc: false
+    lof: false
+    index: false
+    number: false
+    output: |
+      <%=
+        scope = @nodes.select {|n| n.content}
+
+        target = scope.find {|n| n.id == @node.args[0]} || # id has 1st priority
+                 scope.find {|n| n.title == @node.args[0]}
+
+        if target
+          prefix = '%s %s' % [
+            target.type.capitalize,
+            target.index || target.number
+          ]
+
+          unless target.type == 'reference'
+            title = "<em>#{target.title.to_s.to_html}</em>"
+          end
+
+          '<a class="%s" href="#%s">%s</a>' % [
+            @node.type,
+            target.self_link,
+            if @node.args.length > 1
+              @node.args[1].to_s.to_html
+            else
+              [prefix, title].compact.join(': ')
+            end
+          ]
+        else
+          raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
+        end
+      %>
+
+
+  ##
+  # Bibliography
+
+  reference:
+    toc: false
+    lof: false
+    index: false
+    number: true
+    silent: true
+
+  cite:
+    toc: false
+    lof: false
+    index: false
+    number: false
+    output: |
+      <%=
+        target = @types['reference'].find {|n| n.title == @node.args[0]}
+
+        if target
+          '<sup>[%s]</sup>' % [
+            '<a class="%s" href="#%s">%s</a>' % [
+              @node.type,
+              target.self_link,
+              target.number
+            ],
+            *@node.args[1..-1]
+          ].join(', ')
+        else
+          raise ArgumentError, "invalid citation for #{@node.title.inspect}", @node.trace
+        end
+      %>
+
+output: |
+  <%
+    # set default parameter values
+    $title   = '$title' unless defined? $title
+    $authors = {'$authors' => nil} unless defined? $authors
+    $date    = Time.now.strftime("%d %B %Y") unless defined? $date
+  %>
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html>
+    <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+      <meta name="date" content="<%= $date %>"/>
+      <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
+      <meta name="generator" content="<%= GENERATOR[:name] %> <%= GENERATOR[:version] %>"/>
+      <title><%= $title %></title>
+
+      <%
+        styles = @spec['styles']
+        %w[screen print].each do |media|
+      %>
+      <style type="text/css" media="<%= media %>">
+        <%= styles['common'] %>
+        <%= styles[media] %>
+      </style>
+      <% end %>
+    </head>
+    <body>
+      <div id="header">
+      <% if header = @types['header'].first %>
+        <%= header.output %>
+      <% else %>
+        <%= $logo %>
+        <h1 class="title"><%= $title %></h1>
+        <h2 class="authors"><%=
+          $authors.map do |(name, url)|
+            if url
+              %{<a href="#{url}">#{name}</a>}
+            else
+              name
+            end
+          end.join(', ')
+        %></h2>
+        <h3 class="date"><%= $date %></h3>
+      <% end %>
+      </div>
+
+      <% if abstract = @types['abstract'].first %>
+        <%= abstract.output %>
+      <% end %>
+
+      <% # table of contents
+        builder = lambda do |n|
+          if @spec['nodes'][n.type]['toc']
+            entry = '%s<a id="%s" href="#%s">%s</a>' % [
+              (n.index.to_s + '&nbsp;&nbsp;' if n.index),
+              n.list_link,
+              n.self_link,
+              n.title.to_s.to_html
+            ]
+            nested = n.children.inject('') {|s,c| s << builder[c] }
+
+            %{<li>#{entry}#{ "<ul>#{nested}</ul>" unless nested.empty? }</li>}
+          else
+            ''
+          end
+        end
+
+        toc = @roots.inject('') {|s,n| s << builder[n] }
+
+        unless toc.empty?
+          %><div id="toc"><h1>Contents</h1> <ul><%= toc %></ul></div><%
+        end
+      %>
+
+      <% # list of figures
+        enums = {} # type => nodes
+
+        @spec['nodes'].each_pair do |name, info|
+          if info['lof']
+            nodes = @types[name]
+            enums[name] = nodes unless nodes.empty?
+          end
+        end
+
+        lof = enums.sort.map do |(type, nodes)|
+          nested = nodes.map do |n|
+            %{<li><a id="#{n.list_link}" href="##{n.self_link}">#{n.title.to_s.to_html}</a></li>}
+          end
+
+          %{<h1>#{type.capitalize}s</h1> <ol>#{nested}</ol>}
+        end
+
+        unless lof.empty?
+          %><div id="lof"><%= lof %></div><%
+        end
+      %>
+
+      <div id="content"><%= @content %></div>
+
+      <% unless (refs = @types['reference']).empty? %>
+      <div id="references">
+        <h1 class="title">References</h1>
+        <ol>
+        <% refs.each do |n| %>
+          <li id="<%= n.self_link %>"><%= n.content.to_s.to_html %></li>
+        <% end %>
+        </ol>
+      </div>
+      <% end %>
+
+      <br style="display: none"/>
+      <hr style="display: none"/>
+      <br style="display: none"/>
+
+      <div id="footer">
+      <% if footer = @types['footer'].first %>
+        <%= footer.content.to_s.to_html %>
+      <% else %>
+        Generated on <%= Time.now %> by <a href="<%= GENERATOR[:website] %>"><%= GENERATOR[:name] %></a> <%= GENERATOR[:version] %>.
+      <% end %>
+
+      <% if $icons_used and not $icons_used.empty? %>
+        <p>The admonition icons (<%= $icons_used.uniq.map {|icon| icon.to_html}.join(' ') %>) used in this document are Copyright &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.</p>
+      <% end %>
+      </div>
+    </body>
+  </html>
+
+styles:
+  common: |
+    body
+    {
+      color              : #000000;
+      background-color   : #FFFFFF;
+      line-height        : 1.5em;
+      font-family        : Calibri, Verdana, sans-serif;
+    }
+
+    /* emphasis */
+
+      em,
+      blockquote
+      {
+        font-family      : Cambria, Georgia, serif;
+      }
+
+    /* headings */
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .title
+      {
+        font-weight      : lighter;
+        font-family      : Constantia, "Book Antiqua", "URW Bookman L", serif;
+      }
+
+      #lof h1,
+      #lof h2,
+      #lof h3,
+      #lof h4,
+      #lof h5,
+      #lof h6
+      {
+        margin-top       : 1.25em;
+      }
+
+      #content h1,
+      #content h2,
+      #content h3,
+      #content h4,
+      #content h5,
+      #content h6
+      {
+        margin-top       : 2.5em;
+        line-height      : 1.25em;
+      }
+
+      #content h1
+      {
+        font-size        : 2.0em;
+      }
+
+      #content h2
+      {
+        font-size        : 1.8em;
+      }
+
+      #content h3
+      {
+        font-size        : 1.6em;
+      }
+
+      #content h4
+      {
+        font-size        : 1.4em;
+      }
+
+      #content h5
+      {
+        font-size        : 1.2em;
+      }
+
+      #content h6
+      {
+        font-size        : 1.0em;
+      }
+
+    /* tables */
+
+      table
+      {
+        border           : none;
+      }
+
+      th,
+      td
+      {
+        padding          : 1em;
+        border           : 1px solid #C0C0C0;
+        vertical-align   : top;
+        background-color : #FFFFFF;
+      }
+
+      th
+      {
+        background-color : #F5F5F5;
+      }
+
+      table
+      {
+        margin           : auto;
+      }
+
+    /* document structure */
+
+      #header
+      {
+        margin-bottom    : 5em;
+        text-align       : center;
+      }
+
+      #abstract
+      {
+        margin-bottom    : 5em;
+      }
+
+      #toc li
+      {
+        list-style-type  : none;
+      }
+
+      #toc li ul
+      {
+        padding-bottom   : 1em;
+        border-left      : thick solid #F5F5F5;
+      }
+
+      #toc li ul:hover
+      {
+        border-color     : #DCDCDC;
+      }
+
+      #toc > ul
+      {
+        padding-left     : 1em;
+      }
+
+      #references
+      {
+        margin-top       : 5em;
+      }
+
+      #footer
+      {
+        border-top       : thick dotted #DCDCDC;
+        padding-top      : 1em;
+        margin-top       : 5em;
+        text-align       : center;
+      }
+
+    /* document nodes */
+
+      .part    > .title,
+      .chapter > .title
+      {
+        padding-bottom   : 0.5em;
+      }
+
+      .part    > .title > big,
+      .chapter > .title > big
+      {
+        display          : block;
+        margin-top       : 0.25em;
+      }
+
+      .part    .title big,
+      .chapter .title big
+      {
+        _display         : block; /* for IE6 */
+        _margin-top      : 0.25em; /* for IE6 */
+        _margin-bottom   : 0.75em; /* for IE6 */
+      }
+
+      .paragraph > .title,
+      .tip       > .title,
+      .note      > .title,
+      .caution   > .title,
+      .warning   > .title,
+      .important > .title,
+      .figure    > .title,
+      .table     > .title,
+      .example   > .title,
+      .equation  > .title,
+      .procedure > .title
+      {
+        font-size        : large;
+        margin-top       : 2em;
+      }
+
+      .paragraph .title,
+      .tip       .title,
+      .note      .title,
+      .caution   .title,
+      .warning   .title,
+      .important .title,
+      .figure    .title,
+      .table     .title,
+      .example   .title,
+      .equation  .title,
+      .procedure .title
+      {
+        _font-size       : large; /* for IE6 */
+        _font-weight     : bold; /* large is not bold in IE6 */
+        _margin-top      : 2em; /* for IE6 */
+      }
+
+      .tip      ,
+      .note     ,
+      .caution  ,
+      .warning  ,
+      .important,
+      .figure   ,
+      .table    ,
+      .example  ,
+      .equation ,
+      .procedure
+      {
+        margin           : 3em;
+      }
+
+      .tip       > .icon,
+      .note      > .icon,
+      .caution   > .icon,
+      .warning   > .icon,
+      .important > .icon
+      {
+        float            : left;
+        margin           : 0 1em 1em 0; /* top right bottom left */
+      }
+
+      .tip       .icon,
+      .note      .icon,
+      .caution   .icon,
+      .warning   .icon,
+      .important .icon
+      {
+        _display         : none; /* IE6 cannot display embedded images */
+      }
+
+      .figure > .title
+      {
+        text-align       : center;
+      }
+
+      .figure .title
+      {
+        _text-align      : center; /* for IE6 */
+      }
+
+      .figure > .content > img
+      {
+        display          : block;
+        margin           : auto;
+      }
+
+      .figure .content img
+      {
+        _display         : block; /* for IE6 */
+        _margin          : auto; /* for IE6 */
+      }
+
+  screen: |
+    body
+    {
+      margin             : auto;
+      padding            : 0.5em;
+      max-width          : 36em;
+    }
+
+    /* hyperlinks */
+
+      a
+      {
+        color            : #0000FF;
+        text-decoration  : none;
+      }
+
+      a:visited
+      {
+        color            : #800080;
+      }
+
+      a:hover
+      {
+        color            : #FF0000;
+        text-decoration  : underline;
+      }
+
+      a:target
+      {
+        color            : #FF0000;
+        text-decoration  : underline;
+      }
+
+      a.toc:link,
+      a.toc:visited
+      {
+        text-decoration  : none;
+        z-index          : 1;
+      }
+
+      a img
+      {
+        border           : none;
+      }
+
+    /* source code */
+
+      tt,
+      code,
+      pre
+      {
+        font-family      : Consolas, "Lucida Console", monospace;
+      }
+
+      tt
+      {
+        font-weight      : bold;
+        color            : #A52A2A;
+        background-color : #FFFAF0;
+      }
+
+      /* output of syntax colorizer */
+      .code
+      {
+        background-color : #FFFFF0;
+      }
+
+      pre
+      {
+        line-height      : normal;
+        border           : 1px dashed #C0C0C0;
+        background-color : #F5FFDF;
+        padding          : 1em;
+        overflow         : auto;
+        cursor           : text;
+      }
+
+      /*
+      pre:hover
+      {
+        border           : none;
+        position         : fixed;
+        z-index          : 1;
+        margin           : 0;
+        top              : 0;
+        left             : 0;
+        right            : 0;
+        bottom           : 0;
+        overflow         : auto;
+        cursor           : text;
+      }
+      */
+
+    /* emphasis */
+
+      blockquote
+      {
+        margin           : 1em;
+        border           : 5px dotted #C0C0C0;
+        padding          : 1em;
+        color            : #444;
+      }
+
+      hr
+      {
+        color            : #FF0000; /* for IE6 */
+        background-color : #FF0000; /* for Firefox */
+      }
+
+  print: |
+    /* headings */
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6
+      {
+        font-weight      : normal;
+      }
+
+    /* hyperlinks */
+
+      a:link,
+      a:visited,
+      a:active
+      {
+        color            : #0000FF;
+        font-weight      : bold;
+        text-decoration  : underline;
+      }
+
+      a:after
+      {
+        content          : " (" attr(href) ")";
+        font-family      : sans-serif;
+        font-weight      : normal;
+        font-size        : 90%;
+      }
+
+      a[href^="#"]:after
+      {
+        content          : "";
+      }
+
+      a[href^="#"]
+      {
+        color            : #A52A2A;
+        font-weight      : lighter;
+        text-decoration  : none;
+        font-style       : italic;
+      }
+
+      a.toc:link,
+      a.toc:visited
+      {
+        color            : inherit;
+        .color           : #000000; /* for IE6 and IE7 */
+        font-weight      : inherit;
+        text-decoration  : none;
+        font-style       : normal;
+      }
+
+    /* source code */
+
+      tt
+      {
+        color            : inherit;
+        background-color : inherit;
+        font-weight      : normal;
+      }
+
+      pre,
+      .code
+      {
+        border           : none;
+        overflow         : visible;
+        background-color : inherit;
+      }
+
+    /* document structure */
+
+      #lof
+      {
+        display          : none;
+      }
+
+    /* document nodes */
+
+      .part    > .title > big,
+      .chapter > .title > big
+      {
+        padding-bottom   : 0.5em;
+      }
+
+      .part    .title big,
+      .chapter .title big
+      {
+        _padding-bottom  : 0.5em; /* for IE6 */
+      }

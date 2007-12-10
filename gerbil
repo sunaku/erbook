@@ -1,0 +1,280 @@
+#!/usr/bin/env ruby
+
+# Gerbil is an extensible document generator based on eRuby.
+#
+# * STDIN will be read if an input file is not specified.
+#
+# * If an error occurs, the input document will be printed to STDOUT
+#   so you can investigate line numbers in the error's stack trace.
+#
+#   Otherwise, the final output document will be printed to STDOUT.
+
+# Copyright 2007 Suraj N. Kurapati
+# See the file named LICENSE for details.
+
+GENERATOR = {
+  :name    => 'Gerbil',
+  :version => '0.0.0',
+  :release => '2007-12-09',
+  :website => 'http://gerbil.rubyforge.org',
+  :home    => File.dirname(__FILE__)
+}
+
+require 'erb'
+include ERB::Util
+
+require 'digest/sha1'
+require 'yaml'
+require 'ostruct'
+
+# Prints the given message and raises the given error.
+def hoist aMessage, aError = $!
+  STDERR.printf "%s:\n\n", aMessage
+  raise aError
+end
+
+class String
+  # Returns a SHA1 digest (in hex format) of this string.
+  def digest
+    Digest::SHA1.hexdigest(self)
+  end
+end
+
+class Template < ERB
+  # Returns the result of template evaluation thus far.
+  attr_reader :buffer
+
+  # aName:: String that replaces the ambiguous '(erb)' identifier in stack
+  #         traces, so that the user can better determine the source of an
+  #         error.
+  #
+  # args:: Arguments for ERB::new
+  def initialize aName, *args
+    # silence the code-only <% ... %> directive, just like PHP does
+    args[0].gsub!(/^[ \t]*<%[^%=]((?!<%).)*?[^%]%>[ \t]*\r?\n/m) {|s| s.strip}
+
+    args[3] = '@buffer'
+    super(*args)
+
+    @filename = aName
+  end
+
+  # Renders this template within a fresh object that
+  # is populated with the given instance variables.
+  def render_with aInstVars = {}
+    context = Object.new.instance_eval do
+      aInstVars.each_pair do |var, val|
+        instance_variable_set var, val
+      end
+
+      binding
+    end
+
+    result(context)
+  end
+
+  private
+
+  # Returns the content that the given block wants to append to
+  # the buffer.  If the given block does not want to append to the
+  # buffer, then returns the result of invoking the given block.
+  def content_from_block *aBlockArgs
+    raise ArgumentError, 'block must be given' unless block_given?
+
+    start = @buffer.length
+    value = yield(*aBlockArgs) # this will do: buffer << content
+    finish = @buffer.length
+
+    if finish > start
+      @buffer.slice! start..-1
+    else
+      value
+    end.to_s
+  end
+end
+
+class Node < OpenStruct
+  undef id, type # these are deprecated in Ruby 1.8 anyway
+end
+
+# the basename() is for being launched by a RubyGems executable
+if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
+  # parse command-line options
+    require 'optparse'
+
+    opts = OptionParser.new('')
+
+    opts.on '-h', '--help', 'show usage information' do
+      # show program description located at the top of this file
+      puts File.read(__FILE__).split(/^$\n/)[1].gsub(/^# ?/, '')
+
+      puts "\nUsage: #{File.basename $0} [Option...] Format|SpecFile [InputFile]\n"
+
+      puts "\nOption: #{opts}"
+
+      puts "\nFormat:"
+      Dir[File.join(GENERATOR[:home], 'format', '*.yaml')].each do |file|
+        name = File.basename(file, '.yaml')
+        desc = YAML.load_file(file)['desc'] rescue nil
+        puts '    %-32s %s' % [name, desc]
+      end
+
+      exit
+    end
+
+    opts.on '-v', '--version', 'show version information' do
+      puts "%s %s (%s) %s %s" %
+        [:name, :version, :release, :website, :home].map { |m| GENERATOR[m] }
+      exit
+    end
+
+    opts.parse! ARGV
+
+  # load format specification file
+    specFile = ARGV.shift or
+      raise ArgumentError, "Format was not specified.  Try `{$0} -h` for help."
+
+    File.file? specFile or
+      specFile = File.join(GENERATOR[:home], 'format', specFile + '.yaml')
+
+    begin
+      specData = YAML.load_file(specFile).merge!(
+        :file => specFile,
+        :name => File.basename(specFile).sub(/\..*?$/, '')
+      )
+    rescue Exception
+      hoist "Error when loading the format specification file (#{specFile.inspect})"
+    end
+
+    if specData.key? 'code'
+      eval specData['code'].to_s, binding, "#{specFile}:code"
+    end
+
+  # load input document
+    input = ARGF.read
+
+    # expand all "include" directives in the input
+    begin end while input.gsub! %r/<%#\s*include\s+(.+?)\s*%>/ do
+      "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
+    end
+
+  # process input document
+    template = Template.new('INPUT', input)
+
+    templateVars = {
+      :@spec => specData,
+      :@roots => roots = [], # root nodes of all trees
+      :@nodes => nodes = [], # all nodes in the forest
+      :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
+    }.each_pair { |k,v| template.instance_variable_set(k, v) }
+
+    nodeDefs = specData['nodes'].each_pair do |name, info|
+      template.instance_eval %{
+        #
+        # XXX: using a string because define_method()
+        #      does not accept a block until Ruby 1.9
+        #
+        def #{name} *aArgs, &aBlock
+          node = Node.new(
+            :type => #{name.inspect},
+            :args => aArgs,
+            :trace => caller,
+            :children => []
+          )
+          @nodes << node
+          @types[node.type] << node
+
+          # calculate occurrence number for this node
+          if #{info['number']}
+            @count ||= Hash.new {|h,k| h[k] = []}
+            node.number = (@count[node.type] << node).length
+          end
+
+          @stack ||= []
+
+          # assign node family
+          if parent = @stack.last
+            parent.children << node
+            node.parent = parent
+            node.depth = parent.depth.next
+
+            # calculate latex-style index number for this node
+            if #{info['index']}
+              branches = parent.children.select {|n| n.index}
+              node.index = [parent.index, branches.length.next].join('.')
+            end
+          else
+            @roots << node
+            node.parent = nil
+            node.depth = 0
+
+            # calculate latex-style index number for this node
+            if #{info['index']}
+              branches = @roots.select {|n| n.index}
+              node.index = branches.length.next.to_s
+            end
+          end
+
+          # assign node content
+          if block_given?
+            @stack << node
+            content = content_from_block(node, &aBlock)
+            @stack.pop
+
+            digest = content.digest
+
+            node.content = content
+            node.digest  = digest
+
+            @buffer << digest
+          else
+            digest = node.object_id.to_s.digest
+            node.digest = digest
+          end
+
+          digest
+        end
+      },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
+    end
+
+    begin
+      # build the document tree
+      document = template.instance_eval { result(binding) }
+
+      # replace nodes with output
+      expander = lambda do |n, buf|
+        # unindent content
+        if defined? $unindent and n.content
+          n.content.gsub! %r/^(#{Regexp.escape $unindent}){0,#{n.depth.next}}/, ''
+        end
+
+        # calculate node output
+        source = "#{specFile}:nodes:#{n.type}:output"
+        n.output = Template.new(source, nodeDefs[n.type]['output'].to_s.chomp).
+                   render_with(templateVars.merge(:@node => n))
+
+        # replace node with output
+        if nodeDefs[n.type]['silent']
+          buf.sub! n.digest, ''
+          buf = n.output
+        else
+          buf.sub! n.digest, n.output
+        end
+
+        # repeat for all child nodes
+        n.children.each {|c| expander[c, buf]}
+      end
+
+      roots.each {|n| expander[n, document]}
+
+    rescue Exception
+      puts input # so the user can debug the line numbers in the stack trace
+      hoist 'Error when processing the input document (INPUT)'
+    end
+
+  # produce output document
+    output = Template.new("#{specFile}:output", specData['output'].to_s).
+             render_with(templateVars.merge(:@content => document))
+
+    puts output
+end
