@@ -298,6 +298,9 @@ output: |
       <meta name="date" content="<%= $date %>"/>
       <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
       <meta name="generator" content="<%= GENERATOR[:name] %> <%= GENERATOR[:version] %>"/>
+      <% if $feed %>
+      <link rel="alternate" type="application/rss+xml" href="<%= $feed %>"/>
+      <% end %>
       <title><%= $title %></title>
 
       <%

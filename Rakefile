@@ -41,18 +41,47 @@ GENERATOR[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{GENERATOR[:id]}"
 
 # releasing
   desc 'Build packages for distribution.'
-  task :dist => :doc do
+  task :release => [:clobber, :doc] do
     system 'rake package'
   end
 
-# utility
-  desc "Show a list of available tasks."
-  task :default do
-    Rake.application.options.show_task_pattern = //
-    Rake.application.display_tasks_and_comments
-  end
+  desc 'Create announcement feed.'
+  file 'rss.xml' => 'CHANGES.yaml' do |t|
+    require 'format/html.rb'
+    require 'yaml'
+    require 'time'
 
+    feed = Template.new('feed', <<-EOS.gsub(/^ {6}/, '')).result(binding)
+      <?xml version="1.0" encoding="utf-8"?>
+      <rss version="2.0">
+      <channel>
+        <title><%= GENERATOR[:name] %></title>
+        <link><%= spec.homepage %></link>
+        <description><%= spec.summary %></description>
+        <lastBuildDate><%= Time.now.rfc822 %></lastBuildDate>
+      <% YAML.load_documents(File.open(t.prerequisites[0])) do |item| %>
+        <item>
+          <title>Version <%= item['version'] %></title>
+          <guid><%= item.to_s.digest %></guid>
+          <pubDate><%= Time.parse(item['release'].to_s).rfc822 %></pubDate>
+          <description><%=h item['message'].to_s.to_html %></description>
+        </item>
+      <% end %>
+      </channel>
+      </rss>
+    EOS
+
+    File.open(t.name, 'w') {|f| f << feed}
+  end
+  CLOBBER.include 'rss.xml'
+
+# utility
   desc 'Connect to website FTP.'
   task :ftp do
     sh 'lftp', "sftp://#{GENERATOR[:ssh]}"
+  end
+
+  desc 'Upload to project website.'
+  task :upload => [:doc, 'rss.xml'] do
+    sh 'rsync', '-avz', 'doc/', 'rss.xml', GENERATOR[:ssh]
   end

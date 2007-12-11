@@ -6,6 +6,7 @@
   $title   = "Gerbil #{GENERATOR[:version]} user guide"
   $authors = {'Suraj N. Kurapati' => 'http://rassmalog.rubyforge.org/blog/'}
   $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
+  $feed    = File.join(GENERATOR[:website], 'rss.xml')
 
   # local variables for this document
   mailing_list_url = 'http://rubyforge.org/mailman/listinfo/gerbil-talk'
@@ -35,8 +36,7 @@
   <% end %>
 
   <% section "Project links" do %>
-    * "Project website":<%= GENERATOR[:website] %> - official project home page.
-    * "Announcements":http://gerbil.rubyforge.org/rss.xml - project news feed. !http://gerbil.rubyforge.org/images/feed-icon-14x14.png!
+    * "Announcements":<%= $feed %> !http://gerbil.rubyforge.org/feed-icon-28x28.png(RSS icon)! - project release announcements. 
     * "Download area":<%= download_url %> - place to obtain release packages.
     * "Mailing list":<%= mailing_list_url %> - ask questions, get help, discuss.
   <% end %>
