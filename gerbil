@@ -14,8 +14,8 @@
 
 GENERATOR = {
   :name    => 'Gerbil',
-  :version => '0.0.0',
-  :release => '2007-12-09',
+  :version => '0.0.1',
+  :release => '2007-12-13',
   :website => 'http://gerbil.rubyforge.org',
   :home    => File.dirname(__FILE__)
 }
@@ -138,10 +138,10 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       specFile = File.join(GENERATOR[:home], 'format', specFile + '.yaml')
 
     begin
-      specData = YAML.load_file(specFile).merge!(
-        :file => specFile,
+      specData = YAML.load_file(specFile).merge! \
+        :file => File.expand_path(specFile),
         :name => File.basename(specFile).sub(/\..*?$/, '')
-      )
+
     rescue Exception
       hoist "Error when loading the format specification file (#{specFile.inspect})"
     end

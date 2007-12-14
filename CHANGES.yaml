@@ -1,4 +1,16 @@
 ---
+version: 0.0.1
+release: Thu Dec 13 23:44:35 PST 2007
+message: |
+  * Added a @$feeds@ parameter to the HTML format.
+  * Added the <tt>format/rdoc.rb</tt> library for accessing RDoc's parse tree.
+  * Updated the user guide:
+  ** added documentation for methods provided by the HTML format
+  ** added RSS feed for project release announcements
+  ** improved the ghastly HelloWorld example
+  * Added a simple change-log (<tt>CHANGES.yaml</tt>) for the project.
+
+---
 version: 0.0.0
 release: Sun Dec  9 21:10:00 PST 2007
 message: |
