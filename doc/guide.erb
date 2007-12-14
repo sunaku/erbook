@@ -1,20 +1,23 @@
 <%
-  # parameters for Gerbil
-  $unindent = '  '
+  # local variables for this document
+  mailing_list_url  = 'http://rubyforge.org/mailman/listinfo/gerbil-talk'
+  mailing_list_link = link(mailing_list_url, "project mailing list")
+  download_url      = 'http://rubyforge.org/frs/?group_id=4905'
+  feed_url          = File.join(GENERATOR[:website], 'rss.xml')
+  feed_icon_url     = File.join(GENERATOR[:website], 'feed-icon-28x28.png')
+
+  # XXX: initialize dynamic local variables that are defined below
+  #      (this is necessary due to binding / block scope trickery)
+  common_template_vars = nil
 
   # parameters for the HTML format
   $title   = "Gerbil #{GENERATOR[:version]} user guide"
   $authors = {'Suraj N. Kurapati' => 'http://rassmalog.rubyforge.org/blog/'}
   $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
-  $feed    = File.join(GENERATOR[:website], 'rss.xml')
+  $feeds   = { feed_url => :rss }
 
-  # local variables for this document
-  mailing_list_url = 'http://rubyforge.org/mailman/listinfo/gerbil-talk'
-  mailing_list_link = link(mailing_list_url, "project mailing list")
-  download_url = 'http://rubyforge.org/frs/?group_id=4905'
-
-  # XXX: declare variables used below (due to binding / block scope trickery)
-  common_template_vars = nil
+  # parameters for Gerbil
+  $unindent = '  '
 %>
 
 <% chapter "Introduction" do %>
@@ -36,7 +39,7 @@
   <% end %>
 
   <% section "Project links" do %>
-    * "Announcements":<%= $feed %> !http://gerbil.rubyforge.org/feed-icon-28x28.png(RSS icon)! - project release announcements. 
+    * "Announcements":<%= feed_url %> !<%= feed_icon_url %>(RSS icon)! - project news and release announcements.
     * "Download area":<%= download_url %> - place to obtain release packages.
     * "Mailing list":<%= mailing_list_url %> - ask questions, get help, discuss.
   <% end %>
@@ -371,10 +374,11 @@
       The HTML format accepts the following document parameters.
 
       |_. Parameter   |_. Type  |_. Default value                          |_. Description |
-      | @$logo@       | String  | @nil@                                    | Arbitrary content that goes above the document title in the default header. |
       | @$title@      | String  | @"$title"@                               | Title of the document. |
       | @$authors@    | Hash    | @{"$authors" => nil}@                    | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided @String.to_html_entities@ method like this:<br/>@{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_html_entities }@ |
       | @$date@       | String  | @Time.now.strftime("%d %B %Y")@          | Date when the document was written. |
+      | @$logo@       | String  | @nil@                                    | Arbitrary content that goes above the document title in the default header. |
+      | @$feeds@      | Hash    | @nil@                                    | A mapping of feed URL to feed format. Here is an example: <code>$feeds = { "my_rss_feed.xml" => "rss", "my_atom_feed.xml" => "atom" }</code>|
       | @$use_icons@  | Boolean | @true@                                   | Use "Tango icons":http://tango.freedesktop.org/Tango_Icon_Library in admonitions (see <%= xref "Admonitions" %>)? |
     <% end %>
 

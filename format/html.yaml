@@ -298,9 +298,9 @@ output: |
       <meta name="date" content="<%= $date %>"/>
       <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
       <meta name="generator" content="<%= GENERATOR[:name] %> <%= GENERATOR[:version] %>"/>
-      <% if $feed %>
-      <link rel="alternate" type="application/rss+xml" href="<%= $feed %>"/>
-      <% end %>
+      <% $feeds.each_pair do |url, fmt| %>
+      <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
+      <% end if $feeds %>
       <title><%= $title %></title>
 
       <%
