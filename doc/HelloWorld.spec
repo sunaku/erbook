@@ -1,7 +1,7 @@
-desc: A format conceived just for the sake of illustration.
+desc: A illustrative format.
 
 code: |
-  # generates a random name
+  # Returns a random, but pronounceable, name.
   def generate_name
     letters = ('a'..'z').to_a - %w[ c q w x ] # redundant sounds
     vowels = %w[a e i o u]
@@ -20,7 +20,6 @@ code: |
   end
 
   class Node
-    attr_writer :name
     def name
       @name ||= generate_name
     end

@@ -2,6 +2,7 @@
 version: 0.0.1
 release: Thu Dec 13 23:44:35 PST 2007
 message: |
+  * Fixed the generation of unique node URI fragments in the HTML format.
   * Added a @$feeds@ parameter to the HTML format.
   * Added the <tt>format/rdoc.rb</tt> library for accessing RDoc's parse tree.
   * Updated the user guide:
