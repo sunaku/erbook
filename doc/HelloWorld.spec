@@ -32,31 +32,36 @@ nodes:
     number: true
     silent: false
     output: |
-      <h1><%= @node.type %> <%= @node.name.inspect %></h1>
+      <h1><%= @node.type %> #<%= @node.index %>: <%= @node.name.inspect %></h1>
+      My name is <%= @node.name.inspect %> and these are my properties:
       <table>
         <tr>
-          <th>args</th>
+          <th>Property</th>
+          <th>Value</th>
+        </tr>
+        <tr>
+          <td>args</td>
           <td><%= @node.args.inspect %></td>
         </tr>
         <tr>
-          <th>index</th>
+          <td>index</td>
           <td><%= @node.index.inspect %></td>
         </tr>
         <tr>
-          <th>number</th>
+          <td>number</td>
           <td><%= @node.number.inspect %></td>
         </tr>
         <tr>
-          <th>trace</th>
+          <td>trace</td>
           <td><ul><%= @node.trace.map {|s| "<li>#{s}</li>"} %></ul></td>
         </tr>
         <tr>
-          <th>content</th>
+          <td>content</td>
           <td><%= @node.content %></td>
         </tr>
       </table>
 
 output: |
   Welcome to the "<%= @spec[:name] %>" format.
-  <div style="<%= $style %>"<%= @content %></div>
+  <div style="<%= $style %>"><%= @content %></div>
   That's all folks!

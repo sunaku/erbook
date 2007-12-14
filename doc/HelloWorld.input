@@ -1,40 +1,37 @@
 <% $style = "border-left: thick solid salmon; padding-left: 1em;" %>
-<% hello "1" do |node| %>
-  1
+<% hello "Pretentious" do %>
+  <big>I'm</big> the very first node, oh _yes_ I am! *sneer*
 
-  <% node.name = 'hard-coded ' + generate_name %>
+  <% hello "Bashful" do %>
+    Hi, I... *hide*
 
-  <% hello "1.1" do %>
-    1.1
+    <% hello "Hopeful" do %>
+      *sigh*
 
-    <% hello "1.1.1" do %>
-      1.1.1
-
-      <% hello "1.1.1.1" do %>
-        1.1.1.1
+      <% hello "Confused" do %>
+        Huh?
       <% end %>
     <% end %>
 
-    <% hello "1.1.2" do %>
-      1.1.2
+    <% hello "Raving" do %>
+      Oh it's *on* now! You're going *down*!
     <% end %>
   <% end %>
 
-  <% hello "1.2" do %>
-    1.2
+  <% hello "Sleepy" do %>
+    *yawn* Just five more minutes...
 
-    <% hello "1.2.1" do %>
-      1.2.1
+    <% hello "Peaceful" do %>
+      So _be_ happy my friend, *happy*!
 
-      <%= hello "1.2.1.1 (no block)" %>
+      <%= hello "Lonely (as you can see, I have no block)" %>
     <% end %>
   <% end %>
 <% end %>
 
-<% hello "2" do %>
-  2, with extra newlines
-
-
+<% hello "Snappy" do %>
+  Zip! Zap! Wake up, you sap!
+  _Whoo I'm wild!_ ;-)
 <% end %>
 
-<%= hello "3 (no block)" %>
+<%= hello "Independent (no block, no parents, I am _free_!)" %>
