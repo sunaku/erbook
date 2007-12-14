@@ -26,7 +26,7 @@ GENERATOR[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{GENERATOR[:id]}"
     s.summary     = 'Extensible document generator based on eRuby.'
     s.description = s.summary
     s.homepage    = GENERATOR[:website]
-    s.files       = FileList['**/*'].exclude('_darcs', File.basename(__FILE__))
+    s.files       = FileList['**/*'].exclude('_darcs')
     s.executables = GENERATOR[:id]
     s.bindir      = '.' # our executable is not inside 'bin/'
 
