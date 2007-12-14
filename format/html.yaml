@@ -10,6 +10,8 @@ code: |
   # load admonition icons
     Icon = Struct.new(:path, :name, :format, :data)
     class Icon
+      # Returns a HTML image tag containing embedded image data.  The given
+      # attributes (name => value) are applied to the HTML tag declaration.
       def to_html aAttributes = {}
         atts = aAttributes.inject('') {|s,(k,v)| s << %( #{k}="#{v}") }
         %{<img src="data:image/#{format};base64,#{data}" alt="#{name}"#{atts}/>}
