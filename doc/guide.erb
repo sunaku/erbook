@@ -378,6 +378,31 @@
       | @$use_icons@  | Boolean | @true@                                   | Use "Tango icons":http://tango.freedesktop.org/Tango_Icon_Library in admonitions (see <%= xref "Admonitions" %>)? |
     <% end %>
 
+    <% section "Methods" do %>
+      The HTML format provides the following methods. In the method declarations shown below,
+      * a pound sign (#) indicates that the method is an *instance method*, meaning that it can only be invoked on instances of a class, not on the classes themselves.
+      * a double colon sign (::) indicates that the method is a *class method*, meaning that it can only be invoked on a class.
+
+      |_. Method declaration |_. Description |
+      <%
+        # load library for parsing method documentation
+        require File.join(GENERATOR[:home], 'format', 'rdoc.rb')
+
+        spec_tree = RDoc::gen_parse_tree(@spec['code'])
+
+        html_rb_path = File.join(GENERATOR[:home], 'format', 'html.rb')
+        html_rb_code = File.read(html_rb_path)
+        html_rb_tree = RDoc::gen_parse_tree(html_rb_code, html_rb_path)
+
+        trees = spec_tree + html_rb_tree
+        meths = RDoc::gen_method_infos(*trees)
+
+        meths.each do |m|
+      %>
+      | @<%= m[:decl] %>@ | <noformat><%= m[:docs_html] %></noformat> |
+      <% end %>
+    <% end %>
+
     <% chapter "Nodes", "html.nodes" do %>
       Unless otherwise noted, all nodes defined by the HTML format accept two arguments, in this order:
       # a title or name for the node
