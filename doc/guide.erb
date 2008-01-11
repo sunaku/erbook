@@ -3,15 +3,15 @@
   mailing_list_url  = 'http://rubyforge.org/mailman/listinfo/gerbil-talk'
   mailing_list_link = link(mailing_list_url, "project mailing list")
   download_url      = 'http://rubyforge.org/frs/?group_id=4905'
-  feed_url          = File.join(GENERATOR[:website], 'rss.xml')
-  feed_icon_url     = File.join(GENERATOR[:website], 'feed-icon-28x28.png')
+  feed_url          = File.join(Gerbil[:website], 'rss.xml')
+  feed_icon_url     = File.join(Gerbil[:website], 'feed-icon-28x28.png')
 
   # XXX: initialize dynamic local variables that are defined below
   #      (this is necessary due to binding / block scope trickery)
   common_template_vars = nil
 
   # parameters for the HTML format
-  $title   = "Gerbil #{GENERATOR[:version]} user guide"
+  $title   = "Gerbil #{Gerbil[:version]} user guide"
   $authors = {'Suraj N. Kurapati' => 'http://rassmalog.rubyforge.org/blog/'}
   $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
   $feeds   = { feed_url => :rss }
@@ -94,7 +94,7 @@
     ** <tt>gerbil.svg</tt> - the source file of the Gerbil logo.
     ** <tt>guide.erb</tt> - the source file of this user guide.
     * <tt>format/</tt> - contains the predefined set of format specification files (see <%= xref 'SpecFile' %>). If you ever need to install your custom format specification file globally, put it inside this directory.
-    <% Dir[File.join(GENERATOR[:home], 'format', '*.yaml')].each do |file| %>
+    <% Dir[File.join(Gerbil[:home], 'format', '*.yaml')].each do |file| %>
     ** <tt><%= File.basename(file) %></tt> - <%= YAML.load_file(file)['desc'] %>
     <% end %>
     * <tt>gerbil</tt> - the main source code of Gerbil.
@@ -398,11 +398,11 @@
       |_. Method declaration |_. Description |
       <%
         # load library for parsing method documentation
-        require File.join(GENERATOR[:home], 'format', 'rdoc.rb')
+        require File.join(Gerbil[:home], 'format', 'rdoc.rb')
 
         spec_tree = RDoc::gen_parse_tree(@spec['code'])
 
-        html_rb_path = File.join(GENERATOR[:home], 'format', 'html.rb')
+        html_rb_path = File.join(Gerbil[:home], 'format', 'html.rb')
         html_rb_code = File.read(html_rb_path)
         html_rb_tree = RDoc::gen_parse_tree(html_rb_code, html_rb_path)
 

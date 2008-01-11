@@ -6,8 +6,8 @@ require 'rake/gempackagetask'
 
 load 'gerbil' # does not have a '.rb' extension, so we cannot use require()
 
-GENERATOR[:id] = GENERATOR[:name].downcase
-GENERATOR[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{GENERATOR[:id]}"
+Gerbil[:id] = Gerbil[:name].downcase
+Gerbil[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{Gerbil[:id]}"
 
 # documentation
   desc "Generate documentation."
@@ -21,13 +21,13 @@ GENERATOR[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{GENERATOR[:id]}"
 
 # packaging
   spec = Gem::Specification.new do |s|
-    s.name        = GENERATOR[:id]
-    s.version     = GENERATOR[:version]
+    s.name        = Gerbil[:id]
+    s.version     = Gerbil[:version]
     s.summary     = 'Extensible document generator based on eRuby.'
     s.description = s.summary
-    s.homepage    = GENERATOR[:website]
+    s.homepage    = Gerbil[:website]
     s.files       = FileList['**/*'].exclude('_darcs')
-    s.executables = GENERATOR[:id]
+    s.executables = Gerbil[:id]
     s.bindir      = '.' # our executable is not inside 'bin/'
 
     s.add_dependency 'RedCloth' # needed by the default 'html' format
@@ -55,7 +55,7 @@ GENERATOR[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{GENERATOR[:id]}"
       <?xml version="1.0" encoding="utf-8"?>
       <rss version="2.0">
       <channel>
-        <title><%= GENERATOR[:name] %></title>
+        <title><%= Gerbil[:name] %></title>
         <link><%= spec.homepage %></link>
         <description><%= spec.summary %></description>
         <lastBuildDate><%= Time.now.rfc822 %></lastBuildDate>
@@ -78,10 +78,10 @@ GENERATOR[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{GENERATOR[:id]}"
 # utility
   desc 'Connect to website FTP.'
   task :ftp do
-    sh 'lftp', "sftp://#{GENERATOR[:ssh]}"
+    sh 'lftp', "sftp://#{Gerbil[:ssh]}"
   end
 
   desc 'Upload to project website.'
   task :upload => [:doc, 'rss.xml'] do
-    sh 'rsync', '-avz', 'doc/', 'rss.xml', GENERATOR[:ssh]
+    sh 'rsync', '-avz', 'doc/', 'rss.xml', Gerbil[:ssh]
   end

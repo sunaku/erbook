@@ -12,7 +12,7 @@
 # Copyright 2007 Suraj N. Kurapati
 # See the file named LICENSE for details.
 
-GENERATOR = {
+Gerbil = {
   :name    => 'Gerbil',
   :version => '0.0.1',
   :release => '2007-12-13',
@@ -113,7 +113,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       puts "\nOption: #{opts}"
 
       puts "\nFormat:"
-      Dir[File.join(GENERATOR[:home], 'format', '*.yaml')].each do |file|
+      Dir[File.join(Gerbil[:home], 'format', '*.yaml')].each do |file|
         name = File.basename(file, '.yaml')
         desc = YAML.load_file(file)['desc'] rescue nil
         puts '    %-32s %s' % [name, desc]
@@ -124,7 +124,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
     opts.on '-v', '--version', 'show version information' do
       puts "%s %s (%s) %s %s" %
-        [:name, :version, :release, :website, :home].map { |m| GENERATOR[m] }
+        [:name, :version, :release, :website, :home].map { |m| Gerbil[m] }
       exit
     end
 
@@ -135,7 +135,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       raise ArgumentError, "Format was not specified.  Try `{$0} -h` for help."
 
     File.file? specFile or
-      specFile = File.join(GENERATOR[:home], 'format', specFile + '.yaml')
+      specFile = File.join(Gerbil[:home], 'format', specFile + '.yaml')
 
     begin
       specData = YAML.load_file(specFile).merge! \

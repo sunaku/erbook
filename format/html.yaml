@@ -5,7 +5,7 @@ desc: web page for the Internet
 
 code: |
   # load the String#to_html method
-  require File.join(GENERATOR[:home], 'format', 'html.rb')
+  require File.join(Gerbil[:home], 'format', 'html.rb')
 
   # load admonition icons
     Icon = Struct.new(:path, :name, :format, :data)
@@ -19,7 +19,7 @@ code: |
     end
 
     ICONS = {}
-    Dir[File.join(GENERATOR[:home], 'format', 'html.icons', '*.*')].each \
+    Dir[File.join(Gerbil[:home], 'format', 'html.icons', '*.*')].each \
     do |path|
       ext = File.extname(path)
       name = File.basename(path, ext)
@@ -309,7 +309,7 @@ output: |
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
       <meta name="date" content="<%= $date %>"/>
       <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
-      <meta name="generator" content="<%= GENERATOR[:name] %> <%= GENERATOR[:version] %>"/>
+      <meta name="generator" content="<%= Gerbil[:name] %> <%= Gerbil[:version] %>"/>
       <% $feeds.each_pair do |url, fmt| %>
       <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
       <% end if $feeds %>
@@ -417,7 +417,7 @@ output: |
       <% if footer = @types['footer'].first %>
         <%= footer.content.to_s.to_html %>
       <% else %>
-        Generated on <%= Time.now %> by <a href="<%= GENERATOR[:website] %>"><%= GENERATOR[:name] %></a> <%= GENERATOR[:version] %>.
+        Generated on <%= Time.now %> by <a href="<%= Gerbil[:website] %>"><%= Gerbil[:name] %></a> <%= Gerbil[:version] %>.
       <% end %>
 
       <% if $icons_used and not $icons_used.empty? %>
