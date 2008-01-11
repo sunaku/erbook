@@ -683,7 +683,7 @@ styles:
         _text-align      : center; /* for IE6 */
       }
 
-      .figure > .content > img
+      .figure > .content img
       {
         display          : block;
         margin           : auto;
