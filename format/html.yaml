@@ -313,7 +313,7 @@ output: |
       <% $feeds.each_pair do |url, fmt| %>
       <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
       <% end if $feeds %>
-      <title><%= $title %></title>
+      <title><%= $title.to_s.to_html %></title>
 
       <%
         styles = @spec['styles']
@@ -331,7 +331,7 @@ output: |
         <%= header.output %>
       <% else %>
         <%= $logo %>
-        <h1 class="title"><%= $title %></h1>
+        <h1 class="title"><%= $title.to_s.to_html %></h1>
         <h2 class="authors"><%=
           $authors.map do |(name, url)|
             if url
