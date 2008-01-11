@@ -6,10 +6,6 @@
   feed_url          = File.join(Gerbil[:website], 'rss.xml')
   feed_icon_url     = File.join(Gerbil[:website], 'feed-icon-28x28.png')
 
-  # XXX: initialize dynamic local variables that are defined below
-  #      (this is necessary due to binding / block scope trickery)
-  common_template_vars = nil
-
   # parameters for the HTML format
   $title   = "Gerbil #{Gerbil[:version]} user guide"
   $authors = {'Suraj N. Kurapati' => 'http://rassmalog.rubyforge.org/blog/'}
@@ -171,6 +167,13 @@
     | code        | String | Ruby code that will be loaded before the input document is processed. This source code will be evaluated inside the main Gerbil executable, so any file-system or path-dependent portions of this source code should take appropriate precautions. |
     | nodes       | Hash   | A listing of node definitions. See <%= xref "SpecFile.nodes" %>. |
     | output      | String | An eRuby template for the final output document. See <%= xref "SpecFile.output" %>. |
+
+    <%
+      # XXX: "declare" this local variable here (in the parent
+      #      scope) because it is initialized and used in two
+      #      different child scopes that exist at different depths
+      common_template_vars = nil
+    %>
 
     <% section "Node definition", "SpecFile.nodes" do %>
       A node definition is a mapping from a name (the "node type") to the following set of parameters:
