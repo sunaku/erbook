@@ -17,8 +17,12 @@ Gerbil = {
   :version => '0.0.1',
   :release => '2007-12-13',
   :website => 'http://gerbil.rubyforge.org',
-  :home    => File.dirname(__FILE__)
+  :home    => File.dirname(__FILE__),
 }
+Gerbil[:format_home]  = File.join(Gerbil[:home], 'fmt')
+Gerbil[:format_files] = Dir[File.join(Gerbil[:format_home], '*.yaml')]
+
+$:.unshift File.join(Gerbil[:home], 'lib')
 
 require 'erb'
 include ERB::Util
@@ -113,7 +117,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       puts "\nOption: #{opts}"
 
       puts "\nFormat:"
-      Dir[File.join(Gerbil[:home], 'format', '*.yaml')].each do |file|
+      Gerbil[:format_files].each do |file|
         name = File.basename(file, '.yaml')
         desc = YAML.load_file(file)['desc'] rescue nil
         puts '    %-32s %s' % [name, desc]
@@ -135,7 +139,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       raise ArgumentError, "Format was not specified.  Try `{$0} -h` for help."
 
     File.file? specFile or
-      specFile = File.join(Gerbil[:home], 'format', specFile + '.yaml')
+      specFile = File.join(Gerbil[:format_home], specFile + '.yaml')
 
     begin
       specData = YAML.load_file(specFile).merge! \

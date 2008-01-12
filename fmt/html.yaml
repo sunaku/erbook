@@ -5,7 +5,7 @@ desc: web page for the Internet
 
 code: |
   # load the String#to_html method
-  require File.join(Gerbil[:home], 'format', 'html.rb')
+  require 'gerbil/html'
 
   # load admonition icons
     Icon = Struct.new(:path, :name, :format, :data)
@@ -19,8 +19,7 @@ code: |
     end
 
     ICONS = {}
-    Dir[File.join(Gerbil[:home], 'format', 'html.icons', '*.*')].each \
-    do |path|
+    Dir[File.join(Gerbil[:format_home], 'html.icons', '*.*')].each do |path|
       ext = File.extname(path)
       name = File.basename(path, ext)
       data = [File.read(path)].pack('m')

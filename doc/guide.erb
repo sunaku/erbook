@@ -90,7 +90,7 @@
     ** <tt>gerbil.svg</tt> - the source file of the Gerbil logo.
     ** <tt>guide.erb</tt> - the source file of this user guide.
     * <tt>format/</tt> - contains the predefined set of format specification files (see <%= xref 'SpecFile' %>). If you ever need to install your custom format specification file globally, put it inside this directory.
-    <% Dir[File.join(Gerbil[:home], 'format', '*.yaml')].each do |file| %>
+    <% Gerbil[:format_files].each do |file| %>
     ** <tt><%= File.basename(file) %></tt> - <%= YAML.load_file(file)['desc'] %>
     <% end %>
     * <tt>gerbil</tt> - the main source code of Gerbil.
@@ -401,11 +401,11 @@
       |_. Method declaration |_. Description |
       <%
         # load library for parsing method documentation
-        require File.join(Gerbil[:home], 'format', 'rdoc.rb')
+        require 'gerbil/rdoc'
 
         spec_tree = RDoc::gen_parse_tree(@spec['code'])
 
-        html_rb_path = File.join(Gerbil[:home], 'format', 'html.rb')
+        html_rb_path = 'lib/gerbil/html.rb'
         html_rb_code = File.read(html_rb_path)
         html_rb_tree = RDoc::gen_parse_tree(html_rb_code, html_rb_path)
 

@@ -47,7 +47,7 @@ Gerbil[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{Gerbil[:id]}"
 
   desc 'Create announcement feed.'
   file 'rss.xml' => 'CHANGES.yaml' do |t|
-    require 'format/html.rb'
+    require 'gerbil/html'
     require 'yaml'
     require 'time'
 
