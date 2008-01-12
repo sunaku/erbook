@@ -4,8 +4,7 @@
 require 'rake/clean'
 require 'rake/gempackagetask'
 
-load 'gerbil' # does not have a '.rb' extension, so we cannot use require()
-
+require 'version'
 Gerbil[:id] = Gerbil[:name].downcase
 Gerbil[:ssh] = "snk@rubyforge.org:/var/www/gforge-projects/#{Gerbil[:id]}"
 
