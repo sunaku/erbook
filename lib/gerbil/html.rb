@@ -39,6 +39,9 @@ class String
     html = text.thru_redcloth
     restore_tags! html, protectedStore
 
+    # collapse redundant <pre> elements -- a side effect of RedCloth
+    html.gsub! %r{(<pre>)\s*<pre>(.*?)</pre>\s*(</pre>)}m, '\1\2\3'
+
     html = html.thru_coderay
     restore_tags! html, verbatimStore
 
@@ -61,9 +64,8 @@ class String
     # redcloth adds <span> tags around acronyms
     html.gsub! %r{<span class="caps">([[:upper:][:digit:]]+)</span>}, '\1'
 
-    # redcloth wraps indented text within <pre> tags
+    # redcloth wraps indented text within <pre><code> tags
     html.gsub! %r{(<pre>)\s*<code>(.*?)\s*</code>\s*(</pre>)}m, '\1\2\3'
-    html.gsub! %r{(<pre>)\s*<pre>(.*?)</pre>\s*(</pre>)}m, '\1\2\3'
 
     # redcloth wraps a single item within paragraph tags, which
     # prevents the item's HTML from being validly injected within
