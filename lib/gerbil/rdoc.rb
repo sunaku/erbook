@@ -46,7 +46,7 @@ module RDoc
   # given parse trees (which are produced by RDoc::gen_parse_trees).
   def self.gen_method_infos *aParseTrees
     meths = aParseTrees.map do |i|
-      i.method_list + i.classes.map { |c| c.method_list }
+      [i, i.classes, i.modules].flatten.map {|j| j.method_list }
     end.flatten.uniq
 
     meths.map do |m|
