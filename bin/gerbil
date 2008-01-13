@@ -12,15 +12,15 @@
 # Copyright 2007 Suraj N. Kurapati
 # See the file named LICENSE for details.
 
-require 'version'
-$:.unshift File.join(Gerbil[:home], 'lib')
-
 require 'erb'
 include ERB::Util
 
 require 'digest/sha1'
 require 'yaml'
 require 'ostruct'
+
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'gerbil'
 
 # Prints the given message and raises the given error.
 def hoist aMessage, aError = $!

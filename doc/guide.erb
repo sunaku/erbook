@@ -73,9 +73,9 @@
     # Download the newest release package from "the download area":<%= download_url %>.
     # Extract the release package anywhere you want on your system.
     # Go inside the extracted directory and run the following command:
-      <pre>ruby gerbil -v</pre>
+      <pre>ruby bin/gerbil -v</pre>
 
-    If the installation was successful, then you will see output like this: <pre><%=h `ruby gerbil -v` %></pre>
+    If the installation was successful, then you will see output like this: <pre><%=h `ruby bin/gerbil -v` %></pre>
 
     Otherwise, you can ask for help in the <%= mailing_list_link %>.
   <% end %>
@@ -251,14 +251,14 @@
       <% end %>
 
       <% example "Output of HelloWorld format", "HelloWorld.output" do %>
-        <%= `ruby gerbil doc/HelloWorld.spec doc/HelloWorld.input` %>
+        <%= `ruby bin/gerbil doc/HelloWorld.spec doc/HelloWorld.input` %>
       <% end %>
     <% end %>
   <% end %>
 <% end %>
 
 <% chapter "Usage" do %>
-  <pre><%=h "\n" << `ruby gerbil -h`.gsub(/^/, $unindent) %></pre>
+  <pre><%=h "\n" << `ruby bin/gerbil -h`.gsub(/^/, $unindent) %></pre>
 
   Gerbil requires its _first_ command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>. Predefined formats are simply short-hand names of format specification files located in the <tt>format/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>).
 
