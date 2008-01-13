@@ -26,10 +26,11 @@ module RDoc
     include DummyMixin
   end
 
-  # Returns an RDoc parse tree for the given code.  If the file name (which
-  # signifies the origin of the given code) is given, it MUST have a ".rb"
-  # file extension.  Otherwise, RDoc will give you an empty parse tree!  :-(
-  def self.gen_parse_tree aCode, aFileName = __FILE__
+  # Returns an array of RDoc parse trees for the given code.
+  # If the file name (which signifies the origin of the given
+  # code) is given, it MUST have a ".rb" file extension.
+  # Otherwise, RDoc will give you an empty parse tree!  :-(
+  def self.gen_parse_trees aCode, aFileName = __FILE__
     root = TopLevel.new(aFileName)
     parser = ParserFactory.parser_for(root, aFileName, aCode, DummyOptions.new, Stats.new)
     info = parser.scan

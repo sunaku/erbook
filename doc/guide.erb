@@ -403,11 +403,11 @@
         # load library for parsing method documentation
         require 'gerbil/rdoc'
 
-        spec_tree = RDoc::gen_parse_tree(@spec['code'])
+        spec_tree = RDoc::gen_parse_trees(@spec['code'])
 
         html_rb_path = 'lib/gerbil/html.rb'
         html_rb_code = File.read(html_rb_path)
-        html_rb_tree = RDoc::gen_parse_tree(html_rb_code, html_rb_path)
+        html_rb_tree = RDoc::gen_parse_trees(html_rb_code, html_rb_path)
 
         trees = spec_tree + html_rb_tree
         meths = RDoc::gen_method_infos(*trees)
