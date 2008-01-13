@@ -38,7 +38,7 @@ module RDoc
     info.requires.map do |r|
       f = r.name
       f << '.rb' unless File.exist? f
-      gen_parse_tree f if File.exist? f
+      gen_parse_trees f if File.exist? f
     end.flatten.compact << info
   end
 
