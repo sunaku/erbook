@@ -739,6 +739,20 @@ styles:
         border           : none;
       }
 
+      /*
+        mark external links with a symbol to help the user
+        distinguish between internal and external links
+      */
+      a:after
+      {
+        content: "∗";
+      }
+
+      a[href^="#"]:after
+      {
+        content: "";
+      }
+
     /* source code */
 
       tt,
