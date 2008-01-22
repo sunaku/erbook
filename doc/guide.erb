@@ -22,7 +22,7 @@
 
   Gerbil is *lighter* and more *flexible* than "DocBook":http://www.docbook.org, "Deplate":http://deplate.sourceforge.net, and "SiSU":http://www.jus.uio.no/sisu/SiSU/ because it is small, fast, and lets you <%= xref "HelloWorld", "define your own custom format" %>. Furthermore, Gerbil is *scriptable* unlike raw text generators such as "AsciiDoc":http://www.methods.co.nz/asciidoc/, "txt2tags":http://txt2tags.sourceforge.net, and "Grutatxt":http://www.triptico.com/software/grutatxt.html because it lets you inject Ruby code directly into your documents for dynamic content generation.
 
-  Gerbil is *open-source software* (see <%= xref "License" %>) so feel free to contribute your improvements and discuss your ideas in the <%= mailing_list_link %>. You can obtain the source code from Gerbil's "Darcs":http://darcs.net repository by running the following command:
+  Gerbil is *open-source software* (see <%= xref "License" %>) so feel free to contribute your improvements and discuss your ideas in the <%= mailing_list_link %>. You can obtain the source code from the project "Darcs":http://darcs.net repository by running the following command:
 
     darcs get <%= source_repo_url %> gerbil
 
@@ -41,10 +41,13 @@
     <%=h File.read('LICENSE') %>
   <% end %>
 
-  <% section "Project links" do %>
-    * "Announcements":<%= feed_url %> !<%= feed_icon_url %>(RSS icon)! - project news and release announcements.
-    * "Download area":<%= download_url %> - place to obtain release packages.
-    * "Mailing list":<%= mailing_list_url %> - ask questions, get help, discuss.
+  <% section "Resources" do %>
+    * "Announcements":<%= feed_url %> !<%= feed_icon_url %>(RSS icon)!
+      - project news and release announcements.
+    * "Download area":<%= download_url %>
+      - place to obtain release packages.
+    * "Mailing list":<%= mailing_list_url %>
+      - ask questions, get help, discuss.
   <% end %>
 
   <% section "Testimonials" do %>
@@ -76,7 +79,8 @@
     # Download the newest release package from "the download area":<%= download_url %>.
     # Extract the release package anywhere you want on your system.
     # Go inside the extracted directory and run the following command:
-      <pre>ruby bin/gerbil -v</pre>
+
+      ruby bin/gerbil -v
 
     If the installation was successful, then you will see output like this: <pre><%=h `ruby bin/gerbil -v` %></pre>
 

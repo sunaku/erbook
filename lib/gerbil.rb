@@ -7,5 +7,5 @@ Gerbil = {
   :website => 'http://gerbil.rubyforge.org',
   :home    => File.expand_path(File.join(File.dirname(__FILE__), '..'))
 }
-Gerbil[:format_home]  = File.join(Gerbil[:home], 'fmt')
+Gerbil[:format_home] = File.join(Gerbil[:home], 'fmt')
 Gerbil[:format_files] = Dir[File.join(Gerbil[:format_home], '*.yaml')]

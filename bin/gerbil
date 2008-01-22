@@ -118,8 +118,9 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     end
 
     opts.on '-v', '--version', 'show version information' do
-      puts "%s %s (%s) %s %s" %
-        [:name, :version, :release, :website, :home].map { |m| Gerbil[m] }
+      puts "%s %s (%s) %s %s" % [
+        :name, :version, :release, :website, :home
+      ].map {|m| Gerbil[m] }
       exit
     end
 
@@ -157,11 +158,11 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     template = Template.new('INPUT', input)
 
     templateVars = {
-      :@spec => specData,
+      :@spec  => specData,
       :@roots => roots = [], # root nodes of all trees
       :@nodes => nodes = [], # all nodes in the forest
       :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
-    }.each_pair { |k,v| template.instance_variable_set(k, v) }
+    }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
     nodeDefs = specData['nodes'].each_pair do |name, info|
       template.instance_eval %{
