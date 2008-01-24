@@ -329,7 +329,7 @@ output: |
       <% if header = @types['header'].first %>
         <%= header.output %>
       <% else %>
-        <%= $logo %>
+        <%= $logo if defined? $logo %>
         <h1 class="title"><%= $title.to_s.to_html %></h1>
         <h2 class="authors"><%=
           $authors.map do |(name, url)|
@@ -419,7 +419,7 @@ output: |
         Generated on <%= Time.now %> by <a href="<%= Gerbil[:website] %>"><%= Gerbil[:name] %></a> <%= Gerbil[:version] %>.
       <% end %>
 
-      <% if $icons_used and not $icons_used.empty? %>
+      <% if defined? $icons_used and $icons_used and not $icons_used.empty? %>
         <p>The admonition icons (<%= $icons_used.uniq.map {|icon| icon.to_html}.join(' ') %>) used in this document are Copyright &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.</p>
       <% end %>
       </div>
