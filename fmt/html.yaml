@@ -514,6 +514,8 @@ styles:
       table
       {
         border           : none;
+        margin           : auto; /* center horizontally */
+        margin-top       : 1em;
       }
 
       th,
@@ -528,11 +530,6 @@ styles:
       th
       {
         background-color : #F5F5F5;
-      }
-
-      table
-      {
-        margin           : auto;
       }
 
     /* document structure */
