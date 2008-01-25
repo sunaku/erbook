@@ -55,6 +55,6 @@ require 'rake/gempackagetask'
 # utility
   desc 'Upload to project website.'
   task :upload => :doc do
-    ln_s './guide.html', 'doc/index.html'
-    sh "rsync -av doc/ ~/www/lib/#{spec.name} --delete"
+    sh "rsync -av doc/ ~/www/lib/#{spec.name}"
+    sh "rsync -av doc/api/ ~/www/lib/#{spec.name}/api/ --delete"
   end
