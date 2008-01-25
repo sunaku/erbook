@@ -9,3 +9,13 @@ Gerbil = {
 }
 Gerbil[:format_home] = File.join(Gerbil[:home], 'fmt')
 Gerbil[:format_files] = Dir[File.join(Gerbil[:format_home], '*.yaml')]
+
+class << Gerbil
+  # Returns the name and version.
+  def to_s
+    self[:name] + ' ' + self[:version]
+  end
+
+  # throw an exception instead of returning nil
+  alias [] fetch
+end
