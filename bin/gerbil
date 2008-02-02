@@ -251,10 +251,10 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
         # replace node with output
         if nodeDefs[n.type]['silent']
-          buf.sub! n.digest, ''
+          buf[n.digest] = ''
           buf = n.output
         else
-          buf.sub! n.digest, n.output
+          buf[n.digest] = n.output
         end
 
         # repeat for all child nodes
