@@ -6,13 +6,114 @@
 require 'rdoc/rdoc'
 
 module RDoc
-  module DummyMixin
+  class TopLevel
+    # Returns an array of all classes recorded thus far.
+    def self.all_classes
+      @@all_classes.values
+    end
+
+    # Returns an array of all modules recorded thus far.
+    def self.all_modules
+      @@all_modules.values
+    end
+
+    # Returns an array of RDoc::AnyMethod objects
+    # representing all methods recorded thus far.
+    def self.all_methods
+      all_classes_and_modules.map {|c| c.method_list }.flatten
+    end
+
+    # Update the return value of the all_classes_and_modules() method
+    # to *really* include every class and every module seen thus far.
+    def self.refresh_all_classes_and_modules
+      visit = lambda do |node|
+        if node.is_a? NormalClass or node.is_a? SingleClass
+          @@all_classes[node.full_name] = node
+
+        elsif node.is_a? NormalModule
+          @@all_modules[node.full_name] = node
+        end
+
+        (node.classes + node.modules).each {|n| visit[n] }
+      end
+
+      all_classes_and_modules.each {|n| visit[n] }
+    end
+
+    # Returns a RDoc::TopLevel object containing information
+    # parsed from the given code string.  This information is
+    # also added to the global TopLevel class state, so you can
+    # access it via the class methods of the TopLevel class.
+    #
+    # If the file name (which signifies the origin
+    # of the given code) is given, it MUST have a
+    # ".c" or ".rb" file extension.  Otherwise,
+    # RDoc will ignore the given code string!  :-(
+    #
+    def self.parse aCodeString, aFileName = __FILE__
+      top = ParserFactory.parser_for(
+        TopLevel.new(aFileName), aFileName,
+        aCodeString, DummyOptions.new, Stats.new
+      ).scan
+
+      refresh_all_classes_and_modules
+
+      top
+    end
+
+    # Returns a RDoc::TopLevel object containing information
+    # parsed from the code in the given file.  This information
+    # is also added to the global TopLevel class state, so you
+    # can access it via the class methods of the TopLevel class.
+    #
+    # The given file name MUST have a ".c" or ".rb" file
+    # extension.  Otherwise, RDoc will ignore the file!  :-(
+    #
+    def self.parse_file aFileName
+      parse File.read(aFileName), aFileName
+    end
+  end
+
+  class AnyMethod
+    # Returns the fully qualified name of this method.
+    def full_name
+      [parent.full_name, name].join(singleton ? '::' : '#')
+    end
+
+    # Returns a complete method declaration with block parameters and all.
+    def decl
+      a = params.dup
+      if b = block_params
+        a.sub! %r/\s*\#.*(?=.$)/, '' # remove "# :yields: ..." string
+        a << " {|#{b}| ... }"
+      end
+      full_name << a
+    end
+
+    # Returns a HTML version of this method's comment.
+    def comment_html
+      DummyMarkup.new.markup comment
+    end
+
+    # Returns the RDoc::TopLevel object which contains this method.
+    def top_level
+      n = parent
+      while n && n.parent
+        n = n.parent
+      end
+      n
+    end
+  end
+
+  private
+
+  module DummyMixin #:nodoc:
     def method_missing *args
       # ignore all messages
     end
   end
 
-  class DummyOptions
+  class DummyOptions #:nodoc:
     include DummyMixin
 
     def quiet # supress '...c..m...' output on STDERR
@@ -20,72 +121,9 @@ module RDoc
     end
   end
 
-  class DummyMarkup
+  class DummyMarkup #:nodoc:
     require 'rdoc/generators/html_generator'
     include Generators::MarkUp
     include DummyMixin
-  end
-
-  # Returns an array of RDoc parse trees for the given code.
-  # If the file name (which signifies the origin of the given
-  # code) is given, it MUST have a ".rb" file extension.
-  # Otherwise, RDoc will give you an empty parse tree!  :-(
-  def self.gen_parse_trees aCode, aFileName = __FILE__
-    root = TopLevel.new(aFileName)
-    parser = ParserFactory.parser_for(root, aFileName, aCode, DummyOptions.new, Stats.new)
-    info = parser.scan
-
-    info.requires.map do |r|
-      f = r.name
-      f << '.rb' unless File.exist? f
-      gen_parse_trees f if File.exist? f
-    end.flatten.compact << info
-  end
-
-  # Returns an array of hashes describing all methods present in the
-  # given parse trees (which are produced by RDoc::gen_parse_trees).
-  def self.gen_method_infos *aParseTrees
-    meths = aParseTrees.map do |i|
-      [i, i.classes, i.modules].flatten.map {|j| j.method_list }
-    end.flatten.uniq
-
-    meths.map do |m|
-      # determine full path to method (Module::Class::...::method)
-      hier = []
-      root = m.parent
-      while root && root.parent
-        hier.unshift root
-        root = root.parent
-      end
-
-      if hier.empty?
-        path = m.name
-      else
-        path = hier.map {|n| n.name}.join('::')
-        path = [path, m.name].join(m.singleton ? '::' : '#')
-      end
-
-      # determine argument string for method
-      args = m.params
-      if m.block_params
-        args.sub! %r/\#.*(?=.$)/, ''
-        args << " { |#{m.block_params}| ... }"
-      end
-
-      {
-        :file => root.file_absolute_name,
-        :name => path,
-        :args => args,
-        :decl => path + args,
-        :docs => m.comment,
-        :docs_html => DummyMarkup.new.markup(m.comment),
-
-        # nodes in the parse tree
-        :node => m,
-        :root => root,
-        # for top level methods, info.parent == root
-        # for class methods, info.singleton == true
-      }
-    end
   end
 end
