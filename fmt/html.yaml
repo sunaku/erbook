@@ -104,9 +104,18 @@ nodes:
     index: false
     number: false
     silent: true
-    output: <%= @node.content %>
+    output: <%= @node.content.to_html %>
 
-  footer: *header
+  header_outside_above: *header
+  header_inside_above:  *header
+  header_inside_below:  *header
+  header_outside_below: *header
+
+  footer:               *header
+  footer_outside_above: *header
+  footer_inside_above:  *header
+  footer_inside_below:  *header
+  footer_outside_below: *header
 
   abstract:
     toc: false
@@ -325,7 +334,9 @@ output: |
       <% end %>
     </head>
     <body>
+      <%= node = @types['header_outside_above'].first and node.output %>
       <div id="header">
+      <%= node = @types['header_inside_above'].first and node.output %>
       <% if header = @types['header'].first %>
         <%= header.output %>
       <% else %>
@@ -342,7 +353,9 @@ output: |
         %></h2>
         <h3 class="date"><%= $date %></h3>
       <% end %>
+      <%= node = @types['header_inside_below'].first and node.output %>
       </div>
+      <%= node = @types['header_outside_below'].first and node.output %>
 
       <% if abstract = @types['abstract'].first %>
         <%= abstract.output %>
@@ -412,7 +425,9 @@ output: |
       <hr style="display: none"/>
       <br style="display: none"/>
 
+      <%= node = @types['footer_outside_above'].first and node.output %>
       <div id="footer">
+      <%= node = @types['footer_inside_above'].first and node.output %>
       <% if footer = @types['footer'].first %>
         <%= footer.content.to_s.to_html %>
       <% else %>
@@ -422,7 +437,9 @@ output: |
       <% if defined? $icons_used and $icons_used and not $icons_used.empty? %>
         <p>The admonition icons (<%= $icons_used.uniq.map {|icon| icon.to_html}.join(' ') %>) used in this document are Copyright &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.</p>
       <% end %>
+      <%= node = @types['footer_inside_below'].first and node.output %>
       </div>
+      <%= node = @types['footer_outside_below'].first and node.output %>
     </body>
   </html>
 
