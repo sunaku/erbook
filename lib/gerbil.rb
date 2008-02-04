@@ -2,8 +2,8 @@
 
 Gerbil = {
   :name    => 'Gerbil',
-  :version => '1.1.0',
-  :release => '2008-01-22',
+  :version => '2.0.0',
+  :release => '2008-02-03',
   :website => 'http://gerbil.rubyforge.org',
   :home    => File.expand_path(File.join(File.dirname(__FILE__), '..'))
 }
