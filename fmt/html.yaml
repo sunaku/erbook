@@ -7,26 +7,6 @@ code: |
   # load the String#to_html method
   require 'gerbil/html'
 
-  # load admonition icons
-    Icon = Struct.new(:path, :name, :format, :data)
-    class Icon
-      # Returns a HTML image tag containing embedded image data.  The given
-      # attributes (name => value) are applied to the HTML tag declaration.
-      def to_html aAttributes = {}
-        atts = aAttributes.inject('') {|s,(k,v)| s << %( #{k}="#{v}") }
-        %{<img src="data:image/#{format};base64,#{data}" alt="#{name}"#{atts}/>}
-      end
-    end
-
-    ICONS = {}
-    Dir[File.join(Gerbil[:format_home], 'html.icons', '*.*')].each do |path|
-      ext = File.extname(path)
-      name = File.basename(path, ext)
-      data = [File.read(path)].pack('m')
-
-      ICONS[name] = Icon.new(path, name, ext.sub('.', ''), data)
-    end
-
   class String
     # Transforms this UTF-8 string into HTML entities.
     def to_html_entities
@@ -92,6 +72,54 @@ code: |
   def link aUrl, aName = aUrl, aTitle = nil
     %{<a href="#{h aUrl}"#{%{ title="#{aTitle}"} if aTitle}>#{aName}</a>}
   end
+
+  # Encodes the given input in base64 format.
+  def encode_base_64 aInput
+    [aInput].pack('m')
+  end
+
+  # Returns a HTML <img> tag that embeds the given image data.
+  #
+  # aData:: raw image image data in base64 encoding
+  # aFormat:: format of the image data (e.g. PNG, JPG, GIF, etc.)
+  # aAttrs:: additional attributes for the <img> tag
+  #
+  def embed_image_data aData, aFormat, aAttrs
+    atts = aAttrs.inject('') {|s,(k,v)| s << %( #{k}="#{v}") }
+    %{<img src="data:image/#{aFormat};base64,#{aData}"#{atts}/>}
+  end
+
+  # Returns a HTML <img> tag that embeds the given image file.
+  #
+  # aPath:: path to the image file
+  # aFormat:: format of the image data (e.g. PNG, JPG, GIF, etc.)
+  # aAttrs:: additional attributes for the <img> tag
+  #
+  def embed_image_file aPath, aFormat = aPath[/\w+$/], aAttrs = {}
+    data = encode_base_64 File.read(aPath)
+    embed_image_data data, aFormat, aAttrs
+  end
+
+  # load admonition icons
+    Icon = Struct.new(:path, :name, :format, :data)
+
+    class Icon
+      # Returns a HTML image tag containing embedded image data.  The given
+      # attributes (name => value) are applied to the HTML tag declaration.
+      def to_html aAttributes = {}
+        embed_image_data data, format, aAttributes
+      end
+    end
+
+    ICONS = {}
+
+    Dir[File.join(Gerbil[:format_home], 'html.icons', '*.*')].each do |path|
+      ext = File.extname(path)
+      name = File.basename(path, ext)
+      data = encode_base_64 File.read(path)
+
+      ICONS[name] = Icon.new(path, name, ext.sub('.', ''), data)
+    end
 
 
 nodes:
