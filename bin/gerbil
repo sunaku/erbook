@@ -89,7 +89,8 @@ class Template < ERB
 end
 
 class Node < OpenStruct
-  undef id, type # these are deprecated in Ruby 1.8 anyway
+  undef id if respond_to? :id # deprecated in Ruby 1.8; removed in Ruby 1.9
+  undef type if respond_to? :type # deprecated in Ruby 1.8; removed in Ruby 1.9
 end
 
 # the basename() is for being launched by a RubyGems executable
