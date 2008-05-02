@@ -489,6 +489,18 @@ styles:
         font-family      : Cambria, Georgia, serif;
       }
 
+    /* lists */
+
+      #content li:first-child
+      {
+        margin-top       : 1em;
+      }
+
+      #content li
+      {
+        margin-bottom    : 1em;
+      }
+
     /* headings */
 
       h1,
@@ -569,7 +581,7 @@ styles:
         padding          : 1em;
         border           : 1px solid #C0C0C0;
         vertical-align   : top;
-        background-color : #FFFFFF;
+        background-color : inherit;
       }
 
       th
@@ -744,55 +756,20 @@ styles:
       max-width          : 36em;
     }
 
-    /* hyperlinks */
+    /* emphasis */
 
-      a
+      blockquote
       {
-        color            : #0000FF;
-        text-decoration  : none;
+        margin           : 1em;
+        border           : 5px dotted #C0C0C0;
+        padding          : 1em;
+        color            : #444;
       }
 
-      a:visited
+      hr
       {
-        color            : #800080;
-      }
-
-      a:hover
-      {
-        color            : #FF0000;
-        text-decoration  : underline;
-      }
-
-      a:target
-      {
-        color            : #FF0000;
-        text-decoration  : underline;
-      }
-
-      a.toc:link,
-      a.toc:visited
-      {
-        text-decoration  : none;
-        z-index          : 1;
-      }
-
-      a img
-      {
-        border           : none;
-      }
-
-      /*
-        mark external links with a symbol to help the user
-        distinguish between internal and external links
-      */
-      a:after
-      {
-        content: "∗";
-      }
-
-      a[href^="#"]:after
-      {
-        content: "";
+        color            : #FF0000; /* for IE6 */
+        background-color : #FF0000; /* for Firefox */
       }
 
     /* source code */
@@ -811,7 +788,7 @@ styles:
         background-color : #FFFAF0;
       }
 
-      /* output of syntax colorizer */
+      /* output of the syntax coloring library */
       .code
       {
         background-color : #FFFFF0;
@@ -819,12 +796,12 @@ styles:
 
       pre
       {
+        cursor           : text;
         line-height      : normal;
         border           : 1px dashed #C0C0C0;
         background-color : #F5FFDF;
         padding          : 1em;
         overflow         : auto;
-        cursor           : text;
       }
 
       /*
@@ -843,23 +820,62 @@ styles:
       }
       */
 
-    /* emphasis */
+    /* hyperlinks */
 
-      blockquote
+      a > img
       {
-        margin           : 1em;
-        border           : 5px dotted #C0C0C0;
-        padding          : 1em;
-        color            : #444;
+        border           : none;
       }
 
-      hr
+      a:link
       {
-        color            : #FF0000; /* for IE6 */
-        background-color : #FF0000; /* for Firefox */
+        color            : #0000FF;
+        text-decoration  : none;
+      }
+
+      a:visited
+      {
+        color            : #9400D3;
+        text-decoration  : none;
+      }
+
+      a:hover
+      {
+        color            : #FF0000;
+        text-decoration  : underline;
+      }
+
+      a:target
+      {
+        color            : #FF0000;
+        font-weight      : bold;
+      }
+
+      a.toc:link,
+      a.toc:visited
+      {
+        text-decoration  : none;
+        z-index          : 1;
       }
 
   print: |
+    /* source code */
+
+      tt
+      {
+        color            : inherit;
+        background-color : inherit;
+        font-weight      : normal;
+      }
+
+      pre,
+      .code
+      {
+        border           : none;
+        overflow         : visible;
+        background-color : inherit;
+      }
+
     /* headings */
 
       h1,
@@ -885,8 +901,8 @@ styles:
 
       a:after
       {
-        content          : " (" attr(href) ")";
-        font-family      : sans-serif;
+        content          : " " attr(href);
+        font-family      : Consolas, "Lucida Console", monospace;
         font-weight      : normal;
         font-size        : 90%;
       }
@@ -914,23 +930,6 @@ styles:
         font-style       : normal;
       }
 
-    /* source code */
-
-      tt
-      {
-        color            : inherit;
-        background-color : inherit;
-        font-weight      : normal;
-      }
-
-      pre,
-      .code
-      {
-        border           : none;
-        overflow         : visible;
-        background-color : inherit;
-      }
-
     /* document structure */
 
       #lof
@@ -951,3 +950,5 @@ styles:
       {
         _padding-bottom  : 0.5em; /* for IE6 */
       }
+
+
