@@ -158,7 +158,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     input = ARGF.read
 
     # expand all "include" directives in the input
-    begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*%>} do
+    begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
       "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
     end
 
