@@ -2,11 +2,10 @@
 
 # Gerbil is an extensible document generator based on eRuby.
 #
-# * STDIN will be read if an input file is not specified.
+# * STDIN will be read if no input files are specified.
 #
 # * If an error occurs, the input document will be printed to STDOUT
 #   so you can investigate line numbers in the error's stack trace.
-#
 #   Otherwise, the final output document will be printed to STDOUT.
 
 # Copyright 2007 Suraj N. Kurapati
@@ -104,11 +103,11 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       # show program description located at the top of this file
       puts File.read(__FILE__).split(/^$\n/)[1].gsub(/^# ?/, '')
 
-      puts "\nUsage: #{File.basename $0} [Option...] Format|SpecFile [InputFile]\n"
+      puts '', "Usage: #{File.basename $0} [Option...] Format|SpecFile [InputFile]\n"
 
-      puts "\nOption: #{opts}"
+      puts '', "Option: #{opts}"
 
-      puts "\nFormat:"
+      puts '', "Format:"
       Gerbil[:format_files].each do |file|
         name = File.basename(file, '.yaml')
         desc = YAML.load_file(file)['desc'] rescue nil
@@ -122,6 +121,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       puts "%s %s (%s) %s %s" % [
         :name, :version, :release, :website, :home
       ].map {|m| Gerbil[m] }
+
       exit
     end
 
@@ -151,7 +151,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     input = ARGF.read
 
     # expand all "include" directives in the input
-    begin end while input.gsub! %r/<%#\s*include\s+(.+?)\s*%>/ do
+    begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*%>} do
       "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
     end
 
@@ -214,20 +214,19 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
           # assign node content
           if block_given?
-            @stack << node
+            @stack.push node
             content = content_from_block(node, &aBlock)
             @stack.pop
 
             digest = content.digest
-
-            node.content = content
-            node.digest  = digest
-
             @buffer << digest
           else
+            content = nil
             digest = node.object_id.to_s.digest
-            node.digest = digest
           end
+
+          node.content = content
+          node.digest = digest
 
           digest
         end
@@ -259,10 +258,10 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
         end
 
         # repeat for all child nodes
-        n.children.each {|c| expander[c, buf]}
+        n.children.each {|c| expander[c, buf] }
       end
 
-      roots.each {|n| expander[n, document]}
+      roots.each {|n| expander[n, document] }
 
     rescue Exception
       puts input # so the user can debug the line numbers in the stack trace
