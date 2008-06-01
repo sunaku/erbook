@@ -134,16 +134,23 @@ nodes:
     silent: true
     output: <%= @node.content.to_html %>
 
-  header_outside_above: *header
-  header_inside_above:  *header
-  header_inside_below:  *header
-  header_outside_below: *header
+  header_outside_above: &header_insert
+    toc: false
+    lof: false
+    index: false
+    number: false
+    silent: true
+    output: <div class="<%= @node.type %>"><%= @node.content.to_html %></div>
+
+  header_inside_above:  *header_insert
+  header_inside_below:  *header_insert
+  header_outside_below: *header_insert
 
   footer:               *header
-  footer_outside_above: *header
-  footer_inside_above:  *header
-  footer_inside_below:  *header
-  footer_outside_below: *header
+  footer_outside_above: *header_insert
+  footer_inside_above:  *header_insert
+  footer_inside_below:  *header_insert
+  footer_outside_below: *header_insert
 
   abstract:
     toc: false
@@ -593,8 +600,33 @@ styles:
 
       #header
       {
-        margin-bottom    : 5em;
         text-align       : center;
+      }
+
+      .header_outside_above,
+      #header,
+      .header_outside_below
+      {
+        margin-bottom    : 5em;
+      }
+
+      .footer_outside_above,
+      #footer,
+      .footer_outside_below
+      {
+        margin-top       : 5em;
+      }
+
+      #header .header_inside_above,
+      #footer .footer_inside_above
+      {
+        margin-bottom    : 4em;
+      }
+
+      #header .header_inside_below,
+      #footer .footer_inside_below
+      {
+        margin-top       : 4em;
       }
 
       #abstract
@@ -633,7 +665,6 @@ styles:
       {
         border-top       : thick dotted #DCDCDC;
         padding-top      : 1em;
-        margin-top       : 5em;
         text-align       : center;
       }
 
