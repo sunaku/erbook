@@ -11,7 +11,7 @@ require 'rake/gempackagetask'
 
   # the user guide
   file 'doc/guide.html' => 'doc/guide.erb' do |t|
-    sh "ruby bin/gerbil html #{t.prerequisites} > #{t.name}"
+    sh "ruby bin/gerbil -u html #{t.prerequisites} > #{t.name}"
   end
   task :doc => 'doc/guide.html'
   CLOBBER.include 'doc/guide.html'

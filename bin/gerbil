@@ -7,6 +7,10 @@
 # * If an error occurs, the input document will be printed to STDOUT
 #   so you can investigate line numbers in the error's stack trace.
 #   Otherwise, the final output document will be printed to STDOUT.
+#
+# * The --unindent option assumes that all beginning (<% ... do %>)
+#   and ending (<% end %>) eRuby directives appear one per line
+#   (with nothing else on the line, except whitespace) in the input.
 
 # Copyright 2007 Suraj N. Kurapati
 # See the file named LICENSE for details.
@@ -125,6 +129,9 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       exit
     end
 
+    unindent = false
+    opts.on '-u', '--unindent', 'unindent node content' do unindent = true end
+
     opts.parse! ARGV
 
   # load format specification file
@@ -153,6 +160,36 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     # expand all "include" directives in the input
     begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*%>} do
       "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
+    end
+
+    # unindent node content
+    if unindent
+      BLOCK_HEAD = /<%(?!%)(?:.(?!<%[^%]))*\bdo\s*%>/
+      BLOCK_TAIL = /<%\s*end\s*%>/
+
+      margins = input.scan(/#{BLOCK_HEAD}(?:\r?\n)*([ \t]*)/).flatten
+      lines = input.split(/^/)
+
+      # unindent each line by the inner margin of its containing node
+      stack = []
+      lines.each do |line|
+        case line
+        when BLOCK_HEAD
+          line.replace $&
+          stack.push margins.shift
+
+        when BLOCK_TAIL
+          line.replace $&
+          stack.pop
+
+        else
+          if margin = stack.last and line.include? margin
+            line[margin] = ''
+          end
+        end
+      end
+
+      input = lines.join
     end
 
   # process input document
@@ -239,11 +276,6 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
       # replace nodes with output
       expander = lambda do |n, buf|
-        # unindent content
-        if defined? $unindent and n.content
-          n.content.gsub! %r/^(#{Regexp.escape $unindent}){0,#{n.depth.next}}/, ''
-        end
-
         # calculate node output
         source = "#{specFile}:nodes:#{n.type}:output"
         n.output = Template.new(source, nodeDefs[n.type]['output'].to_s.chomp).

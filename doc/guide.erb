@@ -12,9 +12,6 @@
   $authors = { 'Suraj N. Kurapati' => 'http://snk.tuxfamily.org' }
   $feeds   = { feed_url => :rss }
   $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
-
-  # parameters for Gerbil
-  $unindent = '  '
 %>
 
 <% chapter "Introduction" do %>
@@ -263,16 +260,12 @@
       On the other hand, if you have ideas on how to improve this example, please speak up in the <%= mailing_list_link %>.  Thanks!
       <% end %>
 
-      <% example "HelloWorld format specification file", "HelloWorld.spec" do |n| %>
-        <code lang="rhtml">
-        <%= h File.read('doc/HelloWorld.spec').gsub(/^/, $unindent * n.depth.next).lstrip %>
-        </code>
+      <% example "HelloWorld format specification file", "HelloWorld.spec" do %>
+        <code lang="rhtml"><%= h File.read('doc/HelloWorld.spec') %></code>
       <% end %>
 
-      <% example "Input document for HelloWorld format", "HelloWorld.input" do |n| %>
-        <code lang="rhtml">
-        <%= h File.read('doc/HelloWorld.input').gsub(/^/, $unindent * n.depth.next).lstrip %>
-        </code>
+      <% example "Input document for HelloWorld format", "HelloWorld.input" do %>
+        <code lang="rhtml"><%= h File.read('doc/HelloWorld.input') %></code>
       <% end %>
 
       <% example "Output of HelloWorld format", "HelloWorld.output" do %>
@@ -283,7 +276,7 @@
 <% end %>
 
 <% chapter "Usage" do %>
-  <pre><%=h "\n" << `ruby bin/gerbil -h`.gsub(/^/, $unindent) %></pre>
+  <pre><%=h `ruby bin/gerbil -h` %></pre>
 
   Gerbil requires its _first_ command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>. Predefined formats are simply short-hand names of format specification files located in the <tt>format/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>).
 
@@ -295,16 +288,6 @@
     Here, _path_ is the path of the file whose content you wish to insert into the input document.
 
     You can divide a large document into separate files for easier editing and stitch them together, dynamically, into a single document using the *include* directive.
-  <% end %>
-
-  <% section "The @$unindent@ variable", "unindent" do %>
-    The @$unindent@ variable allows you to unindent the content of every node in the input document by a specified amount of whitespace (spaces, tabs, newlines, and so on).
-
-    Simply define this variable somewhere in your input document, like this (assuming you indent your node content using a TAB and two spaces):
-
-      <%% $unindent = "\t  " %>
-
-    and let Gerbil do it's magic!
   <% end %>
 <% end %>
 
