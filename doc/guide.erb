@@ -4,10 +4,11 @@
   src_url = File.join(Gerbil[:website], 'src')
   ann_url = File.join(Gerbil[:website], 'ann')
   dev_url = File.join(Gerbil[:website], 'dev')
+  log_url = File.join(Gerbil[:website], 'log')
 
   # parameters for the HTML format
   $title   = "#{Gerbil} user guide"
-  $authors = { 'Suraj N. Kurapati' => 'http://snk.tuxfamily.org' }
+  $authors = { 'Suraj N. Kurapati' => 'http://snk.rubyforge.org' }
   $feeds   = { ann_url => :rss }
   $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
 %>
@@ -15,7 +16,9 @@
 <% header_inside_below do %>
   ---
 
-  "Announcements":<%= ann_url %> - project news and release announcements.
+  "Project news":<%= ann_url %> - announcements of new releases.
+
+  "Release notes":<%= log_url %> - history of project release notes.
 
   "Downloads":<%= pkg_url %> - obtain the newest release package.
 
@@ -257,14 +260,6 @@
       # Run this command: <pre>gerbil HelloWorld.spec HelloWorld.input > HelloWorld.output</pre>
       # Examine the <tt>HelloWorld.output</tt> file until you are satisfied!
 
-      <% note "Author's note about documentation quality" do %>
-      Please excuse my lack of creativity for this example.  I tried different ideas but scrapped most of them because writing documentation is hard and mostly boring. (Although I did have fun reading the wacky names produced by the @generate_name()@ method!)
-
-      Instead, I just _really_ want to get the first release of Gerbil out the door and continue work on my other programming projects, but I cannot do so until I've written some documentation. Ah, the dilemma of an open-source developer who cares about documentation!
-
-      On the other hand, if you have ideas on how to improve this example, please speak up in the <%= mailing_list_link %>.  Thanks!
-      <% end %>
-
       <% example "HelloWorld format specification file", "HelloWorld.spec" do %>
         <code lang="rhtml"><%= h File.read('doc/HelloWorld.spec') %></code>
       <% end %>
@@ -281,9 +276,14 @@
 <% end %>
 
 <% chapter "Usage" do %>
-  <pre><%=h `ruby bin/gerbil -h` %></pre>
+  <%=
+    `ruby bin/gerbil -h`.
+    gsub(/^ {4}(\S+(?:, \S+)?) {4,}(.*)$/, '| \1 | \2 |').  # option listing
+    gsub(/-\w\b|--\w{2,}/, '<tt>\&</tt>').                  # option names
+    gsub(/^\S+?:/, '<b>\&</b>')                             # section headings
+  %>
 
-  Gerbil requires its _first_ command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>. Predefined formats are simply short-hand names of format specification files located in the <tt>format/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>).
+  Gerbil requires its _first_ command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>. Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>).
 
   <% section "The *include* directive", "include" do %>
     The *include* directive allows you to insert the content of an arbitrary file at a certain place in the input document.  It is written like this:
@@ -297,7 +297,7 @@
 <% end %>
 
 <% part "Formats" do %>
-  This section describes the default formats provided along with Gerbil. The format specification files (see <%= xref "SpecFile" %>) for these formats can be found in the <tt>format/</tt> directory of the Gerbil installation directory (see <%= xref "Manifest" %>).
+  This section describes the default formats provided along with Gerbil. The format specification files (see <%= xref "SpecFile" %>) for these formats can be found in the <tt>fmt/</tt> directory of the Gerbil installation directory (see <%= xref "Manifest" %>).
 
   These formats are meant to serve as working examples. If you require more functionality from one of these formats, simply make a copy of the corresponding format specification file and edit the copy to suit your needs. If you would like to contribute or discuss your enhancements to these default formats, you can <%= xref "License", "contact the author" %>.
 
@@ -309,7 +309,7 @@
     Furthermore, the HTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of the "Mozilla":http://mozilla.org and "Opera":http://www.opera.com/ family of web browsers will be pleasantly surprised to notice that all hyperlinks have been expanded to include their target URL next to the link text. So try using the "print preview" function of a graphical web browser to see how the HTML document will appear when printed.
 
     <% section "Text to HTML conversion" do %>
-      Inside the <tt>format/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>), you will see a <tt>html.rb</tt> file. This file defines a @String.to_html@ method which is used to transform text in an input document into HTML.
+      Inside the <tt>fmt/</tt> subdirectory of the Gerbil installation directory (see <%= xref "Manifest" %>), you will see a <tt>html.rb</tt> file. This file defines a @String.to_html@ method which is used to transform text in an input document into HTML.
 
       The default implementation of the @String.to_html@ method is based on the "Textile":http://whytheluckystiff.net/ruby/redcloth/ markup system. If you do not like Textile or wish to use a different markup system for text in your documents, then simply edit the <tt>html.rb</tt> file and adjust the source code of the default @String.to_html@ method accordingly.
 

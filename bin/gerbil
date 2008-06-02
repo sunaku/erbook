@@ -26,7 +26,7 @@ $:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'gerbil'
 
 # Prints the given message and raises the given error.
-def hoist aMessage, aError = $!
+def error aMessage, aError = $!
   STDERR.printf "%s:\n\n", aMessage
   raise aError
 end
@@ -107,7 +107,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       # show program description located at the top of this file
       puts File.read(__FILE__).split(/^$\n/)[1].gsub(/^# ?/, '')
 
-      puts '', "Usage: #{File.basename $0} [Option...] Format|SpecFile [InputFile]\n"
+      puts '', "Usage: #{File.basename $0} [Option...] Format|SpecFile [InputFile...]\n"
 
       puts '', "Option: #{opts}"
 
@@ -147,7 +147,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
         :name => File.basename(specFile).sub(/\..*?$/, '')
 
     rescue Exception
-      hoist "Error when loading the format specification file (#{specFile.inspect})"
+      error "Error when loading the format specification file (#{specFile.inspect})"
     end
 
     if specData.key? 'code'
@@ -297,7 +297,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
     rescue Exception
       puts input # so the user can debug the line numbers in the stack trace
-      hoist 'Error when processing the input document (INPUT)'
+      error 'Error when processing the input document (INPUT)'
     end
 
   # produce output document
