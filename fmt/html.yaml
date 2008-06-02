@@ -799,8 +799,9 @@ styles:
 
       hr
       {
-        color            : #FF0000; /* for IE6 */
-        background-color : #FF0000; /* for Firefox */
+        height           : 0;
+        border           : 0;
+        border-top       : 2px solid #FF0000;
       }
 
     /* source code */
