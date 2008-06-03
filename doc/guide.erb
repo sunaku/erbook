@@ -424,9 +424,9 @@
 
         RDoc::TopLevel.parse @spec['code']
         RDoc::TopLevel.parse_file 'lib/gerbil/html.rb'
-
-        RDoc::TopLevel.all_methods.each do |m|
+        methods = RDoc::TopLevel.all_methods
       %>
+      <% methods.each do |m| %>
       | <code><%= m.decl %></code> | <noformat><%= m.comment_html %></noformat> |
       <% end %>
     <% end %>

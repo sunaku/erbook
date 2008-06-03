@@ -9,7 +9,7 @@
 #   Otherwise, the final output document will be printed to STDOUT.
 #
 # * The --unindent option assumes that all beginning (<% ... do %>)
-#   and ending (<% end %>) eRuby directives appear one per line
+#   and ending (<% end %>) eRuby directives are written one per line
 #   (with nothing else on the line, except whitespace) in the input.
 
 # Copyright 2007 Suraj N. Kurapati
@@ -136,7 +136,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
   # load format specification file
     specFile = ARGV.shift or
-      raise ArgumentError, "Format was not specified.  Try `{$0} -h` for help."
+      raise ArgumentError, "Format was not specified.  Run `{$0} -h` for help."
 
     File.file? specFile or
       specFile = File.join(Gerbil[:format_home], specFile + '.yaml')
@@ -157,143 +157,143 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
   # load input document
     input = ARGF.read
 
-    # expand all "include" directives in the input
-    begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
-      "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
-    end
-
-    # unindent node content
-    if unindent
-      BLOCK_HEAD = /<%(?!%)(?:.(?!<%[^%]))*\bdo\s*%>/
-      BLOCK_TAIL = /<%\s*end\s*%>/
-
-      margins = input.scan(/#{BLOCK_HEAD}(?:\r?\n)*([ \t]*)/).flatten
-      lines = input.split(/^/)
-
-      # unindent each line by the inner margin of its containing node
-      stack = []
-      lines.each do |line|
-        case line
-        when BLOCK_HEAD
-          line.replace $&
-          stack.push margins.shift
-
-        when BLOCK_TAIL
-          line.replace $&
-          stack.pop
-
-        else
-          if margin = stack.last and line.include? margin
-            line[margin] = ''
-          end
-        end
-      end
-
-      input = lines.join
-    end
-
-  # process input document
-    template = Template.new('INPUT', input)
-
-    templateVars = {
-      :@spec  => specData,
-      :@roots => roots = [], # root nodes of all trees
-      :@nodes => nodes = [], # all nodes in the forest
-      :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
-    }.each_pair {|k,v| template.instance_variable_set(k, v) }
-
-    nodeDefs = specData['nodes'].each_pair do |name, info|
-      template.instance_eval %{
-        #
-        # XXX: using a string because define_method()
-        #      does not accept a block until Ruby 1.9
-        #
-        def #{name} *aArgs, &aBlock
-          node = Node.new(
-            :type => #{name.inspect},
-            :args => aArgs,
-            :trace => caller,
-            :children => []
-          )
-          @nodes << node
-          @types[node.type] << node
-
-          # calculate occurrence number for this node
-          if #{info['number']}
-            @count ||= Hash.new {|h,k| h[k] = []}
-            node.number = (@count[node.type] << node).length
-          end
-
-          @stack ||= []
-
-          # assign node family
-          if parent = @stack.last
-            parent.children << node
-            node.parent = parent
-            node.depth = parent.depth.next
-
-            # calculate latex-style index number for this node
-            if #{info['index']}
-              branches = parent.children.select {|n| n.index}
-              node.index = [parent.index, branches.length.next].join('.')
-            end
-          else
-            @roots << node
-            node.parent = nil
-            node.depth = 0
-
-            # calculate latex-style index number for this node
-            if #{info['index']}
-              branches = @roots.select {|n| n.index}
-              node.index = branches.length.next.to_s
-            end
-          end
-
-          # assign node content
-          if block_given?
-            @stack.push node
-            content = content_from_block(node, &aBlock)
-            @stack.pop
-
-            digest = content.digest
-            @buffer << digest
-          else
-            content = nil
-            digest = node.object_id.to_s.digest
-          end
-
-          node.content = content
-          node.digest = digest
-
-          digest
-        end
-      },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
-    end
-
     begin
-      # build the document tree
-      document = template.instance_eval { result(binding) }
-
-      # replace nodes with output
-      expander = lambda do |n, buf|
-        # calculate node output
-        source = "#{specFile}:nodes:#{n.type}:output"
-        n.output = Template.new(source, nodeDefs[n.type]['output'].to_s.chomp).
-                   render_with(templateVars.merge(:@node => n))
-
-        # replace node with output
-        if nodeDefs[n.type]['silent']
-          buf[n.digest] = ''
-          buf = n.output
-        else
-          buf[n.digest] = n.output
+      # expand all "include" directives in the input
+        begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
+          "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
         end
 
-        # repeat for all child nodes
-        n.children.each {|c| expander[c, buf] }
-      end
+      # unindent node content
+        if unindent
+          BLOCK_HEAD = /<%[^%=].*?\bdo\b.*?%>/
+          BLOCK_TAIL = /<%\s*end\s*%>/
 
-      roots.each {|n| expander[n, document] }
+          margins = input.scan(/#{BLOCK_HEAD}(?:\r?\n)*([ \t]*)/).flatten
+          lines = input.split(/^/)
+
+          # unindent each line by the inner margin of its containing node
+          stack = []
+          lines.each_with_index do |line, number|
+            case line
+            when BLOCK_HEAD
+              stack.push margins.shift
+              line.replace $&
+
+            when BLOCK_TAIL
+              stack.pop or raise "unmatched <% end %> at INPUT:#{number} -- ensure that all beginning (<% ... do %>) eRuby directives are written one per line (with nothing else on the line, except whitespace) in the input."
+              line.replace $&
+
+            else
+              if margin = stack.last and line.include? margin
+                line[margin] = ''
+              end
+            end
+          end
+
+          input = lines.join
+        end
+
+      # create sandbox for input evaluation
+        template = Template.new('INPUT', input)
+
+        templateVars = {
+          :@spec  => specData,
+          :@roots => roots = [], # root nodes of all trees
+          :@nodes => nodes = [], # all nodes in the forest
+          :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
+        }.each_pair {|k,v| template.instance_variable_set(k, v) }
+
+        nodeDefs = specData['nodes'].each_pair do |name, info|
+          template.instance_eval %{
+            #
+            # XXX: using a string because define_method()
+            #      does not accept a block until Ruby 1.9
+            #
+            def #{name} *aArgs, &aBlock
+              node = Node.new(
+                :type => #{name.inspect},
+                :args => aArgs,
+                :trace => caller,
+                :children => []
+              )
+              @nodes << node
+              @types[node.type] << node
+
+              # calculate occurrence number for this node
+              if #{info['number']}
+                @count ||= Hash.new {|h,k| h[k] = []}
+                node.number = (@count[node.type] << node).length
+              end
+
+              @stack ||= []
+
+              # assign node family
+              if parent = @stack.last
+                parent.children << node
+                node.parent = parent
+                node.depth = parent.depth.next
+
+                # calculate latex-style index number for this node
+                if #{info['index']}
+                  branches = parent.children.select {|n| n.index}
+                  node.index = [parent.index, branches.length.next].join('.')
+                end
+              else
+                @roots << node
+                node.parent = nil
+                node.depth = 0
+
+                # calculate latex-style index number for this node
+                if #{info['index']}
+                  branches = @roots.select {|n| n.index}
+                  node.index = branches.length.next.to_s
+                end
+              end
+
+              # assign node content
+              if block_given?
+                @stack.push node
+                content = content_from_block(node, &aBlock)
+                @stack.pop
+
+                digest = content.digest
+                @buffer << digest
+              else
+                content = nil
+                digest = node.object_id.to_s.digest
+              end
+
+              node.content = content
+              node.digest = digest
+
+              digest
+            end
+          },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
+        end
+
+      # build the document tree
+        document = template.instance_eval { result(binding) }
+
+        # replace nodes with output
+        expander = lambda do |n, buf|
+          # calculate node output
+          source = "#{specFile}:nodes:#{n.type}:output"
+          n.output = Template.new(source, nodeDefs[n.type]['output'].to_s.chomp).
+                     render_with(templateVars.merge(:@node => n))
+
+          # replace node with output
+          if nodeDefs[n.type]['silent']
+            buf[n.digest] = ''
+            buf = n.output
+          else
+            buf[n.digest] = n.output
+          end
+
+          # repeat for all child nodes
+          n.children.each {|c| expander[c, buf] }
+        end
+
+        roots.each {|n| expander[n, document] }
 
     rescue Exception
       puts input # so the user can debug the line numbers in the stack trace
