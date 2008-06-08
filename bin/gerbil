@@ -7,10 +7,6 @@
 # * If an error occurs, the input document will be printed to STDOUT
 #   so you can investigate line numbers in the error's stack trace.
 #   Otherwise, the final output document will be printed to STDOUT.
-#
-# * The --unindent option assumes that all beginning (<% ... do %>)
-#   and ending (<% end %>) eRuby directives are written one per line
-#   (with nothing else on the line, except whitespace) in the input.
 
 # Copyright 2007 Suraj N. Kurapati
 # See the file named LICENSE for details.
@@ -165,32 +161,29 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
       # unindent node content
         if unindent
-          BLOCK_HEAD = /<%[^%=].*?\bdo\b.*?%>/
-          BLOCK_TAIL = /<%\s*end\s*%>/
+          tags = input.scan(/<%(?:.(?!<%))*?%>/m)
+          margins = []
+          result = ''
 
-          margins = input.scan(/#{BLOCK_HEAD}\s*/).map! {|s| s[/[ \t]*\z/] }
-          lines = input.split(/^/)
+          buffer = input
+          tags.each do |tag|
+            chunk, buffer = buffer.split(tag, 2)
+            chunk << tag
 
-          # unindent each line by the inner margin of its containing node
-          stack = []
-          lines.each_with_index do |line, number|
-            case line
-            when BLOCK_HEAD
-              stack.push margins.shift
-              line.replace $&
+            # perform unindentation
+            result << chunk.gsub( /^#{margins.last}/, '' )
 
-            when BLOCK_TAIL
-              stack.pop or raise "unmatched <% end %> at INPUT:#{number} -- ensure that all beginning (<% ... do %>) eRuby directives are written one per line (with nothing else on the line, except whitespace) in the input."
-              line.replace $&
+            case tag
+            when /<%[^%=].*?\bdo\b.*?%>/m
+              margins.push buffer[/^[ \t]*(?=\S)/]
 
-            else
-              if margin = stack.last and line.include? margin
-                line[margin] = ''
-              end
+            when /<%\s*end\s*%>/m
+              margins.pop
             end
           end
+          result << buffer
 
-          input = lines.join
+          input = result
         end
 
       # create sandbox for input evaluation
