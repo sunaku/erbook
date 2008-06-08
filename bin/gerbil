@@ -168,7 +168,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
           BLOCK_HEAD = /<%[^%=].*?\bdo\b.*?%>/
           BLOCK_TAIL = /<%\s*end\s*%>/
 
-          margins = input.scan(/#{BLOCK_HEAD}(?:\r?\n)*([ \t]*)/).flatten
+          margins = input.scan(/#{BLOCK_HEAD}\s*/).map! {|s| s[/[ \t]*\z/] }
           lines = input.split(/^/)
 
           # unindent each line by the inner margin of its containing node
