@@ -210,7 +210,7 @@ nodes:
     number: false
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><%= @node.title.to_s.to_html %></p>
+        <p class="title" id="<%= @node.url %>"><%= @node.title.to_s.to_html %></p>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
