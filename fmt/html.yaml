@@ -34,6 +34,13 @@ code: |
     end
   end
 
+  class Hash
+    # Transforms this hash into a string of HTML attribute key=value pairs.
+    def to_html_atts
+      inject([]) {|s,(k,v)| s << %( #{k}="#{v}") }.join
+    end
+  end
+
   class Node
     # Returns the user-defined title for this node's content.
     def title
@@ -84,9 +91,9 @@ code: |
   # aFormat:: format of the image data (e.g. PNG, JPG, GIF, etc.)
   # aAttrs:: additional attributes for the <img> tag
   #
-  def embed_image_data aData, aFormat, aAttrs
-    atts = aAttrs.inject('') {|s,(k,v)| s << %( #{k}="#{v}") }
-    %{<img src="data:image/#{aFormat};base64,#{aData}"#{atts}/>}
+  def embed_image_data aData, aFormat, aAtts = {}
+    aAtts['src'] = "data:image/#{aFormat};base64,#{aData}"
+    "<img#{aAtts.to_html_atts}/>"
   end
 
   # Returns a HTML <img> tag that embeds the given image file.
@@ -104,10 +111,9 @@ code: |
     Icon = Struct.new(:path, :name, :format, :data)
 
     class Icon
-      # Returns a HTML image tag containing embedded image data.  The given
-      # attributes (name => value) are applied to the HTML tag declaration.
-      def to_html aAttributes = {}
-        embed_image_data data, format, aAttributes
+      # Returns the CSS class for this icon.
+      def css_class
+        @css_class ||= "icon-#{name}"
       end
     end
 
@@ -227,16 +233,14 @@ nodes:
       <div class="<%= @node.type %>">
         <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<%= @node.title.to_s.to_html %></p>
 
-        <%
+        <div class="content <%=
           $use_icons = true unless defined? $use_icons
 
-          if $use_icons && icon = ICONS[@node.type]
+          if $use_icons and icon = ICONS[@node.type]
             ($icons_used ||= []) << icon
-            %><%= icon.to_html :class => :icon %><%
+            icon.css_class
           end
-        %>
-
-        <div class="content"><%= @node.content.to_s.to_html %></div>
+        %>"><%= @node.content.to_s.to_html %></div>
       </div>
 
   note: *admonition
@@ -345,6 +349,9 @@ output: |
     $title   = '$title' unless defined? $title
     $authors = {'$authors' => nil} unless defined? $authors
     $date    = Time.now.strftime("%d %B %Y") unless defined? $date
+
+    # get a list of all icons used in the document, if any
+    icons_used = $icons_used if defined? $icons_used and not $icons_used.empty?
   %>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -358,6 +365,19 @@ output: |
       <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
       <% end if $feeds %>
       <title><%= $title.to_s.to_html %></title>
+
+      <% if icons_used %>
+      <style type="text/css" media="all">
+        <% icons_used.each do |icon| %>
+        .<%= icon.css_class %> {
+          background-image: url(data:image/<%= icon.format %>;base64,<%= icon.data.tr("\n", '') %>);
+          background-repeat: no-repeat;
+          padding-left: 4.25em;
+          min-height: 3.25em;
+        }
+        <% end %>
+      </style>
+      <% end %>
 
       <%
         styles = @spec['styles']
@@ -468,8 +488,14 @@ output: |
         Generated on <%= Time.now %> by <a href="<%= Gerbil[:website] %>"><%= Gerbil[:name] %></a> <%= Gerbil[:version] %>.
       <% end %>
 
-      <% if defined? $icons_used and $icons_used and not $icons_used.empty? %>
-        <p>The admonition icons (<%= $icons_used.uniq.map {|icon| icon.to_html}.join(' ') %>) used in this document are Copyright &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.</p>
+      <% if icons_used %>
+        <div id="footer-credits">
+          <% icons_used.uniq.each do |icon| %>
+          <span class="<%= icon.css_class %>" style="float: right">&nbsp;</span>
+          <% end %>
+
+          <p>The admonition graphics used in this document are Copyright &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.</p>
+        </div>
       <% end %>
       <%= node = @types['footer_inside_below'].first and node.output %>
       </div>
@@ -665,6 +691,11 @@ styles:
         border-top       : thick dotted #DCDCDC;
         padding-top      : 1em;
         text-align       : center;
+      }
+
+      #footer-credits
+      {
+        margin-top       : 2em;
       }
 
     /* document nodes */
