@@ -166,7 +166,7 @@ nodes:
     silent: true
     output: |
       <div id="<%= @node.type %>">
-        <h1 class="title"><%= @node.type.capitalize %></h1>
+        <h1 class="title"><a class="here" href="#<%= @node.type %>"><%= @node.type.capitalize %></a></h1>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -187,7 +187,7 @@ nodes:
 
           <br/>
 
-          <big><%= @node.title.to_s.to_html %></big>
+          <a class="here" href="#<%= @node.url %>"><big><%= @node.title.to_s.to_html %></big></a>
         </h1>
 
         <div class="content"><%= @node.content.to_s.to_html %></div>
@@ -204,7 +204,7 @@ nodes:
       <% level = [6, @node.depth + 1].min %>
       <div class="<%= @node.type %>">
         <h<%= level %> class="title">
-          <a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>&nbsp;&nbsp;<%= @node.title.to_s.to_html %>
+          <a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a>
         </h<%= level %>>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
@@ -216,7 +216,7 @@ nodes:
     number: false
     output: |
       <div class="<%= @node.type %>">
-        <p class="title" id="<%= @node.url %>"><%= @node.title.to_s.to_html %></p>
+        <p class="title" id="<%= @node.url %>"><a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -231,7 +231,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<%= @node.title.to_s.to_html %></p>
+        <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
 
         <div class="content <%=
           $use_icons = true unless defined? $use_icons
@@ -260,7 +260,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<%= @node.title.to_s.to_html %></p>
+        <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -397,7 +397,7 @@ output: |
         <%= header.output %>
       <% else %>
         <%= $logo if defined? $logo %>
-        <h1 class="title"><%= $title.to_s.to_html %></h1>
+        <h1 class="title"><a class="here" href="#"><%= $title.to_s.to_html %></a></h1>
         <h2 class="authors"><%=
           $authors.map do |(name, url)|
             if url
@@ -435,7 +435,7 @@ output: |
         toc = @roots.inject('') {|s,n| s << builder[n] }
 
         unless toc.empty?
-          %><div id="toc"><h1>Contents</h1> <ul><%= toc %></ul></div><%
+          %><div id="toc"><h1><a class="here" href="#toc">Contents</a></h1> <ul><%= toc %></ul></div><%
         end
       %>
 
@@ -454,7 +454,9 @@ output: |
             %{<li><a id="#{n.list_url}" href="##{n.url}">#{n.title.to_s.to_html}</a></li>}
           end
 
-          %{<h1>#{type.capitalize}s</h1> <ol>#{nested}</ol>}
+          anchor = "lof-#{type}"
+
+          %{<h1 id="#{anchor}"><a class="here" href="##{anchor}">#{type.capitalize}s</a></h1> <ol>#{nested}</ol>}
         end
 
         unless lof.empty?
@@ -519,6 +521,15 @@ styles:
       blockquote
       {
         font-family      : Cambria, Georgia, serif;
+      }
+
+    /* hyperlinks */
+
+      a.here:link,
+      a.here:visited,
+      a.here:hover
+      {
+        color: inherit;
       }
 
     /* lists */
