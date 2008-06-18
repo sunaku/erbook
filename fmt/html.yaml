@@ -183,7 +183,7 @@ nodes:
       <div class="<%= @node.type %>">
         <h1 class="title">
           <%= @node.type.capitalize %>
-          <a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>
+          <a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>
 
           <br/>
 
@@ -204,7 +204,7 @@ nodes:
       <% level = [6, @node.depth + 1].min %>
       <div class="<%= @node.type %>">
         <h<%= level %> class="title">
-          <a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a>
+          <a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a>
         </h<%= level %>>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
@@ -231,7 +231,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
+        <p class="title"><a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
 
         <div class="content <%=
           $use_icons = true unless defined? $use_icons
@@ -260,7 +260,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><a class="toc" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
+        <p class="title"><a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -970,8 +970,8 @@ styles:
         font-style       : italic;
       }
 
-      a.toc:link,
-      a.toc:visited
+      a.list:link,
+      a.list:visited
       {
         color            : inherit;
         .color           : #000000; /* for IE6 and IE7 */
