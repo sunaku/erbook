@@ -370,10 +370,16 @@ output: |
       <style type="text/css" media="all">
         <% icons_used.each do |icon| %>
         .<%= icon.css_class %> {
-          background-image: url(data:image/<%= icon.format %>;base64,<%= icon.data.tr("\n", '') %>);
-          background-repeat: no-repeat;
-          padding-left: 4.25em;
-          min-height: 3.25em;
+          <%
+            # we use list-style-image instead of background-image because the
+            # latter is neither printable nor shown in print preview by default
+            # in most browsers
+            #
+            # see http://www.web-graphics.com/mtarchive/001703.php
+          %>
+          display: list-item;
+          list-style-image: url(data:image/<%= icon.format %>;base64,<%= icon.data.tr("\n", '') %>);
+          list-style-position: inside;
         }
         <% end %>
       </style>
