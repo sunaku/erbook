@@ -165,8 +165,9 @@ nodes:
     number: false
     silent: true
     output: |
-      <div id="<%= @node.type %>">
-        <h1 class="title"><a class="here" href="#<%= @node.type %>"><%= @node.type.capitalize %></a></h1>
+      <% label = @node.type.capitalize %>
+      <div id="<%= label %>">
+        <h1 class="title"><a class="here" href="#<%= label %>"><%= label %></a></h1>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -352,6 +353,53 @@ output: |
 
     # get a list of all icons used in the document, if any
     icons_used = $icons_used if defined? $icons_used and not $icons_used.empty?
+
+    abstract = @types['abstract'].first
+
+    references = @types['reference']
+    references = nil if references.empty?
+
+    # compute table of contents
+      tocBuilder = lambda do |n|
+        if @spec['nodes'][n.type]['toc']
+          entry = '%s<a id="%s" href="#%s">%s</a>' % [
+            (n.index.to_s + '&nbsp;&nbsp;' if n.index),
+            n.list_url,
+            n.url,
+            n.title.to_s.to_html
+          ]
+          nested = n.children.inject('') {|s,c| s << tocBuilder[c] }
+
+          %{<li>#{entry}#{ "<ul>#{nested}</ul>" unless nested.empty? }</li>}
+        else
+          ''
+        end
+      end
+
+      toc = @roots.inject('') {|s,n| s << tocBuilder[n] }
+
+    # compute list of figures
+      lofEnums = {} # type => nodes
+
+      @spec['nodes'].each_pair do |name, info|
+        if info['lof']
+          nodes = @types[name]
+          lofEnums[name] = nodes unless nodes.empty?
+        end
+      end
+
+      lofSections = []
+
+      lof = lofEnums.sort.map do |(type, nodes)|
+        nested = nodes.map do |n|
+          %{<li><a id="#{n.list_url}" href="##{n.url}">#{n.title.to_s.to_html}</a></li>}
+        end
+
+        label = type.capitalize << 's'
+        lofSections << label
+
+        %{<h1 id="#{label}"><a class="here" href="##{label}">#{label}</a></h1> <ol>#{nested}</ol>}
+      end
   %>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -396,6 +444,23 @@ output: |
       <% end %>
     </head>
     <body>
+      <div class="nav">
+        <%=
+          [
+            ('Abstract' if abstract),
+            'Contents',
+            lofSections,
+            ('References' if references)
+          ].flatten.compact.map do |section|
+            %{<a href="##{section}">#{section}</a>}
+          end.join(' &middot; ')
+        %>
+      </div>
+
+      <br style="display: none"/>
+      <hr style="display: none"/>
+      <br style="display: none"/>
+
       <%= node = @types['header_outside_above'].first and node.output %>
       <div id="header">
       <%= node = @types['header_inside_above'].first and node.output %>
@@ -419,64 +484,40 @@ output: |
       </div>
       <%= node = @types['header_outside_below'].first and node.output %>
 
-      <%= node = @types['abstract'].first and node.output %>
+      <%= abstract.output if abstract %>
 
-      <% # table of contents
-        builder = lambda do |n|
-          if @spec['nodes'][n.type]['toc']
-            entry = '%s<a id="%s" href="#%s">%s</a>' % [
-              (n.index.to_s + '&nbsp;&nbsp;' if n.index),
-              n.list_url,
-              n.url,
-              n.title.to_s.to_html
-            ]
-            nested = n.children.inject('') {|s,c| s << builder[c] }
+      <br style="display: none"/>
+      <hr style="display: none"/>
+      <br style="display: none"/>
 
-            %{<li>#{entry}#{ "<ul>#{nested}</ul>" unless nested.empty? }</li>}
-          else
-            ''
-          end
-        end
+      <% unless toc.empty? %>
+        <div id="<%= label = 'Contents' %>">
+          <h1><a class="here" href="#<%= label %>"><%= label %></a></h1>
+          <ul>
+            <%= toc %>
 
-        toc = @roots.inject('') {|s,n| s << builder[n] }
+            <% if references %>
+            <li><a href="#References">References</a></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
-        unless toc.empty?
-          %><div id="toc"><h1><a class="here" href="#toc">Contents</a></h1> <ul><%= toc %></ul></div><%
-        end
-      %>
+      <% unless lof.empty? %>
+        <div id="lof"><%= lof %></div>
+      <% end %>
 
-      <% # list of figures
-        enums = {} # type => nodes
-
-        @spec['nodes'].each_pair do |name, info|
-          if info['lof']
-            nodes = @types[name]
-            enums[name] = nodes unless nodes.empty?
-          end
-        end
-
-        lof = enums.sort.map do |(type, nodes)|
-          nested = nodes.map do |n|
-            %{<li><a id="#{n.list_url}" href="##{n.url}">#{n.title.to_s.to_html}</a></li>}
-          end
-
-          anchor = "lof-#{type}"
-
-          %{<h1 id="#{anchor}"><a class="here" href="##{anchor}">#{type.capitalize}s</a></h1> <ol>#{nested}</ol>}
-        end
-
-        unless lof.empty?
-          %><div id="lof"><%= lof %></div><%
-        end
-      %>
+      <br style="display: none"/>
+      <hr style="display: none"/>
+      <br style="display: none"/>
 
       <div id="content"><%= @content %></div>
 
-      <% unless (refs = @types['reference']).empty? %>
-      <div id="references">
+      <% if references %>
+      <div id="References">
         <h1 class="title"><a class="here" href="#References">References</a></h1>
         <ol>
-        <% refs.each do |n| %>
+        <% references.each do |n| %>
           <li id="<%= n.url %>"><%= n.content.to_s.to_html %></li>
         <% end %>
         </ol>
@@ -535,7 +576,7 @@ styles:
       a.here:visited,
       a.here:hover
       {
-        color: inherit;
+        color            : inherit;
       }
 
     /* lists */
@@ -640,6 +681,14 @@ styles:
 
     /* document structure */
 
+      .nav
+      {
+        text-align       : center;
+        border-bottom    : thick dotted #DCDCDC;
+        padding-bottom   : 1em;
+        margin-bottom    : 4em;
+      }
+
       #header
       {
         text-align       : center;
@@ -671,34 +720,34 @@ styles:
         margin-top       : 4em;
       }
 
-      #abstract
+      #Abstract
       {
         margin-bottom    : 5em;
       }
 
-      #toc li
+      #Contents li
       {
         list-style-type  : none;
       }
 
-      #toc li ul
+      #Contents li ul
       {
         padding-bottom   : 1em;
         border-left      : thick solid #F5F5F5;
         _border-left     : none; /* for IE6 */
       }
 
-      #toc li ul:hover
+      #Contents li ul:hover
       {
         border-color     : #DCDCDC;
       }
 
-      #toc > ul
+      #Contents > ul
       {
         padding-left     : 1em;
       }
 
-      #references
+      #References
       {
         margin-top       : 5em;
       }
@@ -988,6 +1037,7 @@ styles:
 
     /* document structure */
 
+      .nav,
       #lof
       {
         display          : none;
