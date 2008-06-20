@@ -898,7 +898,7 @@ styles:
 
       a:visited
       {
-        color            : #9400D3;
+        color            : #800080;
         text-decoration  : none;
       }
 
