@@ -1,7 +1,7 @@
-desc: A illustrative format.
+desc: An example format.
 
 code: |
-  # Returns a random, but pronounceable, name.
+  # Returns a random, yet pronounceable, name.
   def generate_name
     letters = ('a'..'z').to_a - %w[ c q w x ] # redundant sounds
     vowels = %w[a e i o u]
@@ -10,17 +10,21 @@ code: |
 
     length = 3 + rand(5)
 
-    name = ''
-    length.times do |i|
+    name = (0...length).map do |i|
+      # alternate between consonants and vowels
       set = sets[i % sets.length]
-      name << set[rand(set.length)]
-    end
+
+      # choose a random letter from the set
+      set[rand(set.length)]
+    end.join
 
     name
   end
 
   class Node
     def name
+      # dynamically compute (and store)
+      # the name of this node on demand
       @name ||= generate_name
     end
   end

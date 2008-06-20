@@ -572,6 +572,16 @@ styles:
 
     /* hyperlinks */
 
+      a > img
+      {
+        border           : none;
+      }
+
+      a img
+      {
+        _border           : none; /* for IE6 */
+      }
+
       a.here:link,
       a.here:visited,
       a.here:hover
@@ -660,7 +670,7 @@ styles:
 
       table
       {
-        border           : none;
+        border-collapse  : collapse; /* no spacing between cell borders */
         margin           : auto; /* center horizontally */
         margin-top       : 1em;
       }
@@ -669,7 +679,7 @@ styles:
       td
       {
         padding          : 1em;
-        border           : 1px solid #C0C0C0;
+        border           : 1px solid #bbb;
         vertical-align   : top;
         background-color : inherit;
       }
@@ -755,7 +765,7 @@ styles:
       #footer
       {
         border-top       : thick dotted #DCDCDC;
-        padding-top      : 1em;
+        padding-top      : 2em;
         text-align       : center;
       }
 
@@ -888,9 +898,8 @@ styles:
       blockquote
       {
         margin           : 1em;
-        border           : 5px dotted #C0C0C0;
+        border           : 5px dotted #ddd;
         padding          : 1em;
-        color            : #444;
       }
 
       hr
@@ -933,11 +942,6 @@ styles:
       }
 
     /* hyperlinks */
-
-      a > img
-      {
-        border           : none;
-      }
 
       a:link
       {
@@ -1020,19 +1024,17 @@ styles:
       a[href^="#"]
       {
         color            : #A52A2A;
-        font-weight      : lighter;
+        font-weight      : normal;
         text-decoration  : none;
-        font-style       : italic;
       }
 
       a.list:link,
       a.list:visited
       {
-        color            : inherit;
-        .color           : #000000; /* for IE6 and IE7 */
+        color            : black;
         font-weight      : inherit;
-        text-decoration  : none;
         font-style       : normal;
+        text-decoration  : none;
       }
 
     /* document structure */
@@ -1056,5 +1058,4 @@ styles:
       {
         _padding-bottom  : 0.5em; /* for IE6 */
       }
-
 
