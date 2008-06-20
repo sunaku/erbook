@@ -474,7 +474,7 @@ output: |
 
       <% unless (refs = @types['reference']).empty? %>
       <div id="references">
-        <h1 class="title">References</h1>
+        <h1 class="title"><a class="here" href="#References">References</a></h1>
         <ol>
         <% refs.each do |n| %>
           <li id="<%= n.url %>"><%= n.content.to_s.to_html %></li>
