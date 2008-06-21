@@ -416,6 +416,7 @@ output: |
 
       <% if icons_used %>
       <style type="text/css" media="all">
+      <!--
         <% icons_used.each do |icon| %>
         .<%= icon.css_class %> {
           <%
@@ -430,16 +431,19 @@ output: |
           list-style-position: inside;
         }
         <% end %>
+      -->
       </style>
       <% end %>
 
       <%
         styles = @spec['styles']
-        %w[screen print].each do |media|
+        (styles.keys - %w[common]).each do |media|
       %>
       <style type="text/css" media="<%= media %>">
+      <!--
         <%= styles['common'] %>
         <%= styles[media] %>
+      -->
       </style>
       <% end %>
     </head>
