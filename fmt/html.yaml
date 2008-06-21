@@ -398,7 +398,7 @@ output: |
         label = type.capitalize << 's'
         lofSections << label
 
-        %{<h1 id="#{label}"><a class="here" href="##{label}">#{label}</a></h1> <ol>#{nested}</ol>}
+        %{<h1 id="#{label}" class="title"><a class="here" href="##{label}">#{label}</a></h1> <ol>#{nested}</ol>}
       end
   %>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -492,7 +492,7 @@ output: |
 
       <% unless toc.empty? %>
         <div id="<%= label = 'Contents' %>">
-          <h1><a class="here" href="#<%= label %>"><%= label %></a></h1>
+          <h1 class="title"><a class="here" href="#<%= label %>"><%= label %></a></h1>
           <ul>
             <%= toc %>
 
