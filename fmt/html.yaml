@@ -972,17 +972,17 @@ styles:
 
       tt
       {
-        color            : inherit;
-        background-color : inherit;
-        font-weight      : normal;
+        color             : inherit;
+        background-color  : inherit;
+        font-weight       : normal;
       }
 
       pre,
       .code
       {
-        border           : none;
-        overflow         : visible;
-        background-color : inherit;
+        border            : none;
+        overflow          : visible;
+        background-color  : inherit;
       }
 
     /* headings */
@@ -994,7 +994,7 @@ styles:
       h5,
       h6
       {
-        font-weight      : normal;
+        font-weight       : normal;
       }
 
     /* hyperlinks */
@@ -1003,38 +1003,38 @@ styles:
       a:visited,
       a:active
       {
-        color            : #0000FF;
-        font-weight      : bold;
-        text-decoration  : underline;
+        color             : #0000FF;
+        font-weight       : bold;
+        text-decoration   : underline;
       }
 
       a:after
       {
-        content          : " " attr(href);
-        font-family      : Consolas, "Lucida Console", monospace;
-        font-weight      : normal;
-        font-size        : 90%;
+        content           : " " attr(href);
+        font-family       : Consolas, "Lucida Console", monospace;
+        font-weight       : normal;
+        font-size         : 90%;
       }
 
       a[href^="#"]:after
       {
-        content          : "";
+        content           : "";
       }
 
       a[href^="#"]
       {
-        color            : #A52A2A;
-        font-weight      : normal;
-        text-decoration  : none;
+        color             : #A52A2A;
+        font-weight       : normal;
+        text-decoration   : none;
       }
 
       a.list:link,
       a.list:visited
       {
-        color            : black;
-        font-weight      : inherit;
-        font-style       : normal;
-        text-decoration  : none;
+        color             : black;
+        font-weight       : inherit;
+        font-style        : normal;
+        text-decoration   : none;
       }
 
     /* document structure */
@@ -1042,7 +1042,15 @@ styles:
       .nav,
       #lof
       {
-        display          : none;
+        display           : none;
+      }
+
+      #Contents,
+      .part,
+      .chapter,
+      #References
+      {
+        page-break-before : always;
       }
 
     /* document nodes */
@@ -1050,12 +1058,12 @@ styles:
       .part    > .title > big,
       .chapter > .title > big
       {
-        padding-bottom   : 0.5em;
+        padding-bottom    : 0.5em;
       }
 
       .part    .title big,
       .chapter .title big
       {
-        _padding-bottom  : 0.5em; /* for IE6 */
+        _padding-bottom   : 0.5em; /* for IE6 */
       }
 
