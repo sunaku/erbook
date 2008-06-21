@@ -629,12 +629,11 @@ styles:
 
       a img
       {
-        _border           : none; /* for IE6 */
+        _border          : none; /* for IE6 */
       }
 
       a.here:link,
-      a.here:visited,
-      a.here:hover
+      a.here:visited
       {
         color            : inherit;
       }
@@ -815,7 +814,7 @@ styles:
       #footer
       {
         border-top       : thick dotted #DCDCDC;
-        padding-top      : 2em;
+        padding-top      : 1em;
         text-align       : center;
       }
 
@@ -938,35 +937,35 @@ styles:
   screen: |
     body
     {
-      margin             : auto;
-      padding            : 0.5em;
-      max-width          : 36em;
+      margin            : auto;
+      padding           : 0.5em;
+      max-width         : 36em;
     }
 
     /* hyperlinks */
 
       a:link
       {
-        color            : #0000FF;
-        text-decoration  : none;
+        color           : #0000FF;
+        text-decoration : none;
       }
 
       a:visited
       {
-        color            : #800080;
-        text-decoration  : none;
+        color           : #800080;
+        text-decoration : none;
       }
 
       a:hover
       {
-        color            : #FF0000;
-        text-decoration  : underline;
+        color           : #FF0000;
+        text-decoration : underline;
       }
 
       a:target
       {
-        color            : #FF0000;
-        font-weight      : bold;
+        color           : #FF0000;
+        font-weight     : bold;
       }
 
   print: |
@@ -974,7 +973,6 @@ styles:
 
       tt
       {
-        color             : inherit;
         background-color  : inherit;
         font-weight       : normal;
       }
@@ -1025,7 +1023,7 @@ styles:
 
       a[href^="#"]
       {
-        color             : #A52A2A;
+        color             : #4169E1;
         font-weight       : normal;
         text-decoration   : none;
       }
