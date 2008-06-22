@@ -292,19 +292,25 @@ nodes:
             target.index || target.number
           ]
 
-          unless target.type == 'reference'
-            title = "<em>#{target.title.to_s.to_html}</em>"
-          end
-
-          '<a class="%s" href="#%s">%s</a>' % [
-            @node.type,
-            target.url,
-            if @node.args.length > 1
-              @node.args[1].to_s.to_html
+          title_text =
+            if target.type == 'reference'
+              prefix
             else
-              [prefix, title].compact.join(': ')
+              [prefix, target.title].compact.join('. ')
             end
-          ]
+
+          title_auto = @node.args.length < 2
+
+          title_html =
+            if title_auto
+              title_text.to_html
+            else
+              @node.args[1].to_s.to_html
+            end
+
+          %{<a class="#{@node.type}" href="##{target.url}"#{
+            %{ title="#{title_text}"} unless title_auto
+          }>#{title_html}</a>}
         else
           raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
         end
