@@ -981,7 +981,6 @@ styles:
       .code
       {
         border            : none;
-        overflow          : visible;
         background-color  : inherit;
       }
 
