@@ -70,7 +70,7 @@ class String
     # redcloth wraps a single item within paragraph tags, which
     # prevents the item's HTML from being validly injected within
     # other block-level elements, such as headings (h1, h2, etc.)
-    html.sub! %r{^<p>(.*)</p>$}m do |match|
+    html.sub! %r{\A<p>(.*)</p>\Z}m do |match|
       payload = $1
 
       if payload =~ /<p>/
