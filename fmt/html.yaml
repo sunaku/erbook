@@ -635,7 +635,7 @@ styles:
       a.here:link,
       a.here:visited
       {
-        color            : inherit;
+        color            : #000000;
       }
 
     /* lists */
@@ -1029,9 +1029,11 @@ styles:
       }
 
       a.list:link,
-      a.list:visited
+      a.list:visited,
+      a.here:link,
+      a.here:visited
       {
-        color             : black;
+        color             : #000000;
         font-weight       : inherit;
         font-style        : normal;
         text-decoration   : none;
