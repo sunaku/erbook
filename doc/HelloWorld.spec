@@ -35,36 +35,28 @@ nodes:
     number: true
     silent: false
     output: |
-      <h1><%= @node.type %> #<%= @node.index %>: <%= @node.name.inspect %></h1>
+      <h3><%= @node.type %> #<%= @node.index %>: <%= @node.name.inspect %></h3>
+
       My name is <%= @node.name.inspect %> and these are my properties:
-      <table>
-        <tr>
-          <th>Property</th>
-          <th>Value</th>
-        </tr>
-        <tr>
-          <td>args</td>
-          <td><%= @node.args.inspect %></td>
-        </tr>
-        <tr>
-          <td>index</td>
-          <td><%= @node.index.inspect %></td>
-        </tr>
-        <tr>
-          <td>number</td>
-          <td><%= @node.number.inspect %></td>
-        </tr>
-        <tr>
-          <td>trace</td>
-          <td><ul><%= @node.trace.map {|s| "<li>#{s}</li>"} %></ul></td>
-        </tr>
-        <tr>
-          <td>content</td>
-          <td><%= @node.content %></td>
-        </tr>
-      </table>
+
+      <dl style="<%= $style %>">
+        <dt>args</dt>
+        <dd><code><%= @node.args.inspect %></code></dd>
+
+        <dt>index</dt>
+        <dd><code><%= @node.index.inspect %></code></dd>
+
+        <dt>number</dt>
+        <dd><code><%= @node.number.inspect %></code></dd>
+
+        <dt>trace</td>
+        <dd><pre><%= @node.trace.join("\n") %></pre></dd>
+
+        <dt>content</dt>
+        <dd><%= @node.content %></dd>
+      </dl>
 
 output: |
   Welcome to the "<%= @spec[:name] %>" format.
-  <div style="<%= $style %>"><%= @content %></div>
+  <%= @content %>
   That's all folks!
