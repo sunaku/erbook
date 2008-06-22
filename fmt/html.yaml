@@ -998,44 +998,42 @@ styles:
 
     /* hyperlinks */
 
+      /* blend all hyperlinks with normal text */
       a:link,
-      a:visited,
-      a:active
+      a:visited
+      {
+        color             : #000000;
+        text-decoration   : none;
+      }
+
+      /* emphasize external and cross-reference hyperlinks */
+      a:not([href^="#"]):link,
+      a:not([href^="#"]):visited,
+      a.xref[title]:link,
+      a.xref[title]:visited
       {
         color             : #0000FF;
-        font-weight       : bold;
         text-decoration   : underline;
+        font-weight       : bolder;
+      }
+
+      /* show URL of destination for external hyperlinks */
+      a:not([href^="#"]):after
+      {
+        content           : " " attr(href);
+        font-family       : Consolas, "Lucida Console", monospace;
+      }
+
+      /* show name of destination for cross-references */
+      a.xref[title]:after
+      {
+        content           : " " attr(title);
       }
 
       a:after
       {
-        content           : " " attr(href);
-        font-family       : Consolas, "Lucida Console", monospace;
         font-weight       : normal;
-        font-size         : 90%;
-      }
-
-      a[href^="#"]:after
-      {
-        content           : "";
-      }
-
-      a[href^="#"]
-      {
-        color             : #4169E1;
-        font-weight       : normal;
-        text-decoration   : none;
-      }
-
-      a.list:link,
-      a.list:visited,
-      a.here:link,
-      a.here:visited
-      {
-        color             : #000000;
-        font-weight       : inherit;
-        font-style        : normal;
-        text-decoration   : none;
+        font-size         : smaller;
       }
 
     /* document structure */
