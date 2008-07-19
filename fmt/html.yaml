@@ -454,18 +454,24 @@ output: |
       <% end %>
     </head>
     <body>
+      <%
+        nav = [
+          ('Abstract' if abstract),
+          'Contents',
+          lofSections,
+          ('References' if references)
+        ].flatten.compact
+
+        if nav.length > 1
+      %>
       <div class="nav">
         <%=
-          [
-            ('Abstract' if abstract),
-            'Contents',
-            lofSections,
-            ('References' if references)
-          ].flatten.compact.map do |section|
+          nav.map do |section|
             %{<a href="##{section}">#{section}</a>}
           end.join(' &middot; ')
         %>
       </div>
+      <% end %>
 
       <br style="display: none"/>
       <hr style="display: none"/>
