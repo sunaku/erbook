@@ -755,8 +755,6 @@ styles:
       .nav
       {
         text-align       : center;
-        border-bottom    : thick dotted #DCDCDC;
-        padding-bottom   : 1em;
         margin-bottom    : 4em;
       }
 
