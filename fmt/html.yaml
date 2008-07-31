@@ -4,7 +4,7 @@
 desc: web page for the Internet
 
 code: |
-  # load the String#to_html method
+  # load the String#to_html and String#to_inline_html methods
   require 'gerbil/html'
 
   class String
@@ -188,7 +188,7 @@ nodes:
 
           <br/>
 
-          <a class="here" href="#<%= @node.url %>"><big><%= @node.title.to_s.to_html %></big></a>
+          <a class="here" href="#<%= @node.url %>"><big><%= @node.title.to_s.to_inline_html %></big></a>
         </h1>
 
         <div class="content"><%= @node.content.to_s.to_html %></div>
@@ -205,7 +205,7 @@ nodes:
       <% level = [6, @node.depth + 1].min %>
       <div class="<%= @node.type %>">
         <h<%= level %> class="title">
-          <a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a>
+          <a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.index %></a>&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_inline_html %></a>
         </h<%= level %>>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
@@ -217,7 +217,7 @@ nodes:
     number: false
     output: |
       <div class="<%= @node.type %>">
-        <p class="title" id="<%= @node.url %>"><a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
+        <p class="title" id="<%= @node.url %>"><a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_inline_html %></a></p>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -232,7 +232,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
+        <p class="title"><a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_inline_html %></a></p>
 
         <div class="content <%=
           $use_icons = true unless defined? $use_icons
@@ -261,7 +261,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <p class="title"><a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_html %></a></p>
+        <p class="title"><a class="list" id="<%= @node.url %>" href="#<%= @node.list_url %>"><%= @node.type.capitalize %> <%= @node.number %></a>.&nbsp;&nbsp;<a class="here" href="#<%= @node.url %>"><%= @node.title.to_s.to_inline_html %></a></p>
         <div class="content"><%= @node.content.to_s.to_html %></div>
       </div>
 
@@ -303,10 +303,10 @@ nodes:
 
           title_html =
             if title_auto
-              title_text.to_html
+              title_text
             else
-              @node.args[1].to_s.to_html
-            end
+              @node.args[1].to_s
+            end.to_inline_html
 
           %{<a class="#{@node.type}" href="##{target.url}"#{
             %{ title="#{title_text}"} unless title_auto
@@ -372,7 +372,7 @@ output: |
             (n.index.to_s + '&nbsp;&nbsp;' if n.index),
             n.list_url,
             n.url,
-            n.title.to_s.to_html
+            n.title.to_s.to_inline_html
           ]
           nested = n.children.inject('') {|s,c| s << tocBuilder[c] }
 
@@ -398,7 +398,7 @@ output: |
 
       lof = lofEnums.sort.map do |(type, nodes)|
         nested = nodes.map do |n|
-          %{<li><a id="#{n.list_url}" href="##{n.url}">#{n.title.to_s.to_html}</a></li>}
+          %{<li><a id="#{n.list_url}" href="##{n.url}">#{n.title.to_s.to_inline_html}</a></li>}
         end
 
         label = type.capitalize << 's'
@@ -418,7 +418,7 @@ output: |
       <% $feeds.each_pair do |url, fmt| %>
       <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
       <% end if $feeds %>
-      <title><%= $title.to_s.to_html %></title>
+      <title><%= $title.to_s.to_inline_html %></title>
 
       <% if icons_used %>
       <style type="text/css" media="all">
@@ -484,7 +484,7 @@ output: |
         <%= header.output %>
       <% else %>
         <%= $logo if defined? $logo %>
-        <h1 class="title"><a class="here" href="#"><%= $title.to_s.to_html %></a></h1>
+        <h1 class="title"><a class="here" href="#"><%= $title.to_s.to_inline_html %></a></h1>
         <h2 class="authors"><%=
           $authors.map do |(name, url)|
             if url

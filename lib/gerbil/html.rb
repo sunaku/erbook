@@ -1,8 +1,11 @@
-# This file defines the String#to_html method, which is
-# invoked to transform the content of a blog entry into HTML.
+# This file defines the String#to_html and String#to_inline_html
+# methods, which are invoked to transform plain text into HTML.
 #
-# It features the Textile formatting system (RedCloth), syntax coloring
-# (CodeRay), and smart source code sizing (block versus inline display).
+# This particular implementation features the
+# Textile formatting system (RedCloth),
+# syntax coloring (CodeRay), and smart source
+# code sizing (block versus inline display).
+#
 #--
 # Copyright 2006 Suraj N. Kurapati
 # See the file named LICENSE for details.
@@ -12,6 +15,7 @@ require 'digest/sha1'
 
 begin
   require 'rubygems'
+  gem 'RedCloth', '~> 4.0'
 rescue LoadError
 end
 
@@ -30,57 +34,47 @@ class String
   # the text-to-HTML conversion process.
   VERBATIM_TAGS = %w[noformat]
 
-  # Transforms this string into HTML.
-  def to_html
-    text = dup
-    protect_tags! text, VERBATIM_TAGS, verbatimStore = {}, true
-    protect_tags! text, PROTECTED_TAGS, protectedStore = {}, false
+  # Transforms this string into an *inline* HTML string (one that
+  # does not contain block-level HTML elements at the root).
+  def to_inline_html
+    to_html true
+  end
 
-    html = text.thru_redcloth
-    restore_tags! html, protectedStore
+  # Transforms this string into HTML while ensuring that the result
+  # contains one or several block-level elements at the root.
+  #
+  # If aInline is true, then the resulting HTML will be an *inline* string.
+  #
+  def to_html aInline = false
+    protect(self, VERBATIM_TAGS, true) do |text|
+      html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_redcloth aInline }
 
-    # collapse redundant <pre> elements -- a side effect of RedCloth
-    html.gsub! %r{(<pre>)\s*<pre>(.*?)</pre>\s*(</pre>)}m, '\1\2\3'
+      # collapse redundant <pre> elements -- a side effect of RedCloth
+      while html.gsub! %r{<pre>\s*(<(code|pre)[^>]*>.*?</\2>)\s*</pre>}m, '\1'
+      end
 
-    html = html.thru_coderay
-    restore_tags! html, verbatimStore
+      # ensure tables have a border: this *greatly* improves
+      # readability in text-mode web browsers like Lynx and w3m
+      html.gsub! %r/<table/, '\& border="1"'
 
-    # ensure tables have a border (this GREATLY improves
-    # readability in text-mode web browsers like Lynx and w3m)
-    html.gsub! %r/<table/, '\& border="1"'
-
-    html
+      html.thru_coderay
+    end
   end
 
   # Returns the result of running this string through RedCloth.
-  def thru_redcloth
-    text = dup
+  #
+  # If aInline is true, then the resulting HTML will be an *inline* string.
+  #
+  def thru_redcloth aInline = false
+    red = RedCloth.new self
 
-    # redcloth does not correctly convert -- into &mdash;
-    text.gsub! %r{\b--\b}, '&mdash;'
-
-    html = RedCloth.new(text).to_html
-
-    # redcloth adds <span> tags around acronyms
-    html.gsub! %r{<span class="caps">([[:upper:][:digit:]]+)</span>}, '\1'
-
-    # redcloth wraps indented text within <pre><code> tags
-    html.gsub! %r{(<pre>)\s*<code>(.*?)\s*</code>\s*(</pre>)}m, '\1\2\3'
-
-    # redcloth wraps a single item within paragraph tags, which
-    # prevents the item's HTML from being validly injected within
-    # other block-level elements, such as headings (h1, h2, etc.)
-    html.sub! %r{\A<p>(.*)</p>\Z}m do |match|
-      payload = $1
-
-      if payload =~ /<p>/
-        match
-      else
-        payload
-      end
+    if aInline
+      red.lite_mode = true
+      red.hard_breaks = false
+      red.no_span_caps = true
     end
 
-    html
+    red.to_html
   end
 
   # Adds syntax coloring to <code> elements in the given text.  If the
@@ -111,11 +105,40 @@ class String
     end
   end
 
+  # Returns a digest of this string's content.
+  def digest
+    Digest::SHA1.hexdigest(self)
+  end
+
+  # Returns a list of paragraphs in this string.
+  def paras
+    split(/(?:\r?\n){2}/)
+  end
+
+  # Joins the lines that compose a paragraph,
+  # for every paragraph in this string.
+  def para_join
+    paras.map! {|s| s.tr("\n", ' ') }.join("\n\n")
+  end
+
   private
 
-  def protect_tags! aText, aTags, aStore, aVerbatim #:nodoc:
+  # Protects the given tags in the given input, passes
+  # that protected input to the given block, restores the
+  # given tags in the result of the block and returns it.
+  #
+  # If aVerbatim is true, the content of the elments having the given tags will
+  # not be temporarily altered so that process nested elements can be processed.
+  #
+  def protect aInput, aTags, aVerbatim #:yields: aInput
+    raise ArgumentError unless block_given?
+
+    input = aInput.dup
+    escapes = {}
+
+    # protect the given tags by escaping them
     aTags.each do |tag|
-      aText.gsub! %r{(<#{tag}.*?>)(.*?)(</#{tag}>)}m do
+      input.gsub! %r{(<#{tag}.*?>)(.*?)(</#{tag}>)}m do
         head, body, tail = $1, $2, $3
 
         # XXX: when we restore protected tags later on, String.gsub! is
@@ -123,27 +146,32 @@ class String
         #      protect against this by doubling all single backslashes first
         body.gsub! %r/\\/, '\&\&'
 
-        original =
+        orig =
           if aVerbatim
             body
           else
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail
           end
-        escape = Digest::SHA1.hexdigest(original)
 
-        aStore[escape] = original
-        escape
+        esc = orig.digest
+        escapes[esc] = orig
+
+        esc
       end
     end
-  end
 
-  def restore_tags! aText, aStore #:nodoc:
-    until aStore.empty?
-      aStore.each_pair do |escape, original|
-        if aText.gsub! %r{<p>#{escape}</p>|#{escape}}, original
-          aStore.delete escape
+    # invoke the given block with the protected input
+    output = yield(input)
+
+    # restore the protected tags by unescaping them
+    until escapes.empty?
+      escapes.each_pair do |esc, orig|
+        if output.gsub! esc, orig
+          escapes.delete esc
         end
       end
     end
+
+    output
   end
 end
