@@ -11,11 +11,18 @@
 # See the file named LICENSE for details.
 
 require 'cgi'
-require 'digest/sha1'
 
 begin
   require 'rubygems'
-  gem 'RedCloth', '~> 4.0'
+
+  # check for correct versions of the gems we use
+  begin
+    gem 'RedCloth', '~> 4.0'
+    gem 'coderay', '>= 0.7'
+  rescue LoadError => e
+    puts e
+    exit 1
+  end
 rescue LoadError
 end
 
@@ -24,24 +31,23 @@ require 'redcloth'
 
 class String
   # The content of these HTML tags will be preserved while
-  # they are being processed by Textile. By doing this, we
+  # they are being processed by Textile.  By doing this, we
   # avoid unwanted Textile transformations, such as quotation
   # marks becoming curly (&#8192;), in source code.
   PROTECTED_TAGS = %w[tt code pre]
 
-  # The content of these HTML tags will
-  # be preserved *verbatim* throughout
-  # the text-to-HTML conversion process.
+  # The content of these HTML tags will be preserved
+  # *verbatim* throughout the text-to-HTML conversion process.
   VERBATIM_TAGS = %w[noformat]
 
   # Transforms this string into an *inline* HTML string (one that
-  # does not contain block-level HTML elements at the root).
+  # does not contain any block-level HTML elements at the root).
   def to_inline_html
     to_html true
   end
 
-  # Transforms this string into HTML while ensuring that the result
-  # contains one or several block-level elements at the root.
+  # Transforms this string into HTML while ensuring that the
+  # result contains one or more block-level elements at the root.
   #
   # If aInline is true, then the resulting HTML will be an *inline* string.
   #
@@ -103,11 +109,6 @@ class String
 
       %{<#{tag} class="code"#{atts}>#{html}</#{tag}>}
     end
-  end
-
-  # Returns a digest of this string's content.
-  def digest
-    Digest::SHA1.hexdigest(self)
   end
 
   # Returns a list of paragraphs in this string.

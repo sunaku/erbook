@@ -572,10 +572,10 @@ styles:
   common: |
     body
     {
-      color              : #000000;
-      background-color   : #FFFFFF;
-      line-height        : 1.5em;
-      font-family        : Calibri, Verdana, sans-serif;
+        color               : #000000;
+        background-color    : #FFFFFF;
+        line-height         : 1.5em;
+        font-family         : Calibri, Verdana, sans-serif;
     }
 
     /* emphasis */
@@ -583,21 +583,26 @@ styles:
       em,
       blockquote
       {
-        font-family      : Cambria, Georgia, serif;
+          font-family       : Cambria, Georgia, serif;
+      }
+
+      em
+      {
+          background-color  : #FFFFE0;
       }
 
       blockquote
       {
-        margin           : 1em;
-        border           : 5px dotted #ddd;
-        padding          : 1em;
+          margin            : 2em;
+          color             : #333;
+          font-style        : italic;
       }
 
       hr
       {
-        height           : 0;
-        border           : 0;
-        border-top       : 2px solid #FF0000;
+          height            : 0;
+          border            : 0;
+          border-top        : 2px solid #FF0000;
       }
 
     /* source code */
@@ -606,60 +611,58 @@ styles:
       code,
       pre
       {
-        font-family      : Consolas, "Lucida Console", monospace;
+          font-family       : Consolas, "Lucida Console", monospace;
       }
 
       tt
       {
-        font-weight      : bold;
-        color            : #A52A2A;
-        background-color : #FFFAF0;
+          background-color  : #F0F8FF;
       }
 
       /* output of the syntax coloring library */
       .code
       {
-        background-color : #FFFFF0;
+          background-color  : #FFFFF0;
       }
 
       pre
       {
-        cursor           : text;
-        line-height      : normal;
-        border           : 1px dashed #C0C0C0;
-        background-color : #F5FFDF;
-        padding          : 1em;
-        overflow         : auto;
+          cursor            : text;
+          line-height       : normal;
+          border            : 1px dashed #C0C0C0;
+          background-color  : #F5FFDF;
+          padding           : 1em;
+          overflow          : auto;
       }
 
     /* hyperlinks */
 
       a > img
       {
-        border           : none;
+          border            : none;
       }
 
       a img
       {
-        _border          : none; /* for IE6 */
+          _border           : none; /* for IE6 */
       }
 
       a.here:link,
       a.here:visited
       {
-        color            : #000000;
+          color             : #000000;
       }
 
     /* lists */
 
       #content li:first-child
       {
-        margin-top       : 1em;
+          margin-top        : 1em;
       }
 
       #content li
       {
-        margin-bottom    : 1em;
+          margin-bottom     : 1em;
       }
 
     /* headings */
@@ -672,8 +675,8 @@ styles:
       h6,
       .title
       {
-        font-weight      : lighter;
-        font-family      : Constantia, "Book Antiqua", "URW Bookman L", serif;
+          font-weight       : lighter;
+          font-family       : Constantia, "Book Antiqua", "URW Bookman L", serif;
       }
 
       #lof h1,
@@ -683,7 +686,7 @@ styles:
       #lof h5,
       #lof h6
       {
-        margin-top       : 1.25em;
+          margin-top        : 1.25em;
       }
 
       #content h1,
@@ -693,144 +696,145 @@ styles:
       #content h5,
       #content h6
       {
-        margin-top       : 2.5em;
-        line-height      : 1.25em;
+          margin-top        : 2.5em;
+          line-height       : 1.25em;
       }
 
       #content h1
       {
-        font-size        : 2.0em;
+          font-size         : 2.0em;
       }
 
       #content h2
       {
-        font-size        : 1.8em;
+          font-size         : 1.8em;
       }
 
       #content h3
       {
-        font-size        : 1.6em;
+          font-size         : 1.6em;
       }
 
       #content h4
       {
-        font-size        : 1.4em;
+          font-size         : 1.4em;
       }
 
       #content h5
       {
-        font-size        : 1.2em;
+          font-size         : 1.2em;
       }
 
       #content h6
       {
-        font-size        : 1.0em;
+          font-size         : 1.0em;
       }
 
     /* tables */
 
       table
       {
-        border-collapse  : collapse; /* no spacing between cell borders */
-        margin           : auto; /* center horizontally */
-        margin-top       : 1em;
+          border-collapse   : collapse; /* no spacing between cell borders */
+          margin            : auto; /* center horizontally */
+          margin-top        : 1em;
       }
 
       th,
       td
       {
-        padding          : 1em;
-        border           : 1px solid #bbb;
-        vertical-align   : top;
-        background-color : inherit;
+          padding           : 1em;
+          border            : 1px solid #bbb;
+          vertical-align    : top;
+          background-color  : inherit;
+          _background-color : #FFFFFF; /* for IE6 */
       }
 
       th
       {
-        background-color : #F5F5F5;
+          background-color  : #F5F5F5;
       }
 
     /* document structure */
 
       .nav
       {
-        text-align       : center;
-        margin-bottom    : 4em;
+          text-align        : center;
+          margin-bottom     : 4em;
       }
 
       #header
       {
-        text-align       : center;
+          text-align        : center;
       }
 
       .header_outside_above,
       #header,
       .header_outside_below
       {
-        margin-bottom    : 5em;
+          margin-bottom     : 5em;
       }
 
       .footer_outside_above,
       #footer,
       .footer_outside_below
       {
-        margin-top       : 5em;
+          margin-top        : 5em;
       }
 
       #header .header_inside_above,
       #footer .footer_inside_above
       {
-        margin-bottom    : 4em;
+          margin-bottom     : 4em;
       }
 
       #header .header_inside_below,
       #footer .footer_inside_below
       {
-        margin-top       : 4em;
+          margin-top        : 4em;
       }
 
       #Abstract
       {
-        margin-bottom    : 5em;
+          margin-bottom     : 5em;
       }
 
       #Contents li
       {
-        list-style-type  : none;
+          list-style-type   : none;
       }
 
       #Contents li ul
       {
-        padding-bottom   : 1em;
-        border-left      : thick solid #F5F5F5;
-        _border-left     : none; /* for IE6 */
+          padding-bottom    : 1em;
+          border-left       : thick solid #F5F5F5;
+          _border-left      : none; /* for IE6 */
       }
 
       #Contents li ul:hover
       {
-        border-color     : #DCDCDC;
+          border-color      : #DCDCDC;
       }
 
       #Contents > ul
       {
-        padding-left     : 1em;
+          padding-left      : 1em;
       }
 
       #References
       {
-        margin-top       : 5em;
+          margin-top        : 5em;
       }
 
       #footer
       {
-        border-top       : thick dotted #DCDCDC;
-        padding-top      : 1em;
-        text-align       : center;
+          border-top        : thick dotted #DCDCDC;
+          padding-top       : 1em;
+          text-align        : center;
       }
 
       #footer-credits
       {
-        margin-top       : 2em;
+          margin-top        : 2em;
       }
 
     /* document nodes */
@@ -838,22 +842,22 @@ styles:
       .part    > .title,
       .chapter > .title
       {
-        padding-bottom   : 0.5em;
+          padding-bottom    : 0.5em;
       }
 
       .part    > .title > big,
       .chapter > .title > big
       {
-        display          : block;
-        margin-top       : 0.25em;
+          display           : block;
+          margin-top        : 0.25em;
       }
 
       .part    .title big,
       .chapter .title big
       {
-        _display         : block; /* for IE6 */
-        _margin-top      : 0.25em; /* for IE6 */
-        _margin-bottom   : 0.75em; /* for IE6 */
+          _display          : block; /* for IE6 */
+          _margin-top       : 0.25em; /* for IE6 */
+          _margin-bottom    : 0.75em; /* for IE6 */
       }
 
       .paragraph > .title,
@@ -868,8 +872,8 @@ styles:
       .equation  > .title,
       .procedure > .title
       {
-        font-size        : large;
-        margin-top       : 2em;
+          font-size         : large;
+          margin-top        : 2em;
       }
 
       .paragraph .title,
@@ -884,9 +888,9 @@ styles:
       .equation  .title,
       .procedure .title
       {
-        _font-size       : large; /* for IE6 */
-        _font-weight     : bold; /* large is not bold in IE6 */
-        _margin-top      : 2em; /* for IE6 */
+          _font-size        : large; /* for IE6 */
+          _font-weight      : bold; /* large is not bold in IE6 */
+          _margin-top       : 2em; /* for IE6 */
       }
 
       .tip      ,
@@ -900,7 +904,7 @@ styles:
       .equation ,
       .procedure
       {
-        margin           : 3em;
+          margin            : 3em;
       }
 
       .tip       > .icon,
@@ -909,8 +913,8 @@ styles:
       .warning   > .icon,
       .important > .icon
       {
-        float            : left;
-        margin           : 0 1em 1em 0; /* top right bottom left */
+          float             : left;
+          margin            : 0 1em 1em 0; /* top right bottom left */
       }
 
       .tip       .icon,
@@ -919,63 +923,63 @@ styles:
       .warning   .icon,
       .important .icon
       {
-        _display         : none; /* IE6 cannot display embedded images */
+          _display          : none; /* IE6 cannot display embedded images */
       }
 
       .figure > .title
       {
-        text-align       : center;
+          text-align        : center;
       }
 
       .figure .title
       {
-        _text-align      : center; /* for IE6 */
+          _text-align       : center; /* for IE6 */
       }
 
       .figure > .content img
       {
-        display          : block;
-        margin           : auto;
+          display           : block;
+          margin            : auto;
       }
 
       .figure .content img
       {
-        _display         : block; /* for IE6 */
-        _margin          : auto; /* for IE6 */
+          _display          : block; /* for IE6 */
+          _margin           : auto; /* for IE6 */
       }
 
   screen: |
     body
     {
-      margin            : auto;
-      padding           : 0.5em;
-      max-width         : 36em;
+        margin              : auto;
+        max-width           : 36em;
+        padding             : 0.5em;
     }
 
     /* hyperlinks */
 
       a:link
       {
-        color           : #0000FF;
-        text-decoration : none;
+          color             : #0000FF;
+          text-decoration   : none;
       }
 
       a:visited
       {
-        color           : #800080;
-        text-decoration : none;
+          color             : #C71585;
+          text-decoration   : none;
       }
 
       a:hover
       {
-        color           : #FF0000;
-        text-decoration : underline;
+          color             : #FF0000;
+          text-decoration   : underline;
       }
 
       a:target
       {
-        color           : #FF0000;
-        font-weight     : bold;
+          color             : #FF0000;
+          font-weight       : bold;
       }
 
   print: |
@@ -983,15 +987,15 @@ styles:
 
       tt
       {
-        background-color  : inherit;
-        font-weight       : normal;
+          background-color  : inherit;
+          font-weight       : normal;
       }
 
       pre,
       .code
       {
-        border            : none;
-        background-color  : inherit;
+          border            : none;
+          background-color  : inherit;
       }
 
     /* headings */
@@ -1003,7 +1007,7 @@ styles:
       h5,
       h6
       {
-        font-weight       : normal;
+          font-weight       : normal;
       }
 
     /* hyperlinks */
@@ -1012,8 +1016,8 @@ styles:
       a:link,
       a:visited
       {
-        color             : #000000;
-        text-decoration   : none;
+          color             : #000000;
+          text-decoration   : none;
       }
 
       /* emphasize external and cross-reference hyperlinks */
@@ -1022,28 +1026,28 @@ styles:
       a.xref[title]:link,
       a.xref[title]:visited
       {
-        color             : #0000FF;
-        text-decoration   : underline;
-        font-weight       : bolder;
+          color             : #0000FF;
+          text-decoration   : underline;
+          font-weight       : bolder;
       }
 
       /* show URL of destination for external hyperlinks */
       a:not([href^="#"]):after
       {
-        content           : " " attr(href);
-        font-family       : Consolas, "Lucida Console", monospace;
+          content           : " " attr(href);
+          font-family       : Consolas, "Lucida Console", monospace;
       }
 
       /* show name of destination for cross-references */
       a.xref[title]:after
       {
-        content           : " " attr(title);
+          content           : " " attr(title);
       }
 
       a:after
       {
-        font-weight       : normal;
-        font-size         : smaller;
+          font-weight       : normal;
+          font-size         : smaller;
       }
 
     /* document structure */
@@ -1051,7 +1055,7 @@ styles:
       .nav,
       #lof
       {
-        display           : none;
+          display           : none;
       }
 
       #Contents,
@@ -1059,7 +1063,7 @@ styles:
       .chapter,
       #References
       {
-        page-break-before : always;
+          page-break-before : always;
       }
 
     /* document nodes */
@@ -1067,12 +1071,12 @@ styles:
       .part    > .title > big,
       .chapter > .title > big
       {
-        padding-bottom    : 0.5em;
+          padding-bottom    : 0.5em;
       }
 
       .part    .title big,
       .chapter .title big
       {
-        _padding-bottom   : 0.5em; /* for IE6 */
+          _padding-bottom   : 0.5em; /* for IE6 */
       }
 
