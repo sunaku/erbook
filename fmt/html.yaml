@@ -421,8 +421,17 @@ output: |
       <title><%= $title.to_s.to_inline_html %></title>
 
       <% if icons_used %>
-      <style type="text/css" media="all">
-      <!--
+      <style type="text/css" media="screen">
+        <% icons_used.each do |icon| %>
+        .<%= icon.css_class %> {
+          background-image: url(data:image/<%= icon.format %>;base64,<%= icon.data.tr("\n", '') %>);
+          background-repeat: no-repeat;
+          padding-left: 4em;
+        }
+        <% end %>
+      </style>
+
+      <style type="text/css" media="print">
         <% icons_used.each do |icon| %>
         .<%= icon.css_class %> {
           <%
@@ -436,8 +445,11 @@ output: |
           list-style-image: url(data:image/<%= icon.format %>;base64,<%= icon.data.tr("\n", '') %>);
           list-style-position: inside;
         }
+
+        .<%= icon.css_class %> li {
+          list-style-image: none;
+        }
         <% end %>
-      -->
       </style>
       <% end %>
 
