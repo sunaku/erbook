@@ -1,2 +1,6 @@
+Gerbil is an extensible document generator based on eRuby
+that outputs to any format you want: plain text, HTML,
+LaTeX, UNIX man page, your own custom format, and so on.
+
 Please see the ./doc/guide.html file in your web browser
 or visit http://gerbil.rubyforge.org for more information.
