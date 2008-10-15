@@ -14,15 +14,8 @@ require 'cgi'
 
 begin
   require 'rubygems'
-
-  # check for correct versions of the gems we use
-  begin
-    gem 'RedCloth', '~> 4.0'
-    gem 'coderay', '>= 0.7'
-  rescue LoadError => e
-    puts e
-    exit 1
-  end
+  gem 'RedCloth', '~> 4.0'
+  gem 'coderay', '>= 0.7'
 rescue LoadError
 end
 
@@ -60,8 +53,8 @@ class String
       end
 
       # ensure tables have a border: this *greatly* improves
-      # readability in text-mode web browsers like Lynx and w3m
-      html.gsub! %r/<table/, '\& border="1"'
+      # readability in text-based web browsers like w3m and lynx
+      html.gsub! %r/<table\b/, '\& border="1"'
 
       html.thru_coderay
     end
@@ -90,36 +83,13 @@ class String
   def thru_coderay
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
       atts, code = $2, CGI.unescapeHTML($3)
-
-      lang =
-        if $2 =~ /lang=('|")(.*?)\1/i
-          $2
-        else
-          :ruby
-        end
-
-      tag =
-        if code =~ /\n/
-          :pre
-        else
-          :code
-        end
+      lang = atts[/\blang=('|")(.*?)\1/i, 2] || :ruby
 
       html = CodeRay.scan(code, lang).html(:css => :style)
+      tag = if code =~ /\n/ then :pre else :code end
 
       %{<#{tag} class="code"#{atts}>#{html}</#{tag}>}
     end
-  end
-
-  # Returns a list of paragraphs in this string.
-  def paras
-    split(/(?:\r?\n){2}/)
-  end
-
-  # Joins the lines that compose a paragraph,
-  # for every paragraph in this string.
-  def para_join
-    paras.map! {|s| s.tr("\n", ' ') }.join("\n\n")
   end
 
   private
@@ -147,17 +117,17 @@ class String
         #      protect against this by doubling all single backslashes first
         body.gsub! %r/\\/, '\&\&'
 
-        orig =
+        original =
           if aVerbatim
             body
           else
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail
           end
 
-        esc = orig.digest
-        escapes[esc] = orig
+        escaped = original.digest
+        escapes[escaped] = original
 
-        esc
+        escaped
       end
     end
 
