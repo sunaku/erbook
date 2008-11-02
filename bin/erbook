@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Gerbil is an extensible document generator based on eRuby.
+# erbook is an extensible document generator based on eRuby.
 #
 # * STDIN will be read if no input files are specified.
 #
@@ -19,7 +19,7 @@ require 'yaml'
 require 'ostruct'
 
 $:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
-require 'gerbil'
+require 'erbook'
 
 # Prints the given message and raises the given error.
 def error aMessage, aError = $!
@@ -28,9 +28,11 @@ def error aMessage, aError = $!
 end
 
 class String
-  # Returns a SHA1 digest (in hex format) of this string.
-  def digest
-    Digest::SHA1.hexdigest(self)
+  # Returns a digest of this string that's not altered by String#to_html.
+  def digest_id
+    # XXX: surround all digits with alphabets so
+    #      Maruku doesn't change them into HTML
+    Digest::SHA2.hexdigest(self).gsub(/\d/, 'z\&z')
   end
 end
 
@@ -45,12 +47,13 @@ class Template < ERB
   # args:: Arguments for ERB::new
   def initialize aName, *args
     # silence the code-only <% ... %> directive, just like PHP does
-    args[0].gsub!(/^[ \t]*<%[^%=]((?!<%).)*?[^%]%>[ \t]*\r?\n/m) {|s| s.strip}
+    args[0].gsub!( /^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n/m ) { $1 }
 
-    args[3] = '@buffer'
+    # use @buffer to store the result of the ERB template
+    args[3] = :@buffer
     super(*args)
 
-    @filename = aName
+    self.filename = aName
   end
 
   # Renders this template within a fresh object that
@@ -80,7 +83,7 @@ class Template < ERB
     finish = @buffer.length
 
     if finish > start
-      @buffer.slice! start..-1
+      @buffer.slice! start .. -1
     else
       value
     end.to_s
@@ -92,7 +95,7 @@ class Node < OpenStruct
   undef type if respond_to? :type # deprecated in Ruby 1.8; removed in Ruby 1.9
 end
 
-# the basename() is for being launched by a RubyGems executable
+# XXX: the basename() is for being launched by a RubyGems executable
 if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
   # parse command-line options
     require 'optparse'
@@ -103,12 +106,12 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       # show program description located at the top of this file
       puts File.read(__FILE__).split(/^$\n/)[1].gsub(/^# ?/, '')
 
-      puts '', "Usage: #{File.basename $0} [Option...] Format|SpecFile [InputFile...]\n"
+      puts '', "Usage: #{File.basename $0} [Option...] {Format|SpecFile} [InputFile...]\n"
 
       puts '', "Option: #{opts}"
 
       puts '', "Format:"
-      Gerbil[:format_files].each do |file|
+      ERBook::FORMAT_FILES.each do |file|
         name = File.basename(file, '.yaml')
         desc = YAML.load_file(file)['desc'] rescue nil
         puts '    %-32s %s' % [name, desc]
@@ -118,15 +121,16 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     end
 
     opts.on '-v', '--version', 'show version information' do
-      puts "%s %s (%s) %s %s" % [
-        :name, :version, :release, :website, :home
-      ].map {|m| Gerbil[m] }
-
+      puts "project: #{ERBook::PROJECT}",
+           "version: #{ERBook::VERSION}",
+           "release: #{ERBook::RELEASE}",
+           "website: #{ERBook::WEBSITE}",
+           "install: #{ERBook::INSTALL_DIR}"
       exit
     end
 
     unindent = false
-    opts.on '-u', '--unindent', 'unindent node content' do unindent = true end
+    opts.on '-u', '--unindent', 'unindent hierarchically' do unindent = true end
 
     opts.parse! ARGV
 
@@ -135,7 +139,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       raise ArgumentError, "Format was not specified.  Run `{$0} -h` for help."
 
     File.file? specFile or
-      specFile = File.join(Gerbil[:format_home], specFile + '.yaml')
+      specFile = File.join(ERBook::FORMATS_DIR, specFile + '.yaml')
 
     begin
       specData = YAML.load_file(specFile).merge! \
@@ -246,14 +250,14 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
               # assign node content
               if block_given?
                 @stack.push node
-                content = content_from_block(node, &aBlock)
+                content = content_from_block(node, &aBlock).to_s
                 @stack.pop
 
-                digest = content.digest
+                digest = content.digest_id
                 @buffer << digest
               else
                 content = nil
-                digest = node.object_id.to_s.digest
+                digest = node.object_id.to_s.digest_id
               end
 
               node.content = content
@@ -272,7 +276,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
           # calculate node output
           source = "#{specFile}:nodes:#{n.type}:output"
           n.output = Template.new(source, nodeDefs[n.type]['output'].to_s.chomp).
-                     render_with(templateVars.merge(:@node => n))
+                     render_with(templateVars.merge :@node => n)
 
           # replace node with output
           if nodeDefs[n.type]['silent']

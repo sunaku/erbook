@@ -1,14 +1,14 @@
 <%
   # local variables for this document
-  pkg_url = File.join(Gerbil[:website], 'pkg')
-  src_url = File.join(Gerbil[:website], 'src')
-  ann_url = File.join(Gerbil[:website], 'ann')
-  dev_url = File.join(Gerbil[:website], 'dev')
-  log_url = File.join(Gerbil[:website], 'log')
+  pkg_url = File.join(ERBook::WEBSITE, 'pkg')
+  src_url = File.join(ERBook::WEBSITE, 'src')
+  ann_url = File.join(ERBook::WEBSITE, 'ann')
+  dev_url = File.join(ERBook::WEBSITE, 'dev')
+  log_url = File.join(ERBook::WEBSITE, 'log')
 
   # parameters for the HTML format
-  $title   = "#{Gerbil} user guide"
   $authors = { 'Suraj N. Kurapati' => 'http://snk.rubyforge.org' }
+  $title   = "#{ERBook::PROJECT} #{ERBook::VERSION} user manual"
   $feeds   = { ann_url => :rss }
   $logo    = '<img src="gerbil.png" alt="Gerbil logo" title="Gerbil logo"/>'
 %>
@@ -112,8 +112,8 @@
     * <tt>bin/</tt> - contains executable programs.
     ** <tt>gerbil</tt> - the main source code of Gerbil.
     * <tt>fmt/</tt> - contains the predefined set of format specification files (see <%= xref 'SpecFile' %>). If you ever need to install your custom format specification file globally, put it inside this directory.
-    <% Gerbil[:format_files].each do |file| %>
     ** <tt><%= File.basename(file) %></tt> - <%= YAML.load_file(file)['desc'] %>
+    <% ERBook::FORMAT_FILES.each do |file| %>
     <% end %>
     * <tt>lib/</tt> - Gerbil automatically adds this directory to Ruby's load path.
     ** <tt>gerbil.rb</tt> - project version information.
@@ -278,7 +278,7 @@
       <% end %>
 
       <% example "Output of HelloWorld format", "HelloWorld.output" do %>
-        <%= `ruby bin/gerbil doc/HelloWorld.spec doc/HelloWorld.input` %>
+        <%= `ruby bin/erbook -u doc/HelloWorld.spec doc/HelloWorld.input` %>
       <% end %>
     <% end %>
   <% end %>
@@ -286,7 +286,7 @@
 
 <% chapter "Usage" do %>
   <%=
-    `ruby bin/gerbil -h`.
+    `ruby bin/erbook -h`.
     gsub(/^ {4}(\S+(?:, \S+)?) {4,}(.*)$/, '| \1 | \2 |').  # option listing
     gsub(/-\w\b|--\w{2,}/, '<tt>\&</tt>').                  # option names
     gsub(/^\S+?:/, '<b>\&</b>')                             # section headings
@@ -423,10 +423,10 @@
       |_. Method declaration |_. Description |
       <%
         # load library for parsing method documentation
-        require 'gerbil/rdoc'
+        require 'erbook/rdoc'
 
         RDoc::TopLevel.parse @spec['code']
-        RDoc::TopLevel.parse_file 'lib/gerbil/html.rb'
+        RDoc::TopLevel.parse_file 'lib/erbook/html.rb'
         RDoc::TopLevel.all_methods.each do |m|
       %>
       | <code><%= m.decl %></code> | <noformat><%= m.comment_html %></noformat> |

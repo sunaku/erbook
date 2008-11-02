@@ -124,7 +124,7 @@ class String
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail
           end
 
-        escaped = original.digest
+        escaped = original.digest_id
         escapes[escaped] = original
 
         escaped

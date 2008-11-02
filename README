@@ -1,6 +1,8 @@
-Gerbil is an extensible document generator based on eRuby
-that outputs to any format you want: plain text, HTML,
-LaTeX, UNIX man page, your own custom format, and so on.
+erbook is an extensible document generator based on eRuby that
+emits plain text, HTML, LaTeX, UNIX man page, and your own
+custom format.  It is a light (200 lines of code), extensible
+(define your own custom formats), and flexible (your content
+is scriptable) alternative to DocBook, Deplate, and SiSU.
 
-Please see the ./doc/guide.html file in your web browser
-or visit http://gerbil.rubyforge.org for more information.
+Please see the ./doc/index.html file in your web browser or
+visit http://snk.tuxfamily.org/lib/erbook/ for more information.
