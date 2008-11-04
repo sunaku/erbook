@@ -8,12 +8,12 @@ and/or sell copies of the Software, and to permit persons to whom the
 Software is furnished to do so, subject to the following conditions:
 
 * All copies and substantial portions of the Software (the "Derivatives")
-  and their corresponding machine-readable source code (the "Code") must
-  include the above copyright notice and this permission notice.
+  and their corresponding machine-readable source code (the "Source")
+  must include the above copyright notice and this permission notice.
 
-* Upon distribution, the Derivatives must be accompanied by either the Code
-  or--provided that the Code is obtainable for no more than the cost of
-  distribution plus a nominal fee--information on how to obtain the Code.
+* Upon distribution, the Derivatives must be accompanied by either the Source
+  or---provided that the Source is obtainable for no more than the cost of
+  distribution plus a nominal fee---instructions for obtaining the Source.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
