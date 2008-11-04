@@ -49,7 +49,7 @@ nodes:
         <dt>number</dt>
         <dd><code><%= @node.number.inspect %></code></dd>
 
-        <dt>trace</td>
+        <dt>trace</dt>
         <dd><pre><%= @node.trace.join("\n") %></pre></dd>
 
         <dt>content</dt>
