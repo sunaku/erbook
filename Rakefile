@@ -49,8 +49,9 @@ require 'rake/gempackagetask'
     s.executables       = s.name
     s.has_rdoc          = true
 
-    s.add_dependency 'RedCloth' # needed by the default 'html' format
-    s.add_dependency 'coderay'  # needed by the default 'html' format
+    # gems needed by the default 'html' format
+    s.add_dependency 'maruku', '~> 0.5'
+    s.add_dependency 'coderay', '>= 0.7'
   end
 
   Rake::GemPackageTask.new(spec) do |pkg|

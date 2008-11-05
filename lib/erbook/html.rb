@@ -1,10 +1,9 @@
 # This file defines the String#to_html and String#to_inline_html
 # methods, which are invoked to transform plain text into HTML.
 #
-# This particular implementation features the
-# Textile formatting system (RedCloth),
-# syntax coloring (CodeRay), and smart source
-# code sizing (block versus inline display).
+# This particular implementation features the Markdown
+# formatting system via Maruku, syntax coloring via CodeRay,
+# and smart source code sizing (block versus inline display).
 #
 #--
 # Copyright 2006 Suraj N. Kurapati
@@ -14,13 +13,13 @@ require 'cgi'
 
 begin
   require 'rubygems'
-  gem 'RedCloth', '~> 4.0'
+  gem 'maruku', '~> 0.5'
   gem 'coderay', '>= 0.7'
 rescue LoadError
 end
 
 require 'coderay'
-require 'redcloth'
+require 'maruku'
 
 class String
   # The content of these HTML tags will be preserved while
@@ -39,41 +38,43 @@ class String
     to_html true
   end
 
+  # XXX: Maruku also defines String#to_html so we have to hack around it :-(
+  alias to_html_maruku to_html
+
   # Transforms this string into HTML while ensuring that the
   # result contains one or more block-level elements at the root.
   #
   # If aInline is true, then the resulting HTML will be an *inline* string.
   #
   def to_html aInline = false
-    protect(self, VERBATIM_TAGS, true) do |text|
-      html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_redcloth aInline }
+    # XXX: Maruku also defines String#to_html so we have to hack around it :-(
+    return to_html_maruku if caller.detect {|c| c =~ %r'/lib/maruku/output/' }
 
-      # collapse redundant <pre> elements -- a side effect of RedCloth
-      while html.gsub! %r{<pre>\s*(<(code|pre)[^>]*>.*?</\2>)\s*</pre>}m, '\1'
+    protect(self, VERBATIM_TAGS, true) do |text|
+      html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_maruku aInline }
+
+      # Markdown's "code spans" should really be "pre spans"
+      while html.gsub! %r{(<pre>)<code>(.*?)</code>(</pre>)}m, '\1\2\3'
       end
 
       # ensure tables have a border: this *greatly* improves
       # readability in text-based web browsers like w3m and lynx
       html.gsub! %r/<table\b/, '\& border="1"'
 
+      # add syntax coloring
       html.thru_coderay
     end
   end
 
-  # Returns the result of running this string through RedCloth.
+  # Returns the result of running this string through Maruku.
   #
-  # If aInline is true, then the resulting HTML will be an *inline* string.
+  # If aInline is true, then the resulting HTML will
+  # *not* be wrapped in a HTML paragraph element.
   #
-  def thru_redcloth aInline = false
-    red = RedCloth.new self
-
-    if aInline
-      red.lite_mode = true
-      red.hard_breaks = false
-      red.no_span_caps = true
-    end
-
-    red.to_html
+  def thru_maruku aInline = false
+    html = Maruku.new(self).to_html
+    html.sub! %r{\A<p>(.*)</p>\Z}, '\1' if aInline
+    html
   end
 
   # Adds syntax coloring to <code> elements in the given text.  If the
