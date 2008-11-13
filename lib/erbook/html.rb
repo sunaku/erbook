@@ -4,10 +4,6 @@
 # This particular implementation features the Markdown
 # formatting system via Maruku, syntax coloring via CodeRay,
 # and smart source code sizing (block versus inline display).
-#
-#--
-# Copyright 2006 Suraj N. Kurapati
-# See the file named LICENSE for details.
 
 require 'cgi'
 

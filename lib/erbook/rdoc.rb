@@ -1,7 +1,4 @@
 # Workaround for: `rdoc --fmt xml` does not dump information about methods.
-#--
-# Copyright 2007 Suraj N. Kurapati
-# See the file named LICENSE for details.
 
 require 'rdoc/rdoc'
 
