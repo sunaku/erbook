@@ -9,6 +9,7 @@ The images in this directory were generated from the following sources in the
 | caution.png   | scalable/status/dialog-warning.svg            |
 | note.png      | scalable/apps/accessories-text-editor.svg     |
 | tip.png       | scalable/status/dialog-information.svg        |
+| quote.png     | scalable/apps/internet-group-chat.png         |
 +---------------+-----------------------------------------------+
 
 See the file named LICENSE in this directory for copying conditions.

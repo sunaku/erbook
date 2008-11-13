@@ -103,7 +103,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
     opts = OptionParser.new('')
 
-    opts.on '-h', '--help', 'show usage information' do
+    show_help_and_exit = lambda do
       # show program description located at the top of this file
       puts File.read(__FILE__).split(/^$\n/).first.gsub(/^# ?/, '').sub(/\A.*$\n/, '')
 
@@ -121,6 +121,10 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       exit
     end
 
+    opts.on '-h', '--help', 'show usage information' do
+      show_help_and_exit.call
+    end
+
     opts.on '-v', '--version', 'show version information' do
       puts "project: #{ERBook::PROJECT}",
            "version: #{ERBook::VERSION}",
@@ -133,26 +137,30 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     unindent = false
     opts.on '-u', '--unindent', 'unindent hierarchically' do unindent = true end
 
-    opts.parse! ARGV
-
-  # load format specification file
-    specFile = ARGV.shift or
-      raise ArgumentError, "Format was not specified.  Run `{$0} -h` for help."
-
-    File.file? specFile or
-      specFile = File.join(ERBook::FORMATS_DIR, specFile + '.yaml')
-
     begin
-      specData = YAML.load_file(specFile).merge! \
-        :file => File.expand_path(specFile),
-        :name => File.basename(specFile).sub(/\..*?$/, '')
-
-    rescue Exception
-      error "Error when loading the format specification file (#{specFile.inspect})"
+      opts.parse! ARGV
+    rescue
+      show_help_and_exit.call
     end
 
-    if specData.key? 'code'
-      eval specData['code'].to_s, binding, "#{specFile}:code"
+  # load format specification file
+    spec_file = ARGV.shift or
+      raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
+
+    File.file? spec_file or
+      spec_file = File.join(ERBook::FORMATS_DIR, spec_file + '.yaml')
+
+    begin
+      spec_data = YAML.load_file(spec_file).merge! \
+        :file => File.expand_path(spec_file),
+        :name => File.basename(spec_file).sub(/\..*?$/, '')
+
+    rescue Exception
+      error "Error when loading the format specification file (#{spec_file.inspect})"
+    end
+
+    if spec_data.key? 'code'
+      eval spec_data['code'].to_s, binding, "#{spec_file}:code"
     end
 
   # load input document
@@ -194,14 +202,14 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       # create sandbox for input evaluation
         template = Template.new('INPUT', input)
 
-        templateVars = {
-          :@spec  => specData,
+        template_vars = {
+          :@spec  => spec_data,
           :@roots => roots = [], # root nodes of all trees
           :@nodes => nodes = [], # all nodes in the forest
           :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
         }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
-        nodeDefs = specData['nodes'].each_pair do |name, info|
+        node_defs = spec_data['nodes'].each_pair do |name, info|
           template.instance_eval %{
             #
             # XXX: using a string because define_method()
@@ -275,12 +283,12 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
         # replace nodes with output
         expander = lambda do |n, buf|
           # calculate node output
-          source = "#{specFile}:nodes:#{n.type}:output"
-          n.output = Template.new(source, nodeDefs[n.type]['output'].to_s.chomp).
-                     render_with(templateVars.merge :@node => n)
+          source = "#{spec_file}:nodes:#{n.type}:output"
+          n.output = Template.new(source, node_defs[n.type]['output'].to_s.chomp).
+                     render_with(template_vars.merge :@node => n)
 
           # replace node with output
-          if nodeDefs[n.type]['silent']
+          if node_defs[n.type]['silent']
             buf[n.digest] = ''
             buf = n.output
           else
@@ -299,8 +307,8 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
     end
 
   # produce output document
-    output = Template.new("#{specFile}:output", specData['output'].to_s).
-             render_with(templateVars.merge(:@content => document))
+    output = Template.new("#{spec_file}:output", spec_data['output'].to_s).
+             render_with(template_vars.merge(:@content => document))
 
     puts output
 end
