@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+#
 # erbook is an extensible document generator based on eRuby.
 #
 # * STDIN will be read if no input files are specified.
@@ -7,6 +7,7 @@
 # * If an error occurs, the input document will be printed to STDOUT
 #   so you can investigate line numbers in the error's stack trace.
 #   Otherwise, the final output document will be printed to STDOUT.
+#
 
 # Copyright 2007 Suraj N. Kurapati
 # See the file named LICENSE for details.
@@ -104,7 +105,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
 
     opts.on '-h', '--help', 'show usage information' do
       # show program description located at the top of this file
-      puts File.read(__FILE__).split(/^$\n/)[1].gsub(/^# ?/, '')
+      puts File.read(__FILE__).split(/^$\n/).first.gsub(/^# ?/, '').sub(/\A.*$\n/, '')
 
       puts '', "Usage: #{File.basename $0} [Option...] {Format|SpecFile} [InputFile...]\n"
 
