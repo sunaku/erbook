@@ -1,39 +1,34 @@
 require 'rake/clean'
-require 'rake/rdoctask'
-require 'rake/gempackagetask'
 
 # documentation
   desc "Build the documentation."
   task :doc
 
-  ##
-  # the manual
-  #
+  # user manual
+    src = 'doc/manual.erb'
+    dst = 'doc/index.html'
 
-  src = 'doc/manual.erb'
-  dst = 'doc/index.html'
+    task :manual => dst
+    task :doc => :manual
 
-  task :manual => dst
-  task :doc => :manual
+    file dst => src do
+      sh "ruby bin/erbook -u html #{src} > #{dst}"
+    end
 
-  task dst => src do
-    sh "ruby bin/erbook -u html #{src} > #{dst}"
-  end
+    CLOBBER.include dst
 
-  CLOBBER.include dst
-
-  ##
   # API reference
-  #
+    require 'rake/rdoctask'
 
-  Rake::RDocTask.new 'doc/api' do |t|
-    t.rdoc_dir = t.name
-    t.rdoc_files.exclude('_darcs', 'pkg').include('**/*.rb')
-  end
+    Rake::RDocTask.new 'doc/api' do |t|
+      t.rdoc_dir = t.name
+      t.rdoc_files.exclude('pkg').include('**/*.rb')
+    end
 
-  task :doc => 'doc/api'
+    task :doc => 'doc/api'
 
 # packaging
+  require 'rake/gempackagetask'
   require 'lib/erbook' # project info
 
   spec = Gem::Specification.new do |s|
@@ -60,15 +55,14 @@ require 'rake/gempackagetask'
     pkg.need_zip = true
   end
 
-# releasing
   desc 'Build release packages.'
-  task :dist => [:clobber, :doc] do
-    system 'rake package'
+  task :pack => [:clobber, :doc] do
+    sh $0, 'package'
   end
 
-# utility
+# releasing
   desc 'Upload to project website.'
-  task :upload => :doc do
+  task :website => :doc do
     sh "rsync -av doc/ ~/www/lib/#{spec.name}"
     sh "rsync -av doc/api/ ~/www/lib/#{spec.name}/api/ --delete"
   end

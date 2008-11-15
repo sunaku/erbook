@@ -303,9 +303,7 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
       error 'Error when processing the input document (INPUT)'
     end
 
-  # produce output document
-    output = Template.new("#{spec_file}:output", spec_data['output'].to_s).
-             render_with(template_vars.merge(:@content => document))
-
-    puts output
+  # emit output document
+    puts Template.new("#{spec_file}:output", spec_data['output'].to_s).
+         render_with(template_vars.merge(:@content => document))
 end
