@@ -1,8 +1,8 @@
 # Project and release information.
 module ERBook
   PROJECT = 'erbook'
-  VERSION = '3.1.0'
-  RELEASE = '2008-06-22'
+  VERSION = '4.0.0'
+  RELEASE = '2008-11-15'
   WEBSITE = 'http://snk.tuxfamily.org/lib/erbook'
   SUMMARY = 'Extensible document processor based on eRuby.'
   DISPLAY = PROJECT + ' ' + VERSION
