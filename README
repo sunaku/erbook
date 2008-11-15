@@ -1,7 +1,13 @@
-erbook is an extensible document generator based on eRuby that
-emits plain text, HTML, LaTeX, UNIX man page, and your own
-custom format.  It is a light (200 lines of code), extensible
-(define your own custom formats), and flexible (your content
+erbook : write books and documents in eRuby
+===========================================
+
+erbook is an extensible document processor that emits HTML
+(web page), LaTeX (PDF), man (UNIX manual page), plain text,
+and any document format you can imagine from eRuby templates
+that allow scripting and dynamic content generation.
+
+erbook is a light (200 source lines of code), extensible
+(create your own document formats), and flexible (your content
 is scriptable) alternative to DocBook, Deplate, and SiSU.
 
 Please see the ./doc/index.html file in your web browser or

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# erbook is an extensible document generator based on eRuby.
+# erbook is an extensible document processor based on eRuby.
 #
 # * STDIN will be read if no input files are specified.
 #

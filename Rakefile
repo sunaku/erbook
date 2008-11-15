@@ -40,9 +40,9 @@ require 'rake/gempackagetask'
   require 'lib/erbook' # project info
 
   spec = Gem::Specification.new do |s|
-    s.name              = 'erbook'
+    s.name              = ERBook::PROJECT
     s.version           = ERBook::VERSION
-    s.summary           = 'Extensible document generator based on eRuby.'
+    s.summary           = ERBook::SUMMARY
     s.description       = s.summary
     s.homepage          = ERBook::WEBSITE
     s.files             = FileList['**/*']
