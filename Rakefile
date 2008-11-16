@@ -37,6 +37,10 @@ require 'rake/gempackagetask'
   require 'lib/erbook' # project info
 
   spec = Gem::Specification.new do |s|
+    s.rubyforge_project = 'sunaku'
+    s.author, s.email   = File.read('LICENSE').
+                          scan(/Copyright \d+ (.*) <(.*?)>/).first
+
     s.name              = ERBook::PROJECT
     s.version           = ERBook::VERSION
     s.summary           = ERBook::SUMMARY
@@ -67,4 +71,13 @@ require 'rake/gempackagetask'
   task :upload => :doc do
     sh "rsync -av doc/ ~/www/lib/#{spec.name}"
     sh "rsync -av doc/api/ ~/www/lib/#{spec.name}/api/ --delete"
+  end
+
+  desc 'Publish release packages.'
+  task :publish => :pack do
+    sh 'rubyforge', 'login'
+
+    Dir['pkg/*.[a-z]*'].each do |pkg|
+      sh 'rubyforge', 'add_release', '--release_date', ERBook::RELEASE, spec.rubyforge_project, spec.name, spec.version.to_s, pkg
+    end
   end
