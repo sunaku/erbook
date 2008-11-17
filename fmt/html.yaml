@@ -2,7 +2,7 @@ desc: web page for the Internet
 
 code: |
   # load the String#to_html and String#to_inline_html methods
-  require 'erbook/html'
+  require 'erbook/to_html'
 
   class String
     # Transforms this UTF-8 string into HTML entities.

@@ -177,7 +177,7 @@
 
       * <tt>erbook/</tt>
 
-        * <tt>html.rb</tt> --- provides methods (see <%= xref "Text to HTML conversion" %>) for the <%= xref 'html' %> format.
+        * <tt>to_html.rb</tt> --- provides methods (see <%= xref "Text to HTML conversion" %>) for the <%= xref 'html' %> format.
 
         * <tt>rdoc.rb</tt> --- provides RDoc parse trees to Ruby code.
 
@@ -411,7 +411,7 @@
     Furthermore, the HTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of the [Mozilla](http://mozilla.org) and [Opera](http://www.opera.com/) family of web browsers will be pleasantly surprised to notice that all hyperlinks have been expanded to include their target URL next to the link text. So try using the "print preview" function of a graphical web browser to see how the HTML document will appear when printed.
 
     <% section "Text to HTML conversion" do %>
-      Inside the <tt>fmt/</tt> subdirectory of the erbook installation directory (see <%= xref "Manifest" %>), you will see a <tt>html.rb</tt> file. This file defines methods that transform text in an input document into HTML:
+      The <tt>lib/erbook/to_html.rb</tt> file inside erbook's installation directory (see <%= xref "Manifest" %>) defines the following methods:
 
       * `String#to_html` - Transforms this string into HTML while ensuring that the result contains one or more block-level elements at the root.
 
@@ -419,7 +419,7 @@
 
       The default implementation of the `String#to_html` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>html.rb</tt> file and adjust the source code of the default `String#to_html` and `String.to_inline_html` methods accordingly.
 
-      For example, if you replace the entire <tt>html.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
+      For example, if you replace the entire <tt>to_html.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
 
       <code>
       class String
@@ -524,7 +524,7 @@
         require 'erbook/rdoc'
 
         RDoc::TopLevel.parse @spec['code']
-        RDoc::TopLevel.parse_file 'lib/erbook/html.rb'
+        RDoc::TopLevel.parse_file 'lib/erbook/to_html.rb'
         RDoc::TopLevel.all_methods.each do |m|
           section "`#{m.decl}`" do
             m.comment_html
