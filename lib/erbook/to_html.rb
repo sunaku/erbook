@@ -121,7 +121,7 @@ class String
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail
           end
 
-        escaped = original.digest_id
+        escaped = ERBook.digest(original)
         escapes[escaped] = original
 
         escaped

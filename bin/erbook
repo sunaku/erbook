@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby -w
 #
 # erbook is an extensible document processor based on eRuby.
 #
@@ -9,301 +9,305 @@
 #   Otherwise, the final output document will be printed to STDOUT.
 #
 
-require 'erb'
-include ERB::Util
-
-require 'digest/sha1'
-require 'yaml'
-require 'ostruct'
-
 $:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'erbook'
 
-# Prints the given message and raises the given error.
-def error aMessage, aError = $!
-  STDERR.printf "%s:\n\n", aMessage
-  raise aError
-end
+module ERBook
+  # Prints the given message and raises the given error.
+  def ERBook.error aMessage, aError = $!
+    STDERR.printf "%s:\n\n", aMessage
+    raise aError
+  end
 
-class String
+  require 'digest/sha1'
   # Returns a digest of this string that's not altered by String#to_html.
-  def digest_id
+  def ERBook.digest aInput
     # XXX: surround all digits with alphabets so
     #      Maruku doesn't change them into HTML
-    Digest::SHA2.hexdigest(self).gsub(/\d/, 'z\&z')
-  end
-end
-
-class Template < ERB
-  # Returns the result of template evaluation thus far.
-  attr_reader :buffer
-
-  # aName:: String that replaces the ambiguous '(erb)' identifier in stack
-  #         traces, so that the user can better determine the source of an
-  #         error.
-  #
-  # args:: Arguments for ERB::new
-  def initialize aName, *args
-    # silence the code-only <% ... %> directive, just like PHP does
-    args[0].gsub!( /^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n/m ) { $1 }
-
-    # use @buffer to store the result of the ERB template
-    args[3] = :@buffer
-    super(*args)
-
-    self.filename = aName
+    Digest::SHA1.hexdigest(aInput.to_s).gsub(/\d/, 'z\&z')
   end
 
-  # Renders this template within a fresh object that
-  # is populated with the given instance variables.
-  def render_with aInstVars = {}
-    context = Object.new.instance_eval do
-      aInstVars.each_pair do |var, val|
-        instance_variable_set var, val
+  require 'erb'
+  class Template < ERB
+    include ERB::Util
+
+    # The result of template evaluation thus far.
+    attr_reader :buffer
+
+    # aSource:: String that replaces the ambiguous '(erb)'
+    #           identifier in stack traces, so that the user
+    #           can better determine the source of an error.
+    #
+    # aInput:: String containing eRuby directives.  This
+    #          string will be modified by this method!
+    #
+    # aSafeLevel:: See safe_level in ERB::new().
+    #
+    def initialize aSource, aInput, aSafeLevel = nil
+      # silence the code-only <% ... %> directive, just like PHP does
+      aInput.gsub!( /^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n/m ) { $1 }
+
+      # use @buffer to store the result of the ERB template
+      super aInput, aSafeLevel, nil, :@buffer
+
+      self.filename = aSource
+    end
+
+    # Renders this template within a fresh object that
+    # is populated with the given instance variables.
+    def render_with aInstVars = {}
+      context = Object.new.instance_eval do
+        aInstVars.each_pair do |var, val|
+          instance_variable_set var, val
+        end
+
+        binding
       end
 
-      binding
+      result(context)
     end
 
-    result(context)
+    private
+
+    # Returns the content that the given block wants to append to
+    # the buffer.  If the given block does not want to append to the
+    # buffer, then returns the result of invoking the given block.
+    def content_from_block *aBlockArgs
+      raise ArgumentError, 'block must be given' unless block_given?
+
+      head = @buffer.length
+      body = yield(*aBlockArgs) # this will do: @buffer << content
+      tail = @buffer.length
+
+      if tail > head
+        @buffer.slice! head..tail
+      else
+        body
+      end.to_s
+    end
   end
 
-  private
-
-  # Returns the content that the given block wants to append to
-  # the buffer.  If the given block does not want to append to the
-  # buffer, then returns the result of invoking the given block.
-  def content_from_block *aBlockArgs
-    raise ArgumentError, 'block must be given' unless block_given?
-
-    start = @buffer.length
-    value = yield(*aBlockArgs) # this will do: buffer << content
-    finish = @buffer.length
-
-    if finish > start
-      @buffer.slice! start .. -1
-    else
-      value
-    end.to_s
+  require 'ostruct'
+  class Node < OpenStruct
+    # deprecated in Ruby 1.8; removed in Ruby 1.9
+    undef id if respond_to? :id
+    undef type if respond_to? :type
   end
-end
 
-class Node < OpenStruct
-  undef id if respond_to? :id # deprecated in Ruby 1.8; removed in Ruby 1.9
-  undef type if respond_to? :type # deprecated in Ruby 1.8; removed in Ruby 1.9
-end
+  # XXX: the basename() is for being launched by a RubyGems executable
+  if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
+    require 'yaml'
 
-# XXX: the basename() is for being launched by a RubyGems executable
-if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
-  # parse command-line options
-    require 'optparse'
+    # parse command-line options
+      require 'optparse'
+      opts = OptionParser.new('')
 
-    opts = OptionParser.new('')
+      show_help_and_exit = lambda do
+        # show program description located at the top of this file
+        puts File.read(__FILE__).split(/^$\n/).first.gsub(/^# ?/, '').sub(/\A.*$\n/, '')
 
-    show_help_and_exit = lambda do
-      # show program description located at the top of this file
-      puts File.read(__FILE__).split(/^$\n/).first.gsub(/^# ?/, '').sub(/\A.*$\n/, '')
+        puts '', "Usage: #{File.basename $0} [Option...] {Format|SpecFile} [InputFile...]\n"
 
-      puts '', "Usage: #{File.basename $0} [Option...] {Format|SpecFile} [InputFile...]\n"
+        puts '', "Option: #{opts}"
 
-      puts '', "Option: #{opts}"
+        puts '', "Format:"
+        ERBook::FORMAT_FILES.each do |file|
+          name = File.basename(file, '.yaml')
+          desc = YAML.load_file(file)['desc'] rescue nil
+          puts '    %-32s %s' % [name, desc]
+        end
 
-      puts '', "Format:"
-      ERBook::FORMAT_FILES.each do |file|
-        name = File.basename(file, '.yaml')
-        desc = YAML.load_file(file)['desc'] rescue nil
-        puts '    %-32s %s' % [name, desc]
+        exit
       end
 
-      exit
-    end
+      opts.on '-h', '--help', 'show usage information' do
+        show_help_and_exit.call
+      end
 
-    opts.on '-h', '--help', 'show usage information' do
-      show_help_and_exit.call
-    end
+      opts.on '-v', '--version', 'show version information' do
+        puts "project: #{ERBook::PROJECT}",
+             "version: #{ERBook::VERSION}",
+             "release: #{ERBook::RELEASE}",
+             "website: #{ERBook::WEBSITE}",
+             "install: #{ERBook::INSTALL_DIR}"
+        exit
+      end
 
-    opts.on '-v', '--version', 'show version information' do
-      puts "project: #{ERBook::PROJECT}",
-           "version: #{ERBook::VERSION}",
-           "release: #{ERBook::RELEASE}",
-           "website: #{ERBook::WEBSITE}",
-           "install: #{ERBook::INSTALL_DIR}"
-      exit
-    end
+      unindent = false
+      opts.on '-u', '--unindent', 'unindent hierarchically' do unindent = true end
 
-    unindent = false
-    opts.on '-u', '--unindent', 'unindent hierarchically' do unindent = true end
+      begin
+        opts.parse! ARGV
+      rescue
+        show_help_and_exit.call
+      end
 
-    begin
-      opts.parse! ARGV
-    rescue
-      show_help_and_exit.call
-    end
+    # load format specification file
+      spec_file = ARGV.shift or
+        raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
 
-  # load format specification file
-    spec_file = ARGV.shift or
-      raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
+      File.file? spec_file or
+        spec_file = File.join(ERBook::FORMATS_DIR, spec_file + '.yaml')
 
-    File.file? spec_file or
-      spec_file = File.join(ERBook::FORMATS_DIR, spec_file + '.yaml')
+      begin
+        spec_data = YAML.load_file(spec_file)
+        spec_data[:file] = File.expand_path(spec_file)
+        spec_data[:name] = File.basename(spec_file).sub(/\..*?$/, '')
 
-    begin
-      spec_data = YAML.load_file(spec_file).merge! \
-        :file => File.expand_path(spec_file),
-        :name => File.basename(spec_file).sub(/\..*?$/, '')
-
-    rescue Exception
-      error "Error when loading the format specification file (#{spec_file.inspect})"
-    end
-
-    if spec_data.key? 'code'
-      eval spec_data['code'].to_s, binding, "#{spec_file}:code"
-    end
-
-  # load input document
-    input = ARGF.read
-
-    begin
-      # expand all "include" directives in the input
-        begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
-          "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
+        if spec_data.key? 'code'
+          eval spec_data['code'].to_s, TOPLEVEL_BINDING, "#{spec_file}:code"
         end
 
-      # unindent node content
-        if unindent
-          tags = input.scan(/<%(?:.(?!<%))*?%>/m)
-          margins = []
-          result = ''
+      rescue Exception
+        error "Error when loading the format specification file (#{spec_file.inspect})"
+      end
 
-          buffer = input
-          tags.each do |tag|
-            chunk, buffer = buffer.split(tag, 2)
-            chunk << tag
+    # load input document
+      input = ARGF.read
 
-            # perform unindentation
-            result << chunk.gsub( /^#{margins.last}/, '' )
-
-            case tag
-            when /<%[^%=].*?\bdo\b.*?%>/m
-              margins.push buffer[/^[ \t]*(?=\S)/]
-
-            when /<%\s*end\s*%>/m
-              margins.pop
-            end
-          end
-          result << buffer
-
-          input = result
-        end
-
-      # create sandbox for input evaluation
-        template = Template.new('INPUT', input)
-
-        template_vars = {
-          :@spec  => spec_data,
-          :@roots => roots = [], # root nodes of all trees
-          :@nodes => nodes = [], # all nodes in the forest
-          :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
-        }.each_pair {|k,v| template.instance_variable_set(k, v) }
-
-        node_defs = spec_data['nodes'].each_pair do |name, info|
-          template.instance_eval %{
-            #
-            # XXX: using a string because define_method()
-            #      does not accept a block until Ruby 1.9
-            #
-            def #{name} *aArgs, &aBlock
-              node = Node.new(
-                :type => #{name.inspect},
-                :args => aArgs,
-                :trace => caller,
-                :children => []
-              )
-              @nodes << node
-              @types[node.type] << node
-
-              # calculate occurrence number for this node
-              if #{info['number']}
-                @count ||= Hash.new {|h,k| h[k] = []}
-                node.number = (@count[node.type] << node).length
-              end
-
-              @stack ||= []
-
-              # assign node family
-              if parent = @stack.last
-                parent.children << node
-                node.parent = parent
-                node.depth = parent.depth.next
-
-                # calculate latex-style index number for this node
-                if #{info['index']}
-                  branches = parent.children.select {|n| n.index}
-                  node.index = [parent.index, branches.length.next].join('.')
-                end
-              else
-                @roots << node
-                node.parent = nil
-                node.depth = 0
-
-                # calculate latex-style index number for this node
-                if #{info['index']}
-                  branches = @roots.select {|n| n.index}
-                  node.index = branches.length.next.to_s
-                end
-              end
-
-              # assign node content
-              if block_given?
-                @stack.push node
-                content = content_from_block(node, &aBlock).to_s
-                @stack.pop
-
-                digest = content.digest_id
-                @buffer << digest
-              else
-                content = nil
-                digest = node.object_id.to_s.digest_id
-              end
-
-              node.content = content
-              node.digest = digest
-
-              digest
-            end
-          },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
-        end
-
-      # build the document tree
-        document = template.instance_eval { result(binding) }
-
-        # replace nodes with output
-        expander = lambda do |n, buf|
-          # calculate node output
-          source = "#{spec_file}:nodes:#{n.type}:output"
-          n.output = Template.new(source, node_defs[n.type]['output'].to_s.chomp).
-                     render_with(template_vars.merge :@node => n)
-
-          # replace node with output
-          if node_defs[n.type]['silent']
-            buf[n.digest] = ''
-            buf = n.output
-          else
-            buf[n.digest] = n.output
+      begin
+        # expand all "include" directives in the input
+          begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
+            "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
           end
 
-          # repeat for all child nodes
-          n.children.each {|c| expander[c, buf] }
-        end
+        # unindent node content
+          if unindent
+            tags = input.scan(/<%(?:.(?!<%))*?%>/m)
+            margins = []
+            result = ''
 
-        roots.each {|n| expander[n, document] }
+            buffer = input
+            tags.each do |tag|
+              chunk, buffer = buffer.split(tag, 2)
+              chunk << tag
 
-    rescue Exception
-      puts input # so the user can debug the line numbers in the stack trace
-      error 'Error when processing the input document (INPUT)'
-    end
+              # perform unindentation
+              result << chunk.gsub(/^#{margins.last}/, '')
 
-  # emit output document
-    puts Template.new("#{spec_file}:output", spec_data['output'].to_s).
-         render_with(template_vars.merge(:@content => document))
+              case tag
+              when /<%[^%=].*?\bdo\b.*?%>/m
+                margins.push buffer[/^[ \t]*(?=\S)/]
+
+              when /<%\s*end\s*%>/m
+                margins.pop
+              end
+            end
+            result << buffer
+
+            input = result
+          end
+
+        # create sandbox for input evaluation
+          template = Template.new('INPUT', input)
+
+          template_vars = {
+            :@spec  => spec_data,
+            :@roots => roots = [], # root nodes of all trees
+            :@nodes => nodes = [], # all nodes in the forest
+            :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
+          }.each_pair {|k,v| template.instance_variable_set(k, v) }
+
+          node_defs = spec_data['nodes'].each_pair do |name, info|
+            template.instance_eval %{
+              #
+              # XXX: using a string because define_method()
+              #      does not accept a block until Ruby 1.9
+              #
+              def #{name} *aArgs, &aBlock
+                node = Node.new(
+                  :type => #{name.inspect},
+                  :args => aArgs,
+                  :trace => caller,
+                  :children => []
+                )
+                @nodes << node
+                @types[node.type] << node
+
+                # calculate occurrence number for this node
+                if #{info['number']}
+                  @count ||= Hash.new {|h,k| h[k] = []}
+                  node.number = (@count[node.type] << node).length
+                end
+
+                @stack ||= []
+
+                # assign node family
+                if parent = @stack.last
+                  parent.children << node
+                  node.parent = parent
+                  node.depth = parent.depth.next
+
+                  # calculate latex-style index number for this node
+                  if #{info['index']}
+                    branches = parent.children.select {|n| n.index}
+                    node.index = [parent.index, branches.length.next].join('.')
+                  end
+                else
+                  @roots << node
+                  node.parent = nil
+                  node.depth = 0
+
+                  # calculate latex-style index number for this node
+                  if #{info['index']}
+                    branches = @roots.select {|n| n.index}
+                    node.index = branches.length.next.to_s
+                  end
+                end
+
+                # assign node content
+                if block_given?
+                  @stack.push node
+                  content = content_from_block(node, &aBlock)
+                  @stack.pop
+
+                  digest = ERBook.digest(content)
+                  self.buffer << digest
+                else
+                  content = nil
+                  digest = ERBook.digest(node.object_id)
+                end
+
+                node.content = content
+                node.digest = digest
+
+                digest
+              end
+            },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
+          end
+
+        # build the document tree
+          document = template.instance_eval { result(binding) }
+
+          # replace nodes with output
+          expander = lambda do |n, buf|
+            # calculate node output
+            source = "#{spec_file}:nodes:#{n.type}:output"
+            n.output = Template.new(
+              source, node_defs[n.type]['output'].to_s.chomp).
+              render_with(template_vars.merge(:@node => n))
+
+            # replace node with output
+            if node_defs[n.type]['silent']
+              buf[n.digest] = ''
+              buf = n.output
+            else
+              buf[n.digest] = n.output
+            end
+
+            # repeat for all child nodes
+            n.children.each {|c| expander[c, buf] }
+          end
+
+          roots.each {|n| expander[n, document] }
+
+      rescue Exception
+        puts input # so the user can debug the line numbers in the stack trace
+        error 'Error when processing the input document (INPUT)'
+      end
+
+    # emit output document
+      puts Template.new("#{spec_file}:output", spec_data['output'].to_s).
+           render_with(template_vars.merge(:@content => document))
+  end
 end
