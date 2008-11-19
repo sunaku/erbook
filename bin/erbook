@@ -2,11 +2,12 @@
 #
 # erbook is an extensible document processor based on eRuby.
 #
-# * STDIN will be read if no input files are specified.
+# * The standard input stream will be read if an input file is not specified.
 #
-# * If an error occurs, the input document will be printed to STDOUT
-#   so you can investigate line numbers in the error's stack trace.
-#   Otherwise, the final output document will be printed to STDOUT.
+# * The final output document will be written to the standard output stream.
+#
+# * If an error occurs, the input document will be written to the standard
+#   output stream, so that you can investigate line numbers in the error.
 #
 # Usage:
 #
@@ -199,15 +200,15 @@ module ERBook
             :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
           }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
-          node_defs = spec_data['nodes'].each_pair do |name, info|
+          node_defs = spec_data['nodes'].each_pair do |type, defn|
             template.instance_eval %{
               #
               # XXX: using a string because define_method()
               #      does not accept a block until Ruby 1.9
               #
-              def #{name} *aArgs, &aBlock
+              def #{type} *aArgs, &aBlock
                 node = Node.new(
-                  :type => #{name.inspect},
+                  :type => #{type.inspect},
                   :args => aArgs,
                   :trace => caller,
                   :children => []
@@ -216,7 +217,7 @@ module ERBook
                 @types[node.type] << node
 
                 # calculate occurrence number for this node
-                if #{info['number']}
+                if #{defn['number']}
                   @count ||= Hash.new {|h,k| h[k] = []}
                   node.number = (@count[node.type] << node).length
                 end
@@ -230,7 +231,7 @@ module ERBook
                   node.depth = parent.depth.next
 
                   # calculate latex-style index number for this node
-                  if #{info['index']}
+                  if #{defn['index']}
                     branches = parent.children.select {|n| n.index}
                     node.index = [parent.index, branches.length.next].join('.')
                   end
@@ -240,7 +241,7 @@ module ERBook
                   node.depth = 0
 
                   # calculate latex-style index number for this node
-                  if #{info['index']}
+                  if #{defn['index']}
                     branches = @roots.select {|n| n.index}
                     node.index = branches.length.next.to_s
                   end

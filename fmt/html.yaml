@@ -71,17 +71,14 @@ code: |
 
     def title_link aTitle = nil
       here_link here_frag, aTitle || title_html
-      # %{#{aTitle || title_html}&nbsp;&nbsp;&nbsp;&nbsp;#{here_link here_frag, '&para;'}&nbsp;#{list_link here_frag, list_frag, '&equiv;'}}
     end
 
     def index_link
       list_link here_frag, list_frag, index
-      # %{<span id="#{here_frag}">#{index}</span>}
     end
 
     def number_link
       list_link here_frag, list_frag, [type_label, number].compact.join(' ')
-      # %{<span id="#{here_frag}">#{[type_label, number].compact.join(' ')}</span>}
     end
 
     def number_and_title_link
