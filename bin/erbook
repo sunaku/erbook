@@ -46,9 +46,41 @@ module ERBook
     #
     # aSafeLevel:: See safe_level in ERB::new().
     #
-    def initialize aSource, aInput, aSafeLevel = nil
+    def initialize aSource, aInput, aUnindent = false, aSafeLevel = nil
+      # convert "% at beginning of line" usage into <% normal %> usage
+      aInput.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
+      aInput.gsub! %r{^([ \t]*)%%}, '\1%'
+
       # silence the code-only <% ... %> directive, just like PHP does
-      aInput.gsub!( /^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n/m ) { $1 }
+      aInput.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
+
+      # unindent node content hierarchically
+      if aUnindent
+        tags = aInput.scan(/<%(?:.(?!<%))*?%>/m)
+        margins = []
+        result = []
+
+        buffer = aInput
+        tags.each do |tag|
+          chunk, buffer = buffer.split(tag, 2)
+          chunk << tag
+
+          # perform unindentation
+          result << chunk.gsub(/^#{margins.last}/, '')
+
+          # prepare for next unindentation
+          case tag
+          when /<%[^%=].*?\bdo\b.*?%>/m
+            margins.push buffer[/^[ \t]*(?=\S)/]
+
+          when /<%\s*end\s*%>/m
+            margins.pop
+          end
+        end
+        result << buffer
+
+        aInput = result.join
+      end
 
       # use @buffer to store the result of the ERB template
       super aInput, aSafeLevel, nil, :@buffer
@@ -163,35 +195,8 @@ module ERBook
             "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
           end
 
-        # unindent node content
-          if opts[:unindent]
-            tags = input.scan(/<%(?:.(?!<%))*?%>/m)
-            margins = []
-            result = ''
-
-            buffer = input
-            tags.each do |tag|
-              chunk, buffer = buffer.split(tag, 2)
-              chunk << tag
-
-              # perform unindentation
-              result << chunk.gsub(/^#{margins.last}/, '')
-
-              case tag
-              when /<%[^%=].*?\bdo\b.*?%>/m
-                margins.push buffer[/^[ \t]*(?=\S)/]
-
-              when /<%\s*end\s*%>/m
-                margins.pop
-              end
-            end
-            result << buffer
-
-            input = result
-          end
-
         # create sandbox for input evaluation
-          template = Template.new('INPUT', input)
+          template = Template.new('INPUT', input, opts[:unindent])
 
           template_vars = {
             :@spec  => spec_data,

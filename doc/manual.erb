@@ -236,7 +236,23 @@
 
         <%%= node_type node_argument1, node_argument2, ... %>
 
-      Technically, nodes are Ruby method invocations composed of the following:
+    Alternatively, you may omit the leading "<" and trailing "%>" characters from an eRuby directive if the directive spans an _entire_ line.  So, the above examples become:
+
+        %% node_type node_argument1, node_argument2, ... do |node_object|
+          node_content
+        %% end
+
+    And:
+
+        %% node_type node_argument1, node_argument2, ... do
+          node_content
+        %% end
+
+    And:
+
+        %%= node_type node_argument1, node_argument2, ...
+
+    Technically, nodes are Ruby method invocations composed of the following:
 
     |               Component               |                                        Description                                         |
     |               ---------               |                                        -----------                                         |
