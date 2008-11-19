@@ -33,8 +33,6 @@ module ERBook
 
   require 'erb'
   class Template < ERB
-    include ERB::Util
-
     # The result of template evaluation thus far.
     attr_reader :buffer
 

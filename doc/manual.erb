@@ -152,7 +152,7 @@
             ruby bin/erbook -v
 
     If the installation was successful, then you will see output like this:
-    <pre><%=h `ruby bin/erbook -v` %></pre>
+    <pre><%= verbatim `ruby bin/erbook -v` %></pre>
 
     Otherwise, you can <%= xref "License", "contact the author" %> for help.
   <% end %>
@@ -351,11 +351,11 @@
       4.  Examine the <tt>HelloWorld.output</tt> file to your satisfaction!
 
       <% example "HelloWorld format specification file", "HelloWorld.spec" do %>
-        <code lang="rhtml"><%=h File.read('doc/HelloWorld.spec') %></code>
+        <code lang="rhtml"><%= verbatim File.read('doc/HelloWorld.spec') %></code>
       <% end %>
 
       <% example "Input document for HelloWorld format", "HelloWorld.input" do %>
-        <code lang="rhtml"><%=h File.read('doc/HelloWorld.input') %></code>
+        <code lang="rhtml"><%= verbatim File.read('doc/HelloWorld.input') %></code>
       <% end %>
 
       <% example "Output of HelloWorld format", "HelloWorld.output" do %>
@@ -477,15 +477,15 @@
 
           For example, here is some source code _without_ the `lang` attribute:
 
-          <code><%=h sampleCode %></code>
+          <code><%= verbatim sampleCode %></code>
 
           And here is the same source code with a `lang="c"` attribute:
 
-          <code lang="c"><%=h sampleCode %></code>
+          <code lang="c"><%= verbatim sampleCode %></code>
 
           And here is the same source code with a `lang="html"` attribute:
 
-          <code lang="html"><%=h sampleCode %></code>
+          <code lang="html"><%= verbatim sampleCode %></code>
         <% end %>
       <% end %>
 

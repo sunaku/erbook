@@ -123,6 +123,11 @@ code: |
     end
   end
 
+  # Protects the given content from HTML interpretation.
+  def verbatim aContent
+    ERB::Util.html_escape aContent
+  end
+
   def here_link aHereFrag, aLabel
     %{<a class="here" title="Permanent link to this section" href="##{aHereFrag}">#{aLabel}</a>}
   end
@@ -134,7 +139,7 @@ code: |
   # Returns a hyperlink to the given URL of
   # the given label and mouse-hover title.
   def link aUrl, aLabel = aUrl, aTitle = nil
-    %{<a href="#{h aUrl}"#{%{ title="#{aTitle}"} if aTitle}>#{aLabel}</a>}
+    %{<a href="#{aUrl}"#{%{ title="#{aTitle}"} if aTitle}>#{aLabel}</a>}
   end
 
   # Encodes the given input in base64 format.
