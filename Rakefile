@@ -45,6 +45,9 @@ require 'rake/clean'
     s.executables       = s.name
     s.has_rdoc          = true
 
+    # gems needed by the main program executable
+    s.add_dependency 'trollop', '~> 1.10'
+
     # gems needed by the default 'html' format
     s.add_dependency 'maruku', '~> 0.5'
     s.add_dependency 'coderay', '>= 0.7'

@@ -124,15 +124,16 @@
   <% section "Requirements" do %>
     Your system needs the following software to run erbook.
 
-    |               Software                |                           Notes                            |
-    |               --------                |                           -----                            |
-    |     [Ruby](http://ruby-lang.org)      |                 Version 1.8.x is required.                 |
-    | [Maruku](http://maruku.rubyforge.org) | Required by the <%= xref 'html', "default HTML format" %>. |
-    | [CodeRay](http://coderay.rubychan.de) | Required by the <%= xref 'html', "default HTML format" %>. |
+    |                Software                 |        Description         |                           Notes                            |
+    |                --------                 |        -----------         |                           -----                            |
+    |      [Ruby](http://ruby-lang.org)       | Ruby language interpreter  |                 Version 1.8.x is required.                 |
+    |  [Maruku](http://maruku.rubyforge.org)  |     Markdown processor     | Required by the <%= xref 'html', "default HTML format" %>. |
+    |  [CodeRay](http://coderay.rubychan.de)  |     Syntax highlighter     | Required by the <%= xref 'html', "default HTML format" %>. |
+    | [Trollop](http://trollop.rubyforge.org) | Command-line option parser |            Required by the *erbook* executable.            |
 
     If your system has [RubyGems](http://rubygems.org), then you can install Maruku and CodeRay by running the following command:
 
-        gem install maruku coderay
+        gem install trollop maruku coderay
 
   <% end %>
 
@@ -368,14 +369,14 @@
   <% section "Command-line invocation" do %>
     <%=
       `ruby bin/erbook -h`.
-      gsub(/^ {4}(\S+(?:, \S+)?) {4,}(.*)$/, "\\1\n: \\2\n"). # option listing
-      gsub(/-\w\b|--\w{2,}/, '<tt>\&</tt>').                  # option names
-      gsub(/^\S+?: */, "<b>\\&</b>\n").                       # section headings
-      sub(/^erbook \[.*/, '<pre>\&</pre>')
+      gsub(/^ +(.*?):(.*)$/, "\\1\n: \\2\n").   # option listing
+      gsub(/-\w\b|--\w{2,}/, '<tt>\&</tt>').    # option names
+      gsub(/^\S+?: */, "<b>\\&</b>\n").         # section headings
+      gsub(/^ *(erbook \[.*)/, '<pre>\1</pre>') # usage syntax
     %>
 
     <% paragraph "Command-line arguments" do %>
-      As the <tt>{Format|SpecFile}</tt> token in the usage syntax above denotes, erbook requires its first command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>.
+      The <tt>(Format|SpecFile)</tt> token in the above usage syntax above denotes that erbook requires its first command-line argument to be either (1) the name of a predefined format or (2) the path to a <%= xref 'SpecFile', 'format specification file' %>.
 
       Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the erbook installation directory (see <%= xref "Manifest" %>).
     <% end %>

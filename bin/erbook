@@ -8,6 +8,10 @@
 #   so you can investigate line numbers in the error's stack trace.
 #   Otherwise, the final output document will be printed to STDOUT.
 #
+# Usage:
+#
+#   erbook [Option...] (Format|SpecFile) [InputFile...]
+#
 
 $:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'erbook'
@@ -99,47 +103,36 @@ module ERBook
     require 'yaml'
 
     # parse command-line options
-      require 'optparse'
-      opts = OptionParser.new('')
+      begin require 'rubygems' rescue LoadError end
+      require 'trollop'
 
-      show_help_and_exit = lambda do
+      opts = Trollop::options do
         # show program description located at the top of this file
-        puts File.read(__FILE__).split(/^$\n/).first.gsub(/^# ?/, '').sub(/\A.*$\n/, '')
+        banner File.read(__FILE__)[/\A.*?^$\n/m].
+               gsub(/^# ?/, '').sub(/\A.*?\n/, '')
+        banner ''
 
-        puts '', "Usage: #{File.basename $0} [Option...] {Format|SpecFile} [InputFile...]\n"
-
-        puts '', "Option: #{opts}"
-
-        puts '', "Format:"
+        # show list of available formats
+        banner 'Format:'
         ERBook::FORMAT_FILES.each do |file|
           name = File.basename(file, '.yaml')
           desc = YAML.load_file(file)['desc'] rescue nil
-          puts '    %-32s %s' % [name, desc]
+          banner '%16s:   %s' % [name, desc]
         end
+        banner ''
 
-        exit
-      end
+        # show list of command-line options
+        banner 'Option:'
+        opt :unindent, 'Unindent node content hierarchically'
 
-      opts.on '-h', '--help', 'show usage information' do
-        show_help_and_exit.call
-      end
-
-      opts.on '-v', '--version', 'show version information' do
-        puts "project: #{ERBook::PROJECT}",
-             "version: #{ERBook::VERSION}",
-             "release: #{ERBook::RELEASE}",
-             "website: #{ERBook::WEBSITE}",
-             "install: #{ERBook::INSTALL_DIR}"
-        exit
-      end
-
-      unindent = false
-      opts.on '-u', '--unindent', 'unindent hierarchically' do unindent = true end
-
-      begin
-        opts.parse! ARGV
-      rescue
-        show_help_and_exit.call
+        # show program version information
+        version [
+          "project: #{ERBook::PROJECT}",
+          "version: #{ERBook::VERSION}",
+          "release: #{ERBook::RELEASE}",
+          "website: #{ERBook::WEBSITE}",
+          "install: #{ERBook::INSTALL_DIR}",
+        ].join("\n")
       end
 
     # load format specification file
@@ -172,7 +165,7 @@ module ERBook
           end
 
         # unindent node content
-          if unindent
+          if opts[:unindent]
             tags = input.scan(/<%(?:.(?!<%))*?%>/m)
             margins = []
             result = ''
