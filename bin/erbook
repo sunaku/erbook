@@ -328,7 +328,10 @@ module ERBook
 
           roots.each {|n| expander[n, document] }
 
-      rescue Exception
+      rescue Exception => e
+        # omit erbook internals from the stack trace
+        e.backtrace.reject! {|t| t =~ /^#{$0}:\d+/ } unless $DEBUG
+
         puts input # so the user can debug the line numbers in the stack trace
         error "Error when processing the input document (#{input_file})"
       end
