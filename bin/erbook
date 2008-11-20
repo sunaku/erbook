@@ -11,7 +11,8 @@
 #
 # Usage:
 #
-#   erbook [Option...] (Format|SpecFile) [InputFile...]
+#   erbook [Option...] FormatName [InputFile]
+#   erbook [Option...] FormatFile [InputFile]
 #
 
 $:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
@@ -144,7 +145,7 @@ module ERBook
         banner ''
 
         # show list of available formats
-        banner 'Format:'
+        banner 'FormatName:'
         ERBook::FORMAT_FILES.each do |file|
           name = File.basename(file, '.yaml')
           desc = YAML.load_file(file)['desc'] rescue nil
@@ -187,16 +188,45 @@ module ERBook
       end
 
     # load input document
-      input = ARGF.read
+      if input_file = ARGV.shift
+        input = File.read input_file
+      else
+        input_file, input = 'STDIN', STDIN.read
+      end
 
       begin
         # expand all "include" directives in the input
           begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
-            "<%#begin(#{name = $1.inspect})%>#{File.read $1}<%#end(#{name})%>"
+            file, line = $1, $`.count("\n").next
+
+            # provide more accurate stack trace for
+            # errors originating from included files.
+            #
+            # NOTE: eRuby does NOT seem to provide line numbers for trace
+            #       entries that are deeper than the input document itself
+            #
+            "<%
+              begin
+                %>#{File.read file}<%
+              rescue Exception => err
+                bak = err.backtrace
+
+                # set the input document's originating line number to
+                # where this file was included in the input document
+                top = bak.find {|t| t =~ /#{/#{input_file}/}:\\d+$/ }
+                top.sub! %r/\\d+$/, '#{line}'
+
+                # add a stack trace entry mentioning this included file
+                ins = bak.index top
+                bak.insert ins, #{file.inspect}
+
+                raise err
+              end
+            %>"
           end
 
         # create sandbox for input evaluation
-          template = Template.new('INPUT', input, opts[:unindent])
+          template = Template.new(input_file, input, opts[:unindent])
 
           template_vars = {
             :@spec  => spec_data,
@@ -300,7 +330,7 @@ module ERBook
 
       rescue Exception
         puts input # so the user can debug the line numbers in the stack trace
-        error 'Error when processing the input document (INPUT)'
+        error "Error when processing the input document (#{input_file})"
       end
 
     # emit output document
