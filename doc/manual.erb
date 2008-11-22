@@ -5,7 +5,10 @@
   # The nodes in this file are hierarchically indented.  As a result, you must
   # process this file using the "--unindent" option to obtain proper output:
   #
-  #   erbook --unindent html manual.erb > manual.html
+  #   erbook --unindent xhtml manual.erb > manual.xhtml
+  #
+  # Notice the '.xhtml' file extension in the output file name.  Without that,
+  # most web browsers will not display the embedded graphics in the output file.
   #
   ##
 
@@ -16,14 +19,14 @@
   dev_url = File.join(ERBook::WEBSITE, 'dev')
   log_url = File.join(ERBook::WEBSITE, 'log')
 
-  # parameters for the HTML format
+  # parameters for the XHTML format
   $title   = "#{ERBook::DISPLAY} user manual"
   $authors = { 'Suraj N. Kurapati' => 'http://snk.tuxfamily.org' }
   $feeds   = { ann_url => :rss }
-  $logo    = '![erbook logo](erbook.png)'.to_html
+  $logo    = '![erbook logo](erbook.png)'.to_xhtml
 
   def introduction
-    %{erbook is an extensible document processor that emits #{ xref 'html', "HTML (web page)" }, #{ xref 'latex', "LaTeX (PDF)" }, #{ xref "man", "man (UNIX manual page)" }, #{ xref 'text', 'plain text' }, and #{ xref "HelloWorld", "any document format you can imagine" } from [eRuby templates](http://en.wikipedia.org/wiki/ERuby) that allow scripting and dynamic content generation.}
+    %{erbook is an extensible document processor that emits #{ xref 'xhtml', "XHTML (web page)" }, #{ xref 'latex', "LaTeX (PDF)" }, #{ xref "man", "man (UNIX manual page)" }, #{ xref 'text', 'plain text' }, and #{ xref "HelloWorld", "any document format you can imagine" } from [eRuby templates](http://en.wikipedia.org/wiki/ERuby) that allow scripting and dynamic content generation.}
   end
 %>
 
@@ -126,12 +129,12 @@
   <% section "Requirements" do %>
     Your system needs the following software to run erbook.
 
-    |                Software                 |        Description         |                           Notes                            |
-    |                --------                 |        -----------         |                           -----                            |
-    |      [Ruby](http://ruby-lang.org)       | Ruby language interpreter  |                 Version 1.8.x is required.                 |
-    |  [Maruku](http://maruku.rubyforge.org)  |     Markdown processor     | Required by the <%= xref 'html', "default HTML format" %>. |
-    |  [CodeRay](http://coderay.rubychan.de)  |     Syntax highlighter     | Required by the <%= xref 'html', "default HTML format" %>. |
-    | [Trollop](http://trollop.rubyforge.org) | Command-line option parser |            Required by the *erbook* executable.            |
+    |                Software                 |        Description         |                            Notes                             |
+    |                --------                 |        -----------         |                            -----                             |
+    |      [Ruby](http://ruby-lang.org)       | Ruby language interpreter  |                  Version 1.8.x is required.                  |
+    |  [Maruku](http://maruku.rubyforge.org)  |     Markdown processor     | Required by the <%= xref 'xhtml', "default XHTML format" %>. |
+    |  [CodeRay](http://coderay.rubychan.de)  |     Syntax highlighter     | Required by the <%= xref 'xhtml', "default XHTML format" %>. |
+    | [Trollop](http://trollop.rubyforge.org) | Command-line option parser |             Required by the *erbook* executable.             |
 
     If your system has [RubyGems](http://rubygems.org), then you can install Maruku and CodeRay by running the following command:
 
@@ -180,7 +183,7 @@
 
       * <tt>erbook/</tt>
 
-        * <tt>to_html.rb</tt> --- provides methods (see <%= xref "Text to HTML conversion" %>) for the <%= xref 'html' %> format.
+        * <tt>to_xhtml.rb</tt> --- provides methods (see <%= xref "Text to XHTML conversion" %>) for the <%= xref 'xhtml' %> format.
 
         * <tt>rdoc.rb</tt> --- provides RDoc parse trees to Ruby code.
 
@@ -398,6 +401,20 @@
 
       Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the erbook installation directory (see <%= xref "Manifest" %>).
     <% end %>
+
+    <% paragraph "Saving the output to a file" do %>
+      Simply redirect the standard ouput stream (STDOUT) to a file like this:
+
+          erbook > YOUR_PATH_HERE
+
+      In the above example, **YOUR\_PATH\_HERE** is the path of the file in which the output should be saved.
+
+      <% important "Save XHTML output as <tt>.xhtml</tt>" do %>
+        When you use the XHTML format, ensure that the file extension of your saved output document is either <tt>.xhtml</tt> or <tt>.xml</tt>. Alternatively, ensure that your saved output document is served to web browsers under the <tt>application/xhtml+xml</tt> mime type.
+
+        Otherwise, most web browsers _will not display_ the icons and graphics embedded in the saved XHTML output document because they will treat it as HTML instead of as XML.  See this [QuirksMode.org bug report](http://www.quirksmode.org/bugreports/archives/2005/02/custom_dtds_int_1.html) for details.
+      <% end %>
+    <% end %>
   <% end %>
 
   <% section "Including external documents", "include" do %>
@@ -422,35 +439,35 @@
 
   These formats are meant to serve as working examples. If you require more functionality from one of these formats, simply make a copy of the corresponding format specification file and edit the copy to suit your needs. If you would like to contribute or discuss your enhancements to these default formats, you can <%= xref "License", "contact the author" %>.
 
-  <% chapter "HTML", 'html' do %>
-    This format generates a _monolithic_ HTML document that allows users to easily search for a particular topic using nothing more than their web browser's built-in text search mechanism. This facilitates offline reading, where an Internet search engine is not available.
+  <% chapter "XHTML (web page)", 'xhtml' do %>
+    This format generates a _monolithic_ XHTML document that allows users to easily search for a particular topic using nothing more than their web browser's built-in text search mechanism. This facilitates offline reading, where an Internet search engine is not available.
 
-    In the HTML document, you will notice that the numbers of chapters, sections, figures, admonitions, etc. are hyperlinks that take you back to the corresponding place in the table of contents. These links make it easy to navigate the HTML document, especially for users of text-only web browsers.
+    In the XHTML document, you will notice that the numbers of chapters, sections, figures, admonitions, etc. are hyperlinks that take you back to the corresponding place in the table of contents. These links make it easy to navigate the XHTML document, especially for users of text-only web browsers.
 
-    Furthermore, the HTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of the [Mozilla](http://mozilla.org) and [Opera](http://www.opera.com/) family of web browsers will be pleasantly surprised to notice that all hyperlinks have been expanded to include their target URL next to the link text. So try using the "print preview" function of a graphical web browser to see how the HTML document will appear when printed.
+    Furthermore, the XHTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of the [Mozilla](http://mozilla.org) and [Opera](http://www.opera.com/) family of web browsers will be pleasantly surprised to notice that all hyperlinks have been expanded to include their target URL next to the link text. So try using the "print preview" function of a graphical web browser to see how the XHTML document will appear when printed.
 
-    <% section "Text to HTML conversion" do %>
-      The <tt>lib/erbook/to_html.rb</tt> file inside erbook's installation directory (see <%= xref "Manifest" %>) defines the following methods:
+    <% section "Text to XHTML conversion" do %>
+      The <tt>lib/erbook/to_xhtml.rb</tt> file inside erbook's installation directory (see <%= xref "Manifest" %>) defines the following methods:
 
-      * `String#to_html` - Transforms this string into HTML while ensuring that the result contains one or more block-level elements at the root.
+      * `String#to_xhtml` - Transforms this string into XHTML while ensuring that the result contains one or more block-level elements at the root.
 
-      * `String.to_inline_html` - Transforms this string into an *inline* HTML string (one that does not contain any block-level HTML elements at the root).
+      * `String.to_inline_xhtml` - Transforms this string into an *inline* XHTML string (one that does not contain any block-level XHTML elements at the root).
 
-      The default implementation of the `String#to_html` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>html.rb</tt> file and adjust the source code of the default `String#to_html` and `String.to_inline_html` methods accordingly.
+      The default implementation of the `String#to_xhtml` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>to_xhtml.rb</tt> file and adjust the source code of the default `String#to_xhtml` and `String.to_inline_xhtml` methods accordingly.
 
-      For example, if you replace the entire <tt>to_html.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
+      For example, if you replace the entire <tt>to_xhtml.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
 
       <code>
       class String
-        # Transforms this string into HTML while ensuring that the
+        # Transforms this string into XHTML while ensuring that the
         # result contains one or more block-level elements at the root.
-        def to_html
+        def to_xhtml
           '<p style="border: thin solid red">' + self + '</p>'
         end
 
-        # Transforms this string into an *inline* HTML string (one that
-        # does not contain any block-level HTML elements at the root).
-        def to_inline_html
+        # Transforms this string into an *inline* XHTML string (one that
+        # does not contain any block-level XHTML elements at the root).
+        def to_inline_xhtml
           self
         end
       end
@@ -516,25 +533,24 @@
       <% end %>
 
       <% section "Protecting verbatim text" do %>
-        Sometimes you just need to protect some text from being mangled by the text-to-HTML conversion process . In such cases, you can wrap the text you want to proctect within **&lt;noformat&gt;** and **&lt;/noformat&gt;** tags.
+        Sometimes you just need to protect some text from being mangled by the text-to-XHTML conversion process . In such cases, you can wrap the text you want to proctect within **&lt;noformat&gt;** and **&lt;/noformat&gt;** tags.
       <% end %>
     <% end %>
 
     <% section "Parameters" do %>
-      The HTML format accepts the following document parameters.
+      The XHTML format accepts the following document parameters.
 
       |  Parameter   |   Type   |          Default value          |                                                                                                  Description                                                                                                  |
       |  ---------   |   ----   |          -------------          |                                                                                                  -----------                                                                                                  |
       |   `$title`   | `String` |           `"$title"`            |                                                                                            Title of the document.                                                                                             |
-      |  `$authors`  |  `Hash`  |      `{"$authors" => nil}`      | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided `String#to_html_entities` method like this: `{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_html_entities }` |
+      |  `$authors`  |  `Hash`  |      `{"$authors" => nil}`      | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided `String#to_xml_entities` method like this: `{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_xml_entities }` |
       |   `$date`    | `String` | `Time.now.strftime("%d %B %Y")` |                                                                                      Date when the document was written.                                                                                      |
       |   `$logo`    | `String` |              `nil`              |                                                                  Arbitrary content that goes above the document title in the default header.                                                                  |
       |   `$feeds`   |  `Hash`  |              `nil`              |                                 A mapping of feed URL to feed format. Here is an example: <code>$feeds = { "my_rss_feed.xml" => "rss", "my_atom_feed.xml" => "atom" }</code>                                  |
-      | `$use_icons` | Boolean  |             `true`              |                                            Use [Tango icons](http://tango.freedesktop.org/Tango_Icon_Library) in admonitions (see <%= xref "Admonition nodes" %>)?                                            |
     <% end %>
 
     <% section "Methods" do %>
-      The HTML format provides the following methods. In the method declarations shown below,
+      The XHTML format provides the following methods. In the method declarations shown below,
       * a pound sign (#) indicates that the method is an *instance method*, meaning that it can only be invoked on instances of a class, not on the classes themselves.
       * a double colon sign (::) indicates that the method is a *class method*, meaning that it can only be invoked on a class.
 
@@ -543,7 +559,7 @@
         require 'erbook/rdoc'
 
         RDoc::TopLevel.parse @spec['code']
-        RDoc::TopLevel.parse_file 'lib/erbook/to_html.rb'
+        RDoc::TopLevel.parse_file 'lib/erbook/to_xhtml.rb'
         RDoc::TopLevel.all_methods.each do |m|
           section "`#{m.decl}`" do
             m.comment_html
@@ -552,14 +568,14 @@
       %>
     <% end %>
 
-    <% chapter "Nodes", "html.nodes" do %>
-      Unless otherwise noted, all nodes defined by the HTML format accept two arguments, in this order:
+    <% chapter "Nodes", "xhtml.nodes" do %>
+      Unless otherwise noted, all nodes defined by the XHTML format accept two arguments, in this order:
       1.  a required *title* for the node
       2.  an optional *unique identifier* for the node
 
-      The second argument is used by the cross-referencing nodes (see <%= xref "html.nodes.xref" %> and <%= xref "html.nodes.cite" %>), which allow you to refer to another node in the document by its unique identifier.
+      The second argument is used by the cross-referencing nodes (see <%= xref "xhtml.nodes.xref" %> and <%= xref "xhtml.nodes.cite" %>), which allow you to refer to another node in the document by its unique identifier.
 
-      Furthermore, <%= xref "SpecFile.nodes", "node definitions" %> in the HTML format have two additional parameters:
+      Furthermore, <%= xref "SpecFile.nodes", "node definitions" %> in the XHTML format have two additional parameters:
 
       | Parameter |  Type   |                      Description                      |
       | --------- |  ----   |                      -----------                      |
@@ -569,19 +585,19 @@
       <% section "Structural nodes" do %>
         The nodes described in this section form the overall structure of the output document.
 
-        <% section "header", "html.nodes.header" do %>
+        <% section "header", "xhtml.nodes.header" do %>
           This node overrides the logo, title, list of authors, and date when the document was written, all of which are shown at the top of the document.
         <% end %>
 
-        <% section "footer", "html.nodes.footer" do %>
+        <% section "footer", "xhtml.nodes.footer" do %>
           This node overrides (1) the date when this document was generated and (2) the hyperlink to the erbook website, shown at the bottom of the document. The hyperlink is there as a way of saying thanks for erbook, the _wonderful_ little utility you have grown so fond of! ;-)
         <% end %>
 
-        <% section "abstract", "html.nodes.abstract" do %>
+        <% section "abstract", "xhtml.nodes.abstract" do %>
           A summary of the entire document.  This is what most readers will _skim_ through, if you are lucky.  Alas, nobody reads entire documents these days! :-(
         <% end %>
 
-        <% section "xref", "html.nodes.xref" do %>
+        <% section "xref", "xhtml.nodes.xref" do %>
           A cross-reference; a hyperlink that takes you to any node in the document.
 
           The first argument of this node is either the unique identifier or the user-defined title of the node you wish to cross-reference. If no nodes in the document have the given identifier or user-defined title, then an error will be raised.
@@ -605,7 +621,7 @@
       <% section "Organizational nodes" do %>
         The nodes described in this section are meant to help organize the document's content logically.  Based on how deeply these nodes are nested in the document, their heading will be larger (shallow depth) or smaller (deep depth).
 
-        <% section "part", "html.nodes.part" do %>
+        <% section "part", "xhtml.nodes.part" do %>
           A collection of chapters.
 
           <% part "An example" do %>
@@ -613,7 +629,7 @@
           <% end %>
         <% end %>
 
-        <% section "chapter", "html.nodes.chapter" do %>
+        <% section "chapter", "xhtml.nodes.chapter" do %>
           A collection of sections.
 
           <% chapter "An example" do %>
@@ -621,7 +637,7 @@
           <% end %>
         <% end %>
 
-        <% section "section", "html.nodes.section" do %>
+        <% section "section", "xhtml.nodes.section" do %>
           A collection of paragraphs about a particular topic.
 
           <% section "An example" do %>
@@ -629,7 +645,7 @@
           <% end %>
         <% end %>
 
-        <% section "paragraph", "html.nodes.paragraph" do %>
+        <% section "paragraph", "xhtml.nodes.paragraph" do %>
           A collection of sentences about a particular idea.
 
           <% paragraph "An example" do %>
@@ -647,7 +663,7 @@
           L. Watts, "Admonitions: Tips, hints, and Warnings", in _The KDE DocBook Authors guide_, Chapter 13, \[Online document], 22 September 2004 (Revision 1.00.00), \[cited 8 December 2007], Available at <%= link 'http://l10n.kde.org/docs/markup/tips-hints-etc.html' %>
         <% end %>
 
-        <% section "warning", "html.nodes.warning" do %>
+        <% section "warning", "xhtml.nodes.warning" do %>
           Use a **warning** node when "data loss could occur if you follow the procedure being described." <%= cite "KDE.admonitions" %>
 
           <% warning "An example" do %>
@@ -655,7 +671,7 @@
           <% end %>
         <% end %>
 
-        <% section "caution", "html.nodes.caution" do %>
+        <% section "caution", "xhtml.nodes.caution" do %>
           bq. A note of caution. Use this for example when the reader may lose easily recovered or replaceable information (e.g. user settings), or when they could cause data loss if they don't correctly follow the procedure being outlined. <%= cite "KDE.admonitions" %>
 
           <% caution "An example" do %>
@@ -663,7 +679,7 @@
           <% end %>
         <% end %>
 
-        <% section "important", "html.nodes.important" do %>
+        <% section "important", "xhtml.nodes.important" do %>
           Use an **important** node when:
 
           bq. When there is no danger of data loss, but you wish to make clear to the reader a consequence that isn't immediately obvious (e.g. when changing the font for one instance of a program also changes the default setting, and this isn't clear from the GUI.) <%= cite "KDE.admonitions" %>
@@ -673,7 +689,7 @@
           <% end %>
         <% end %>
 
-        <% section "note", "html.nodes.note" do %>
+        <% section "note", "xhtml.nodes.note" do %>
           Use a **note** node to convey:
 
           bq. Information the user should be aware of, but is peripheral to the actual task being described. <%= cite "KDE.admonitions" %>
@@ -683,7 +699,7 @@
           <% end %>
         <% end %>
 
-        <% section "tip", "html.nodes.tip" do %>
+        <% section "tip", "xhtml.nodes.tip" do %>
           Use a **tip** node when:
 
           bq. When you're giving a hint to make things easier or more productive for the reader. <%= cite "KDE.admonitions" %>
@@ -695,7 +711,7 @@
       <% end %>
 
       <% section "Auxilary materials" do %>
-        <% section "figure", "html.nodes.figure" do %>
+        <% section "figure", "xhtml.nodes.figure" do %>
           A diagram, sketch, image, or illustration; something that visually depicts an idea or thought.
 
           <% figure "An example" do %>
@@ -703,7 +719,7 @@
           <% end %>
         <% end %>
 
-        <% section "table", "html.nodes.table" do %>
+        <% section "table", "xhtml.nodes.table" do %>
           Information (typically measurement data) represented in tabular form for easy reading, comparison, and analysis.
 
           <% table "An example" do %>
@@ -711,7 +727,7 @@
           <% end %>
         <% end %>
 
-        <% section "example", "html.nodes.example" do %>
+        <% section "example", "xhtml.nodes.example" do %>
           A sample application of an idea or thought.
 
           <% example "An example" do %>
@@ -719,7 +735,7 @@
           <% end %>
         <% end %>
 
-        <% section "equation", "html.nodes.equation" do %>
+        <% section "equation", "xhtml.nodes.equation" do %>
           A mathematical equation or formula.
 
           <% equation "An example" do %>
@@ -727,7 +743,7 @@
           <% end %>
         <% end %>
 
-        <% section "procedure", "html.nodes.procedure" do %>
+        <% section "procedure", "xhtml.nodes.procedure" do %>
           An outline; a series of steps outlining some kind of process.
 
           <% procedure "An example" do %>
@@ -739,36 +755,36 @@
       <% section "Bibliographical nodes" do %>
         The nodes in this section deal with attribution of ideas---an important weapon against plagiarism.
 
-        <% section "reference", "html.nodes.reference" do %>
+        <% section "reference", "xhtml.nodes.reference" do %>
           This node stores bibliography information about an information source that is relevant to your document.
 
-          If you wish to cite a certain source in several places in your document, start by creating a **reference** node first and then use a **cite** node (see <%= xref "html.nodes.cite" %>) to perform the citation.
+          If you wish to cite a certain source in several places in your document, start by creating a **reference** node first and then use a **cite** node (see <%= xref "xhtml.nodes.cite" %>) to perform the citation.
 
           <% paragraph "An example" do %>
-            See <%= xref 'html.nodes.reference.example' %> for an example of how a **reference** node appears.
+            See <%= xref 'xhtml.nodes.reference.example' %> for an example of how a **reference** node appears.
           <% end %>
 
-          <% reference 'html.nodes.reference.example' do %>
+          <% reference 'xhtml.nodes.reference.example' do %>
             This is how a **reference** node appears.
           <% end %>
         <% end %>
 
-        <% section "cite", "html.nodes.cite" do %>
-          A citation to a **reference** node (see <%= xref 'html.nodes.reference' %>) in the document's bibliography.
+        <% section "cite", "xhtml.nodes.cite" do %>
+          A citation to a **reference** node (see <%= xref 'xhtml.nodes.reference' %>) in the document's bibliography.
 
           The first argument of this node is the unique identifier of the reference node you wish to cite. You can specify additional arguments to give more detail about the citation.
 
           For example, this node in the input document:
 
-              <%%= cite "html.nodes.reference.example" %>
+              <%%= cite "xhtml.nodes.reference.example" %>
 
-          appears in the output document like this: <%= cite "html.nodes.reference.example" %>
+          appears in the output document like this: <%= cite "xhtml.nodes.reference.example" %>
 
           As another example, this node in the input document:
 
-              <%%= cite "html.nodes.reference.example", "chapter 10", "page 53", "..." %>
+              <%%= cite "xhtml.nodes.reference.example", "chapter 10", "page 53", "..." %>
 
-          appears in the output document like this: <%= cite "html.nodes.reference.example", "chapter 10", "page 53", "..." %>
+          appears in the output document like this: <%= cite "xhtml.nodes.reference.example", "chapter 10", "page 53", "..." %>
         <% end %>
       <% end %>
     <% end %>
@@ -778,11 +794,11 @@
     [This format is not yet implemented.](http://en.wikipedia.org/wiki/Plain_text)
   <% end %>
 
-  <% chapter "LaTeX", 'latex' do %>
+  <% chapter "LaTeX (PDF)", 'latex' do %>
     [This format is not yet implemented.](http://www.latex-project.org)
   <% end %>
 
-  <% chapter "UNIX man page", 'man' do %>
+  <% chapter "man (UNIX manual page)", 'man' do %>
     [This format is not yet implemented.](http://en.wikipedia.org/wiki/Man_page)
   <% end %>
 <% end %>

@@ -1,19 +1,19 @@
 desc: web page for the Internet
 
 code: |
-  # load the String#to_html and String#to_inline_html methods
-  require 'erbook/to_html'
+  # load the String#to_xhtml and String#to_inline_xhtml methods
+  require 'erbook/to_xhtml'
 
   class String
-    # Transforms this UTF-8 string into HTML entities.
-    def to_html_entities
+    # Transforms this UTF-8 string into XML entities.
+    def to_xml_entities
       unpack('U*').map! {|c| "&##{c};"}.join
     end
 
     # Transforms this string into a valid URI fragment.
     # See http://www.nmt.edu/tcc/help/pubs/xhtml/id-type.html
     def to_uri_fragment
-      # remove HTML tags from the input
+      # remove XML tags from the input
       buf = gsub(/<.*?>/, '')
 
       # The first or only character must be a letter.
@@ -32,8 +32,8 @@ code: |
   end
 
   class Hash
-    # Transforms this hash into a string of HTML attribute key=value pairs.
-    def to_html_atts
+    # Transforms this hash into a string of XML attribute key="value" pairs.
+    def to_xml_atts
       inject([]) {|s,(k,v)| s << %( #{k}="#{v}") }.join
     end
   end
@@ -54,23 +54,23 @@ code: |
     end
 
     def type_atts
-      { :class => type }.to_html_atts
+      { :class => type }.to_xml_atts
     end
 
     def title_atts
-      { :class => :title, :id => here_frag }.to_html_atts
+      { :class => :title, :id => here_frag }.to_xml_atts
     end
 
-    def title_html
-      title.to_s.to_inline_html
+    def title_xhtml
+      title.to_s.to_inline_xhtml
     end
 
-    def content_html
-      content.to_s.to_html
+    def content_xhtml
+      content.to_s.to_xhtml
     end
 
     def title_link aTitle = nil
-      here_link here_frag, aTitle || title_html
+      here_link here_frag, aTitle || title_xhtml
     end
 
     def index_link
@@ -90,7 +90,7 @@ code: |
     end
 
     def content_div
-      %{<div class="content">#{content_html}</div>}
+      %{<div class="content">#{content_xhtml}</div>}
     end
 
     @@frags = []
@@ -120,7 +120,7 @@ code: |
     end
   end
 
-  # Protects the given content from HTML interpretation.
+  # Protects the given content from the text-to-XHTML conversion process.
   def verbatim aContent
     ERB::Util.html_escape aContent
   end
@@ -155,7 +155,7 @@ code: |
     base_64_embed aData, "image/#{aFormat}"
   end
 
-  # Returns a HTML <img> tag that embeds the given image file.
+  # Returns an <img/> tag that embeds the given image file.
   #
   # aPath:: path to the image file
   # aFormat:: format of the image file (e.g. PNG, JPG, GIF, etc.)
@@ -163,39 +163,64 @@ code: |
   #
   def embed_image_file aPath, aFormat = aPath[/\w+/], aAtts = {}
     data = base_64_encode File.read(aPath)
-    aAtts['src'] = base_64_embed_image_data(data, aFormat)
-    "<img#{aAtts.to_html_atts}/>"
+    aAtts[:src] = base_64_embed_image_data(data, aFormat)
+    "<img#{aAtts.to_xml_atts}/>"
   end
 
   ##
   # load admonition icons
   #
 
-  Icon = Struct.new(:path, :name, :format, :data)
+  ICONS_DIR = File.join(ERBook::FORMATS_DIR, 'xhtml.icons')
+  ICON_DEFS = YAML.load_file File.join(ICONS_DIR, 'index.yaml')
 
+  Icon = Struct.new(:origin, :path, :name, :format, :data)
   class Icon
-    # Returns the CSS class for this icon.
-    def css_class
-      @css_class ||= "icon-#{name}"
+    # Returns a data URI containing embedded image data.
+    def data_uri
+      base_64_embed_image_data self.data, self.format
     end
 
     # Returns a CSS url() containing embedded image data.
-    def css_image
-      "url(#{base_64_embed_image_data self.data, self.format})"
+    def data_css
+      %{url("#{data_uri}")}
+    end
+
+    # Returns a XML entity reference (to this icon's
+    # embedded image data) ready for insertion into XML.
+    def entity_xml
+      "&#{entity_name};"
+    end
+
+    # Returns the name of the XML entity whose
+    # value contains embedded image data.
+    def entity_name
+      "icon_#{name}"
+    end
+
+    # Returns an <img/> tag that renders the image
+    # data embedded as an ENTITY in the html DOCTYPE.
+    def to_xhtml aAtts = {}
+      aAtts[:alt] ||= name
+      aAtts[:src] = entity_xml
+      aAtts[:class] = :icon
+      "<img#{aAtts.to_xml_atts}/>"
     end
   end
 
-  ICONS = {}
+  ICON_BY_NAME = {}
 
-  Dir[File.join(ERBook::FORMATS_DIR, 'html.icons', '*.*')].each do |path|
-    ext = File.extname(path)
-    name = File.basename(path, ext)
+  ICON_DEFS.each_pair do |name, path|
+    format = File.extname(path).sub('.', '')
+    origin = path[/^\w+/]
+
+    path = File.join(ICONS_DIR, path) # make the path absolute
     data = base_64_encode File.open(path, 'rb') {|f| f.read }
 
-    ICONS[name] = Icon.new(path, name, ext.sub('.', ''), data)
+    ICON_BY_NAME[name] = Icon.new(origin, path, name, format, data)
   end
 
-  # STDERR.puts ICONS.inspect
+  ICONS = ICON_BY_NAME.values
 
 
 nodes:
@@ -209,7 +234,7 @@ nodes:
     index: false
     number: false
     silent: true
-    output: <%= @node.content_html %>
+    output: <%= @node.content_xhtml %>
 
   header_outside_above: &header_insert
     toc: false
@@ -217,7 +242,7 @@ nodes:
     index: false
     number: false
     silent: true
-    output: <div class="<%= @node.type %>"><%= @node.content_html %></div>
+    output: <div class="<%= @node.type %>"><%= @node.content_xhtml %></div>
 
   header_inside_above:  *header_insert
   header_inside_below:  *header_insert
@@ -254,7 +279,7 @@ nodes:
     number: true
     output: |
       <div class="<%= @node.type %>">
-        <h1<%= @node.title_atts %>>
+        <h1 class="title">
           <%= @node.type_label %>&nbsp;<%= @node.index_link %>
           <br/>
           <big><%= @node.title_link %></big>
@@ -272,7 +297,7 @@ nodes:
     output: |
       <% depth = [6, @node.depth + 1].min %>
       <div class="<%= @node.type %>">
-        <h<%= depth %><%= @node.title_atts %>>
+        <h<%= depth %> class="title">
           <%= @node.index_and_title_link %>
         </h<%= depth %>>
         <%= @node.content_div %>
@@ -284,9 +309,9 @@ nodes:
     index: false
     number: false
     output: |
-      <div<%= @node.type_atts %>>
-        <p<%= @node.title_atts %>><%= @node.title_link %></p>
-        <%= @node.content_div %>
+      <div class="<%= @node.type %>">
+        <p class="title"><%= @node.title_link %></p>
+        <%= @node.content_xhtml_div %>
       </div>
 
 
@@ -300,16 +325,9 @@ nodes:
     index: false
     number: true
     output: |
-      <div<%= @node.type_atts %>>
-        <p<%= @node.title_atts %>><%= @node.number_and_title_link %></p>
-        <div class="content <%=
-          $use_icons = true unless defined? $use_icons
-
-          if $use_icons and icon = ICONS[@node.type]
-            ($icons_used ||= []) << icon
-            icon.css_class
-          end
-        %>"><%= @node.content_html %></div>
+      <div class="<%= @node.type %>">
+        <p class="title"><%= @node.number_and_title_link %></p>
+        <div class="content"><%= ICON_BY_NAME[@node.type].to_xhtml %><%= @node.content_xhtml %></div>
       </div>
 
   note: *admonition
@@ -368,16 +386,16 @@ nodes:
 
           title_auto = @node.args.length < 2
 
-          title_html =
+          title_xhtml =
             if title_auto
               title_text
             else
               @node.args[1].to_s
-            end.to_inline_html
+            end.to_inline_xhtml
 
           %{<a class="#{@node.type}" href="##{target.here_frag}"#{
             %( title="#{title_text}") unless title_auto
-          }>#{title_html}</a>}
+          }>#{title_xhtml}</a>}
         else
           raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
         end
@@ -442,7 +460,7 @@ output: |
             (n.index.to_s + '&nbsp;&nbsp;' if n.index),
             n.list_frag,
             n.here_frag,
-            n.title.to_s.to_inline_html
+            n.title.to_s.to_inline_xhtml
           ]
           nested = n.children.inject('') {|s,c| s << toc_builder[c] }
 
@@ -468,7 +486,7 @@ output: |
 
       lof = lof_enums.sort.map do |(type, nodes)|
         nested = nodes.map do |n|
-          %{<li><a id="#{n.list_frag}" href="##{n.here_frag}">#{n.title.to_s.to_inline_html}</a></li>}
+          %{<li><a id="#{n.list_frag}" href="##{n.here_frag}">#{n.title.to_s.to_inline_xhtml}</a></li>}
         end
 
         label = type.capitalize << 's' # TODO: pluralize this properly
@@ -477,76 +495,56 @@ output: |
         %{<h2 id="#{label}" class="title"><a class="here" href="##{label}">#{label}</a></h2> <ol>#{nested}</ol>}
       end
   %>
+  <?xml version="1.0" encoding="utf-8"?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" [
+    <% ICONS.each do |icon| %>
+      <!ENTITY <%= icon.entity_name %> "<%= icon.data_uri %>">
+    <% end %>
+  ]>
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
       <meta name="date" content="<%= $date %>"/>
       <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
       <meta name="generator" content="<%= ERBook::DISPLAY %>"/>
-      <% $feeds.each_pair do |here_frag, fmt| %>
-      <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= here_frag %>"/>
-      <% end if $feeds %>
-      <title><%= $title.to_s.to_inline_html %></title>
+      <title><%= $title.to_s.to_inline_xhtml %></title>
 
-      <% if $use_icons %>
-        <style type="text/css" media="screen">
-          blockquote {
-            background-image  : <%= ICONS['quote'].css_image %>;
-            background-repeat : no-repeat;
-            padding-left      : 65px;
-            min-height        : 40px;
-            margin-left       : 0;
-          }
+      <% if $feeds %>
+        <% $feeds.each_pair do |url, fmt| %>
+          <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
+        <% end %>
+      <% end %>
+
+      <% @spec['styles'].each_pair do |media, style| %>
+        <style type="text/css" media="<%= media %>">
+        <![CDATA[<%= style %>]]>
         </style>
       <% end %>
 
-      <% if defined? $icons_used and not $icons_used.empty?  %>
-        <style type="text/css" media="screen">
-          <% $icons_used.each do |icon| %>
-          .<%= icon.css_class %> {
-            background-image: <%= icon.css_image %>;
-            background-repeat: no-repeat;
-            padding-left: 4em;
-          }
-          <% end %>
-        </style>
+      <style type="text/css" media="screen">
+      <![CDATA[
+        /* decorate external hyperlinks with a visual indicator */
+        a:not([href^="#"])
+        {
+            color               : #3366BB;
+            background          : <%= ICON_BY_NAME['link'].data_css %>;
+            background-position : center right;
+            background-repeat   : no-repeat;
+            padding-right       : 13px;
+        }
 
-        <style type="text/css" media="print">
-          <% $icons_used.each do |icon| %>
-            .<%= icon.css_class %> {
-              <%
-                # we use list-style-image instead of
-                # background-image because the latter is
-                # neither printable nor shown in print
-                # preview by default in most browsers
-                #
-                # see http://www.web-graphics.com/mtarchive/001703.php
-              %>
-              display: list-item;
-              list-style-image: <%= icon.css_image %>;
-              list-style-position: inside;
-            }
-
-            .<%= icon.css_class %> li {
-              list-style-image: none;
-            }
-          <% end %>
-        </style>
-      <% end %>
-
-      <%
-        styles = @spec['styles']
-        (styles.keys - %w[common]).each do |media|
-      %>
-      <style type="text/css" media="<%= media %>">
-      <!--
-        <%= styles['common'] %>
-        <%= styles[media] %>
-      -->
+        /* display icon for blockquote elements */
+        blockquote
+        {
+            background-image    : <%= ICON_BY_NAME['quote'].data_css %>;
+            background-repeat   : no-repeat;
+            margin-left         : 0;
+            padding-left        : 65px;
+            min-height          : 50px;
+        }
+      ]]>
       </style>
-      <% end %>
     </head>
     <body>
       <%
@@ -580,11 +578,11 @@ output: |
         <%= header.output %>
       <% else %>
         <%= $logo if defined? $logo %>
-        <h1 class="title"><%= $title.to_s.to_inline_html %></h1>
+        <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
         <h2 class="authors"><%=
-          $authors.map do |(name, here_frag)|
-            if here_frag
-              %{<a href="#{here_frag}">#{name}</a>}
+          $authors.map do |(name, url)|
+            if url
+              %{<a href="#{url}">#{name}</a>}
             else
               name
             end
@@ -630,7 +628,7 @@ output: |
         <h1 class="title" id="References"><a class="here" href="#References">References</a></h1>
         <ol>
         <% references.each do |n| %>
-          <li id="<%= n.here_frag %>"><%= n.content_html %></li>
+          <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
         <% end %>
         </ol>
       </div>
@@ -644,16 +642,32 @@ output: |
       <div id="footer">
       <%= node = @types['footer_inside_above'].first and node.output %>
       <% if footer = @types['footer'].first %>
-        <%= footer.content.to_s.to_html %>
+        <%= footer.content.to_s.to_xhtml %>
       <% else %>
         Generated by <a href="<%= ERBook::WEBSITE %>"><%= ERBook::DISPLAY %></a> on <%= Time.now %>.
       <% end %>
 
-      <% if $icons_used %>
-        <div id="footer-credits">
-          The icons used in this document are &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.
-        </div>
-      <% end %>
+      <div id="footer-credits">
+        <p>
+          <% ICONS.select {|i| i.origin == 'tango' }.each do |icon| %>
+            <%= icon.to_xhtml %>
+          <% end %>
+
+          <br/>
+
+          The icons shown above are &copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>. They are part of the <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a> set, which is distributed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>.
+        </p>
+
+        <p>
+          <% ICONS.select {|i| i.origin == 'mediawiki' }.each do |icon| %>
+            <%= icon.to_xhtml %>
+          <% end %>
+
+          <br/>
+
+          The icons shown above are &copy; 2007 <a href="https://www.ohloh.net/projects/mediawiki/contributors">MediaWiki contributors</a>. They are part of the <a href="http://www.mediawiki.org/wiki/MediaWiki">MediaWiki</a> software, which is distributed under the <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License, version 2</a>.
+        </p>
+      </div>
       <%= node = @types['footer_inside_below'].first and node.output %>
       </div>
       <%= node = @types['footer_outside_below'].first and node.output %>
@@ -661,7 +675,7 @@ output: |
   </html>
 
 styles:
-  common: |
+  all: |
     body
     {
         color               : #000000;
@@ -674,8 +688,8 @@ styles:
 
       blockquote
       {
-          font-family       : Georgia, serif;
-          color             : #444;
+          color             : #333;
+          font-style        : italic;
       }
 
       em
@@ -892,7 +906,7 @@ styles:
 
       #footer-credits
       {
-          margin-top        : 1em;
+          margin-top        : 2em;
           margin-bottom     : 2em;
       }
 
@@ -966,21 +980,35 @@ styles:
           margin            : 3em;
       }
 
-      .tip       > .icon,
-      .note      > .icon,
-      .caution   > .icon,
-      .warning   > .icon,
-      .important > .icon
+      .tip       > .content,
+      .note      > .content,
+      .caution   > .content,
+      .warning   > .content,
+      .important > .content,
+      .figure    > .content,
+      .table     > .content,
+      .example   > .content,
+      .equation  > .content,
+      .procedure > .content
+      {
+          min-height        : 48px; /* 48px is height of icon */
+      }
+
+      .tip       > .content > .icon,
+      .note      > .content > .icon,
+      .caution   > .content > .icon,
+      .warning   > .content > .icon,
+      .important > .content > .icon
       {
           float             : left;
           margin            : 0 1em 1em 0; /* top right bottom left */
       }
 
-      .tip       .icon,
-      .note      .icon,
-      .caution   .icon,
-      .warning   .icon,
-      .important .icon
+      .tip       .content .icon,
+      .note      .content .icon,
+      .caution   .content .icon,
+      .warning   .content .icon,
+      .important .content .icon
       {
           _display          : none; /* IE6 cannot display embedded images */
       }
@@ -1010,9 +1038,9 @@ styles:
   screen: |
     body
     {
-        margin              : auto;
-        max-width           : 36em;
-        padding             : 0.5em;
+          margin            : auto;
+          max-width         : 36em;
+          padding           : 0.5em;
     }
 
     /* source code */
@@ -1053,18 +1081,12 @@ styles:
 
       a:link
       {
-          color             : #0000FF;
+          color             : #002BB8;
       }
 
       a:visited
       {
-          color             : #C71585;
-      }
-
-      /* external hyperlinks */
-      a:not([href^="#"]):before
-      {
-          content           : "\2660"; /* &spades; */
+          color             : #5A3696;
       }
 
       a.here,

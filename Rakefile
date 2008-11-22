@@ -6,13 +6,13 @@ require 'rake/clean'
 
   # user manual
     src = 'doc/manual.erb'
-    dst = 'doc/index.html'
+    dst = 'doc/index.xhtml'
 
     task :manual => dst
     task :doc => :manual
 
     file dst => src do
-      sh "ruby bin/erbook -u html #{src} > #{dst}"
+      sh "ruby bin/erbook -u xhtml #{src} > #{dst}"
     end
 
     CLOBBER.include dst
@@ -48,7 +48,7 @@ require 'rake/clean'
     # gems needed by the main program executable
     s.add_dependency 'trollop', '~> 1.10'
 
-    # gems needed by the default 'html' format
+    # gems needed by the default 'xhtml' format
     s.add_dependency 'maruku', '~> 0.5'
     s.add_dependency 'coderay', '>= 0.7'
   end

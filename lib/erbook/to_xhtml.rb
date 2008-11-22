@@ -1,5 +1,5 @@
-# This file defines the String#to_html and String#to_inline_html
-# methods, which are invoked to transform plain text into HTML.
+# This file defines the String#to_xhtml and String#to_inline_xhtml
+# methods, which are invoked to transform plain text into XHTML.
 #
 # This particular implementation features the Markdown
 # formatting system via Maruku, syntax coloring via CodeRay,
@@ -18,34 +18,28 @@ require 'coderay'
 require 'maruku'
 
 class String
-  # The content of these HTML tags will be preserved while
+  # The content of these XHTML tags will be preserved while
   # they are being processed by Textile.  By doing this, we
   # avoid unwanted Textile transformations, such as quotation
   # marks becoming curly (&#8192;), in source code.
   PROTECTED_TAGS = %w[tt code pre]
 
-  # The content of these HTML tags will be preserved
-  # *verbatim* throughout the text-to-HTML conversion process.
+  # The content of these XHTML tags will be preserved
+  # *verbatim* throughout the text-to-XHTML conversion process.
   VERBATIM_TAGS = %w[noformat]
 
-  # Transforms this string into an *inline* HTML string (one that
-  # does not contain any block-level HTML elements at the root).
-  def to_inline_html
-    to_html true
+  # Transforms this string into an *inline* XHTML string (one that
+  # does not contain any block-level XHTML elements at the root).
+  def to_inline_xhtml
+    to_xhtml true
   end
 
-  # XXX: Maruku also defines String#to_html so we have to hack around it :-(
-  alias to_html_maruku to_html
-
-  # Transforms this string into HTML while ensuring that the
+  # Transforms this string into XHTML while ensuring that the
   # result contains one or more block-level elements at the root.
   #
-  # If aInline is true, then the resulting HTML will be an *inline* string.
+  # If aInline is true, then the resulting XHTML will be an *inline* string.
   #
-  def to_html aInline = false
-    # XXX: Maruku also defines String#to_html so we have to hack around it :-(
-    return to_html_maruku if caller.detect {|c| c =~ %r'/lib/maruku/output/' }
-
+  def to_xhtml aInline = false
     protect(self, VERBATIM_TAGS, true) do |text|
       html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_maruku aInline }
 
@@ -64,8 +58,8 @@ class String
 
   # Returns the result of running this string through Maruku.
   #
-  # If aInline is true, then the resulting HTML will
-  # *not* be wrapped in a HTML paragraph element.
+  # If aInline is true, then the resulting XHTML will
+  # *not* be wrapped in a XHTML paragraph element.
   #
   def thru_maruku aInline = false
     html = Maruku.new(self).to_html

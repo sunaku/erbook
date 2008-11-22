@@ -1,0 +1,20 @@
+# This file defines icons used in erbook's
+# XHTML format using the following syntax:
+#
+# icon_name: relative path to the image file
+#
+
+important: tango-icon-theme-0.8.1/48x48/emblems/emblem-important.png
+
+warning: tango-icon-theme-0.8.1/48x48/status/dialog-error.png
+
+caution: tango-icon-theme-0.8.1/48x48/status/dialog-warning.png
+
+note: tango-icon-theme-0.8.1/48x48/apps/accessories-text-editor.png
+
+tip: tango-icon-theme-0.8.1/48x48/status/dialog-information.png
+
+quote: tango-icon-theme-0.8.1/48x48/apps/internet-group-chat.png
+
+link: mediawiki-1.13.2/skins/simple/external.png
+
