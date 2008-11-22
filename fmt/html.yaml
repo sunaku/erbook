@@ -130,7 +130,7 @@ code: |
   end
 
   def list_link aHereFrag, aListFrag, aLabel
-    %{<a class="list" title="Return to table of contents" href="##{aListFrag}">#{aLabel}</a>}
+    %{<a class="list" title="Return to table of contents" id="#{aHereFrag}" href="##{aListFrag}">#{aLabel}</a>}
   end
 
   # Returns a hyperlink to the given URL of
