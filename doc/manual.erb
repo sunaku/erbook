@@ -34,10 +34,10 @@
   <%= introduction %> <span style="float: right; font-size: larger"><%= xref 'Introduction', 'Read more...' %></span>
 
   <% paragraph "Resources" do %>
-    * [Releases](<%= log_url %>) - release notes and project news. [![RSS feed](feed-icon-28x28.png)](<%= ann_url %>)
-    * [Downloads](<%= pkg_url %>) - obtain the newest release package.
-    * [Reference](api/index.html) - API documentation for source code.
-    * [Source code](<%= src_url %>) - obtain via [Git](http://git.or.cz) or browse online. [![RSS feed](feed-icon-28x28.png)](<%= dev_url %>)
+    * [Release notes](<%= log_url %>) --- news of project releases. [![RSS feed](feed-icon-28x28.png)](<%= ann_url %>)
+    * [Downloads](<%= pkg_url %>) --- obtain the newest release package.
+    * [Source code](<%= src_url %>) --- obtain via [Git](http://git.or.cz) or browse online. [![RSS feed](feed-icon-28x28.png)](<%= dev_url %>)
+    * [API reference](api/index.html) --- documentation for source code.
 
     To get help or provide feedback, simply <%= xref "License", "contact the author" %>.
   <% end %>
@@ -52,7 +52,7 @@
 
   <% section "Relevance" do %>
     Unlike document processors such as [DocBook](http://www.docbook.org), [Deplate](http://deplate.sourceforge.net), and [SiSU](http://www.jus.uio.no/sisu/SiSU/), erbook is:
-    * *tiny* because its core contains less than 200 source lines of code
+    * *tiny* because its core contains less than 210 source lines of code
     * *extensible* because it lets you define <%= xref "HelloWorld", "your own custom document format" %>
 
     Unlike the documents of raw text processors such as [AsciiDoc](http://www.methods.co.nz/asciidoc/), [txt2tags](http://txt2tags.sourceforge.net), and [Grutatxt](http://www.triptico.com/software/grutatxt.html), erbook documents are *scriptable* eRuby templates, which means that you can inject arbitrary Ruby code into your documents for **dynamic content generation**.
@@ -790,15 +790,23 @@
     <% end %>
   <% end %>
 
+  <% patches_are_welcome = "This format is not yet implemented.  I will do this evenually, but until then, **patches are welcome!** :-)" %>
+
   <% chapter "Plain text", 'text' do %>
-    [This format is not yet implemented.](http://en.wikipedia.org/wiki/Plain_text)
+    <%= patches_are_welcome %>
+
+    <%= hyperlink 'http://en.wikipedia.org/wiki/Plain_text' %>
   <% end %>
 
   <% chapter "LaTeX (PDF)", 'latex' do %>
-    [This format is not yet implemented.](http://www.latex-project.org)
+    <%= patches_are_welcome %>
+
+    <%= hyperlink 'http://www.latex-project.org' %>
   <% end %>
 
   <% chapter "man (UNIX manual page)", 'man' do %>
-    [This format is not yet implemented.](http://en.wikipedia.org/wiki/Man_page)
+    <%= patches_are_welcome %>
+
+    <%= hyperlink 'http://en.wikipedia.org/wiki/Man_page' %>
   <% end %>
 <% end %>
