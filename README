@@ -6,7 +6,7 @@ erbook is an extensible document processor that emits XHTML
 and any document format you can imagine from eRuby templates
 that allow scripting and dynamic content generation.
 
-erbook is a light (200 source lines of code), extensible
+erbook is a light (210 source lines of code), extensible
 (create your own document formats), and flexible (your content
 is scriptable) alternative to DocBook, Deplate, and SiSU.
 
