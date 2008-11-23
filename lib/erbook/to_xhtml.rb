@@ -61,7 +61,7 @@ class String
   # If aInline is true, then the resulting XHTML will
   # *not* be wrapped in a XHTML paragraph element.
   #
-  def thru_maruku aInline = false
+  def thru_maruku aInline = false #:nodoc:
     html = Maruku.new(self).to_html
     html.sub! %r{\A<p>(.*)</p>\Z}, '\1' if aInline
     html
@@ -71,7 +71,7 @@ class String
   # <code> tag has an attribute lang="...", then that is considered the
   # programming language for which appropriate syntax coloring should be
   # applied.  Otherwise, the programming language is assumed to be ruby.
-  def thru_coderay
+  def thru_coderay #:nodoc:
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
       atts, code = $2, CGI.unescapeHTML($3)
       lang = atts[/\blang=('|")(.*?)\1/i, 2] || :ruby
@@ -92,7 +92,7 @@ class String
   # If aVerbatim is true, the content of the elments having the given tags will
   # not be temporarily altered so that process nested elements can be processed.
   #
-  def protect aInput, aTags, aVerbatim #:yields: aInput
+  def protect aInput, aTags, aVerbatim #:nodoc: :yields: aInput
     raise ArgumentError unless block_given?
 
     input = aInput.dup
