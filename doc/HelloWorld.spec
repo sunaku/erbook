@@ -1,31 +1,33 @@
 desc: An example format.
 
 code: |
-  # Returns a random, yet pronounceable, name.
-  def generate_name
-    letters = ('a'..'z').to_a - %w[ c q w x ] # redundant sounds
-    vowels = %w[a e i o u]
-    consonants = letters - vowels
-    sets = [consonants, vowels]
-
-    length = 3 + rand(5)
-
-    name = (0...length).map do |i|
-      # alternate between consonants and vowels
-      set = sets[i % sets.length]
-
-      # choose a random letter from the set
-      set[rand(set.length)]
-    end.join
-
-    name
-  end
-
-  class Node
+  class ERBook::Node
     def name
       # dynamically compute (and store)
       # the name of this node on demand
       @name ||= generate_name
+    end
+
+    private
+
+    # Returns a random, yet pronounceable, name.
+    def generate_name
+      letters = ('a'..'z').to_a - %w[ c q w x ] # redundant sounds
+      vowels = %w[a e i o u]
+      consonants = letters - vowels
+      sets = [consonants, vowels]
+
+      length = 3 + rand(5)
+
+      name = (0...length).map do |i|
+        # alternate between consonants and vowels
+        set = sets[i % sets.length]
+
+        # choose a random letter from the set
+        set[rand(set.length)]
+      end.join
+
+      name
     end
   end
 
