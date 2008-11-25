@@ -74,7 +74,12 @@ require 'rake/clean'
   task :publish => :pack do
     sh 'rubyforge', 'login'
 
-    Dir['pkg/*.[a-z]*'].each do |pkg|
-      sh 'rubyforge', 'add_release', '--release_date', ERBook::RELEASE, spec.rubyforge_project, spec.name, spec.version.to_s, pkg
+    pusher = lambda do |cmd, pkg|
+      sh 'rubyforge', cmd, '--release_date', ERBook::RELEASE,
+          spec.rubyforge_project, spec.name, spec.version.to_s, pkg
     end
+
+    packs = Dir['pkg/*.[a-z]*']
+    pusher['add_release', packs.shift]
+    packs.each {|pkg| pusher['add_file', pkg] }
   end
