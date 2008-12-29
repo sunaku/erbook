@@ -20,17 +20,20 @@ require 'erbook'
 
 module ERBook
   # Prints the given message and raises the given error.
-  def ERBook.error aMessage, aError = $!
-    STDERR.printf "%s:\n\n", aMessage
-    raise aError
+  def ERBook.error message, error = $!
+    STDERR.printf "%s:\n\n", message
+    raise error
   end
 
   require 'digest/sha1'
-  # Returns a digest of this string that's not altered by String#to_html.
-  def ERBook.digest aInput
+  # Returns a digest of the given string that
+  # will not be altered by String#to_xhtml.
+  def ERBook.digest input
+    Digest::SHA1.hexdigest(input.to_s).
+
     # XXX: surround all digits with alphabets so
     #      Maruku doesn't change them into HTML
-    Digest::SHA1.hexdigest(aInput.to_s).gsub(/\d/, 'z\&z')
+    gsub(/\d/, 'z\&z')
   end
 
   require 'erb'
@@ -38,30 +41,34 @@ module ERBook
     # The result of template evaluation thus far.
     attr_reader :buffer
 
-    # aSource:: String that replaces the ambiguous '(erb)'
-    #           identifier in stack traces, so that the user
-    #           can better determine the source of an error.
+    # source::      String that replaces the ambiguous '(erb)'
+    #               identifier in stack traces, so that the user
+    #               can better determine the source of an error.
     #
-    # aInput:: String containing eRuby directives.  This
-    #          string will be modified by this method!
+    # input::       String containing eRuby directives.  This
+    #               string will be modified by this method!
     #
-    # aSafeLevel:: See safe_level in ERB::new().
+    # unindent::    If true, then all content blocks will be
+    #               unindented hierarchically, by the leading
+    #               space of their 'do' and 'end' delimiters.
     #
-    def initialize aSource, aInput, aUnindent = false, aSafeLevel = nil
+    # safe_level::  See safe_level in ERB::new().
+    #
+    def initialize source, input, unindent = false, safe_level = nil
       # convert "% at beginning of line" usage into <% normal %> usage
-      aInput.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
-      aInput.gsub! %r{^([ \t]*)%%}, '\1%'
+      input.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
+      input.gsub! %r{^([ \t]*)%%}, '\1%'
 
       # silence the code-only <% ... %> directive, just like PHP does
-      aInput.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
+      input.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
 
       # unindent node content hierarchically
-      if aUnindent
-        tags = aInput.scan(/<%(?:.(?!<%))*?%>/m)
+      if unindent
+        tags = input.scan(/<%(?:.(?!<%))*?%>/m)
         margins = []
         result = []
 
-        buffer = aInput
+        buffer = input
         tags.each do |tag|
           chunk, buffer = buffer.split(tag, 2)
           chunk << tag
@@ -80,39 +87,39 @@ module ERBook
         end
         result << buffer
 
-        aInput = result.join
+        input = result.join
       end
 
       # use @buffer to store the result of the ERB template
-      super aInput, aSafeLevel, nil, :@buffer
+      super input, safe_level, nil, :@buffer
 
-      self.filename = aSource
+      self.filename = source
     end
 
-    # Renders this template within a fresh object that
-    # is populated with the given instance variables.
-    def render_with aInstVars = {}
+    # Renders this template within a fresh object that is populated with
+    # the given instance variables, whose names must be prefixed with '@'.
+    def render_with inst_vars = {}
       context = Object.new.instance_eval do
-        aInstVars.each_pair do |var, val|
+        inst_vars.each_pair do |var, val|
           instance_variable_set var, val
         end
 
         binding
       end
 
-      result(context)
+      result context
     end
 
-    private
+    protected
 
     # Returns the content that the given block wants to append to
     # the buffer.  If the given block does not want to append to the
     # buffer, then returns the result of invoking the given block.
-    def content_from_block *aBlockArgs
+    def content_from_block *block_args
       raise ArgumentError, 'block must be given' unless block_given?
 
       head = @buffer.length
-      body = yield(*aBlockArgs) # this will do: @buffer << content
+      body = yield(*block_args) # this appends 'content' to '@buffer'
       tail = @buffer.length
 
       if tail > head
@@ -236,15 +243,13 @@ module ERBook
           }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
           node_defs = spec_data['nodes'].each_pair do |type, defn|
+            # XXX: using a string because define_method()
+            #      does not accept a block until Ruby 1.9
             template.instance_eval %{
-              #
-              # XXX: using a string because define_method()
-              #      does not accept a block until Ruby 1.9
-              #
-              def #{type} *aArgs, &aBlock
+              def #{type} *node_args, &node_content
                 node = Node.new(
                   :type => #{type.inspect},
-                  :args => aArgs,
+                  :args => node_args,
                   :trace => caller,
                   :children => []
                 )
@@ -285,7 +290,7 @@ module ERBook
                 # assign node content
                 if block_given?
                   @stack.push node
-                  content = content_from_block(node, &aBlock)
+                  content = content_from_block(node, &node_content)
                   @stack.pop
 
                   digest = ERBook.digest(content)

@@ -37,11 +37,12 @@ class String
   # Transforms this string into XHTML while ensuring that the
   # result contains one or more block-level elements at the root.
   #
-  # If aInline is true, then the resulting XHTML will be an *inline* string.
+  # inline:: If true, the resulting XHTML will *not*
+  #          contain a block-level element at the root.
   #
-  def to_xhtml aInline = false
+  def to_xhtml inline = false
     protect(self, VERBATIM_TAGS, true) do |text|
-      html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_maruku aInline }
+      html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_maruku inline }
 
       # Markdown's "code spans" should really be "pre spans"
       while html.gsub! %r{(<pre>)<code>(.*?)</code>(</pre>)}m, '\1\2\3'
@@ -58,12 +59,12 @@ class String
 
   # Returns the result of running this string through Maruku.
   #
-  # If aInline is true, then the resulting XHTML will
-  # *not* be wrapped in a XHTML paragraph element.
+  # inline:: If true, the resulting XHTML will *not*
+  #          be wrapped in a XHTML paragraph element.
   #
-  def thru_maruku aInline = false #:nodoc:
+  def thru_maruku inline = false #:nodoc:
     html = Maruku.new(self).to_html
-    html.sub! %r{\A<p>(.*)</p>\Z}, '\1' if aInline
+    html.sub! %r{\A<p>(.*)</p>\Z}, '\1' if inline
     html
   end
 
@@ -89,17 +90,18 @@ class String
   # that protected input to the given block, restores the
   # given tags in the result of the block and returns it.
   #
-  # If aVerbatim is true, the content of the elments having the given tags will
-  # not be temporarily altered so that process nested elements can be processed.
+  # verbatim:: If true, the content of the elments having the
+  #            given tags will not be temporarily altered so
+  #            that process nested elements can be processed.
   #
-  def protect aInput, aTags, aVerbatim #:nodoc: :yields: aInput
+  def protect input, tags, verbatim #:nodoc: :yields: input
     raise ArgumentError unless block_given?
 
-    input = aInput.dup
+    input = input.dup
     escapes = {}
 
     # protect the given tags by escaping them
-    aTags.each do |tag|
+    tags.each do |tag|
       input.gsub! %r{(<#{tag}.*?>)(.*?)(</#{tag}>)}m do
         head, body, tail = $1, $2, $3
 
@@ -109,7 +111,7 @@ class String
         body.gsub! %r/\\/, '\&\&'
 
         original =
-          if aVerbatim
+          if verbatim
             body
           else
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail

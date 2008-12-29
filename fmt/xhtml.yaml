@@ -41,36 +41,36 @@ code: |
   module ERBook
     class Template
       # Protects the given content from the text-to-XHTML conversion process.
-      def verbatim aContent
-        ERB::Util.html_escape aContent
+      def verbatim content
+        ERB::Util.html_escape content
       end
 
       # Returns XHTML for a hyperlink to the given
       # URL of the given label and mouse-hover title.
-      def hyperlink aUrl, aLabel = aUrl, aTitle = nil
-        %{<a href="#{aUrl}"#{%{ title="#{aTitle}"} if aTitle}>#{aLabel}</a>}
+      def hyperlink url, label = url, title = nil
+        %{<a href="#{url}"#{%{ title="#{title}"} if title}>#{label}</a>}
       end
 
       # Returns an <img/> tag that embeds the given image file.
       #
-      # aPath:: path to the image file
-      # aFormat:: format of the image file (e.g. PNG, JPEG, GIF, etc.)
-      # aAtts:: additional attributes for the <img> tag
+      # path::    path to the image file
+      # format::  format of the image file (e.g. PNG, JPEG, GIF, etc.)
+      # atts::    additional attributes for the <img> tag
       #
-      def embed_image_file aPath, aFormat = aPath[/\w+/], aAtts = {}
-        data = ERBook.base_64_encode File.read(aPath)
-        embed_image_data data, aFormat, aAtts
+      def embed_image_file path, format = path[/\w+/], atts = {}
+        data = ERBook.base_64_encode File.read(path)
+        embed_image_data data, format, atts
       end
 
       # Returns an <img/> tag that embeds the given raw image data.
       #
-      # aData:: raw image data
-      # aFormat:: format of the image file (e.g. PNG, JPEG, GIF, etc.)
-      # aAtts:: additional attributes for the <img> tag
+      # data::    raw image data
+      # format::  format of the image file (e.g. PNG, JPEG, GIF, etc.)
+      # atts::    additional attributes for the <img> tag
       #
-      def embed_image_data aData, aFormat, aAtts = {}
-        aAtts[:src] = ERBook.base_64_embed_image_data(aData, aFormat)
-        "<img#{aAtts.to_xml_atts}/>"
+      def embed_image_data data, format, atts = {}
+        atts[:src] = ERBook.base_64_embed_image_data(data, format)
+        "<img#{atts.to_xml_atts}/>"
       end
     end
 
@@ -115,8 +115,8 @@ code: |
       end
 
       # Returns a hyperlink to this node containing its title.
-      def title_link aTitle = nil
-        here_link here_frag, aTitle || title_xhtml
+      def title_link title = nil
+        here_link here_frag, title || title_xhtml
       end
 
       # Returns a hyperlink to this node
@@ -176,29 +176,31 @@ code: |
 
       private
 
-      def here_link aHereFrag, aLabel #:nodoc:
-        %{<a class="here" title="Permanent link to this section" href="##{aHereFrag}">#{aLabel}</a>}
+      def here_link here_frag, label #:nodoc:
+        %{<a class="here" title="Permanent link to this section" href="##{here_frag}">#{label}</a>}
       end
 
-      def list_link aHereFrag, aListFrag, aLabel #:nodoc:
-        %{<a class="list" title="Return to table of contents" id="#{aHereFrag}" href="##{aListFrag}">#{aLabel}</a>}
+      def list_link here_frag, list_frag, label #:nodoc:
+        %{<a class="list" title="Return to table of contents" id="#{here_frag}" href="##{list_frag}">#{label}</a>}
       end
     end
 
     # Encodes the given input in base64 format.
-    def ERBook.base_64_encode aInput #:nodoc:
-      [aInput].pack('m')
+    def ERBook.base_64_encode input #:nodoc:
+      [input].pack('m')
     end
 
     # Returns a string denoting embedded, base64 encoded data.
-    def ERBook.base_64_embed aData, aFormat #:nodoc:
-      "data:#{aFormat.to_s.downcase};base64,#{aData.tr("\n", '')}"
+    def ERBook.base_64_embed data, format #:nodoc:
+      "data:#{format.to_s.downcase};base64,#{data.tr("\n", '')}"
     end
 
     # Returns a string denoting embedded, base64 encoded image data.
-    # aFormat:: format of the image data (e.g. PNG, JPEG, GIF, etc.)
-    def ERBook.base_64_embed_image_data aData, aFormat #:nodoc:
-      base_64_embed aData, "image/#{aFormat}"
+    #
+    # format:: format of the image data (e.g. PNG, JPEG, GIF, etc.)
+    #
+    def ERBook.base_64_embed_image_data data, format #:nodoc:
+      base_64_embed data, "image/#{format}"
     end
 
     ##
@@ -234,11 +236,11 @@ code: |
 
       # Returns an <img/> tag that renders the image
       # data embedded as an ENTITY in the html DOCTYPE.
-      def to_xhtml aAtts = {}
-        aAtts[:alt] ||= name
-        aAtts[:src] = entity_xml
-        aAtts[:class] = :icon
-        "<img#{aAtts.to_xml_atts}/>"
+      def to_xhtml atts = {}
+        atts[:alt] ||= name
+        atts[:src] = entity_xml
+        atts[:class] = :icon
+        "<img#{atts.to_xml_atts}/>"
       end
     end
 
