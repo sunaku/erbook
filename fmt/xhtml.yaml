@@ -85,7 +85,6 @@ code: |
         @id ||= args[1]
       end
 
-
       ##
       # utility methods
       #
@@ -142,7 +141,6 @@ code: |
         "#{index_link}&nbsp;&nbsp;#{title_link}"
       end
 
-
       ##
       # URI fragments
       #
@@ -172,7 +170,6 @@ code: |
       def list_frag #:nodoc:
         @list_frag ||= "rev:#{here_frag}"
       end
-
 
       private
 
@@ -204,7 +201,7 @@ code: |
     end
 
     ##
-    # load admonition icons
+    # admonition icons
     #
 
     ICONS_DIR = File.join(ERBook::FORMATS_DIR, 'xhtml.icons')
@@ -303,7 +300,6 @@ nodes:
         <%= @node.content_xhtml_div %>
       </div>
 
-
   ##
   # Organization
   #
@@ -350,7 +346,6 @@ nodes:
         <%= @node.content_xhtml_div %>
       </div>
 
-
   ##
   # Admonitions
   #
@@ -370,7 +365,6 @@ nodes:
   caution: *admonition
   warning: *admonition
   important: *admonition
-
 
   ##
   # Auxilary materials (formal blocks)
@@ -436,7 +430,6 @@ nodes:
           raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
         end
       %>
-
 
   ##
   # Bibliography
@@ -759,18 +752,6 @@ styles:
       a img
       {
           _border           : none; /* for IE6 */
-      }
-
-    /* lists */
-
-      #content li:first-child
-      {
-          margin-top        : 1em;
-      }
-
-      #content li
-      {
-          margin-bottom     : 1em;
       }
 
     /* headings */

@@ -98,7 +98,7 @@ module ERBook
         end
 
       rescue Exception
-        error "Error when loading the format specification file (#{spec_file.inspect})"
+        error "Could not load format specification file #{spec_file.inspect}"
       end
 
     # load input document
@@ -216,15 +216,15 @@ module ERBook
           end
 
         # build the document tree
-          document = template.instance_eval { result(binding) }
+          document = template.instance_eval { result binding }
 
           # replace nodes with output
           expander = lambda do |n, buf|
             # calculate node output
             source = "#{spec_file}:nodes:#{n.type}:output"
             n.output = Template.new(
-              source, node_defs[n.type]['output'].to_s.chomp).
-              render_with(template_vars.merge(:@node => n))
+              source, node_defs[n.type]['output'].to_s.chomp
+            ).render_with(template_vars.merge(:@node => n))
 
             # replace node with output
             if node_defs[n.type]['silent']
@@ -245,7 +245,7 @@ module ERBook
         e.backtrace.reject! {|t| t =~ /^#{$0}:\d+/ } unless $DEBUG
 
         puts input # so the user can debug the line numbers in the stack trace
-        error "Error when processing the input document (#{input_file})"
+        error "Could not process input document #{input_file.inspect}"
       end
 
     # emit output document

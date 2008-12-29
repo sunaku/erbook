@@ -41,8 +41,10 @@ class String
   #          contain a block-level element at the root.
   #
   def to_xhtml inline = false
-    protect(self, VERBATIM_TAGS, true) do |text|
-      html = protect(text, PROTECTED_TAGS, false) {|s| s.thru_maruku inline }
+    with_protected_tags(self, VERBATIM_TAGS, true) do |text|
+      html = with_protected_tags(text, PROTECTED_TAGS, false) do
+        |s| s.thru_maruku inline
+      end
 
       # Markdown's "code spans" should really be "pre spans"
       while html.gsub! %r{(<pre>)<code>(.*?)</code>(</pre>)}m, '\1\2\3'
@@ -94,7 +96,7 @@ class String
   #            given tags will not be temporarily altered so
   #            that process nested elements can be processed.
   #
-  def protect input, tags, verbatim #:nodoc: :yields: input
+  def with_protected_tags input, tags, verbatim #:nodoc: :yields: input
     raise ArgumentError unless block_given?
 
     input = input.dup
@@ -125,7 +127,7 @@ class String
     end
 
     # invoke the given block with the protected input
-    output = yield(input)
+    output = yield input
 
     # restore the protected tags by unescaping them
     until escapes.empty?
