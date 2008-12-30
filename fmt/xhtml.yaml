@@ -556,7 +556,6 @@ output: |
         /* decorate external hyperlinks with a visual indicator */
         a:not([href^="#"])
         {
-            color               : #3366BB;
             background          : <%= ICON_BY_NAME['link'].data_css %>;
             background-position : center right;
             background-repeat   : no-repeat;
@@ -1106,12 +1105,12 @@ styles:
 
       a:link
       {
-          color             : #002BB8;
+          color             : #0038E1; /* maximum saturation of RoyalBlue */
       }
 
       a:visited
       {
-          color             : #5A3696;
+          color             : #800080;
       }
 
       a.here,
