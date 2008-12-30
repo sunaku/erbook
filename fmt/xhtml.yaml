@@ -547,7 +547,7 @@ output: |
 
       <% @spec['styles'].each_pair do |media, style| %>
         <style type="text/css" media="<%= media %>">
-        <![CDATA[<%= style %>]]>
+        <![CDATA[<%= ERB.new(style).result(binding) %>]]>
         </style>
       <% end %>
 
@@ -703,6 +703,12 @@ output: |
     </body>
   </html>
 
+# definition of font families for use in the CSS styles
+fonts:
+  serif:      Constantia, "Book Antiqua", "URW Bookman L", serif
+  sans-serif: Calibri, Verdana, sans-serif
+  monospace:  Monaco, Consolas, "Lucida Console", monospace
+
 styles:
   all: |
     body
@@ -710,7 +716,7 @@ styles:
         color               : #000000;
         background-color    : #FFFFFF;
         line-height         : 1.5em;
-        font-family         : Calibri, Verdana, sans-serif;
+        font-family         : <%= @spec['fonts']['sans-serif'] %>;
     }
 
     /* emphasis */
@@ -738,7 +744,7 @@ styles:
       code,
       pre
       {
-          font-family       : Monaco, Consolas, "Lucida Console", monospace;
+          font-family       : <%= @spec['fonts']['monospace'] %>;
           font-size         : 100%; /* appears like "size: small" otherwise */
       }
 
@@ -765,7 +771,7 @@ styles:
       .title
       {
           font-weight       : lighter;
-          font-family       : Constantia, "Book Antiqua", "URW Bookman L", serif;
+          font-family       : <%= @spec['fonts']['serif'] %>;
       }
 
       #lof h1,
@@ -1179,7 +1185,7 @@ styles:
       a:not([href^="#"]):after
       {
           content           : " " attr(href);
-          font-family       : Monaco, Consolas, "Lucida Console", monospace;
+          font-family       : <%= @spec['fonts']['monospace'] %>;
       }
 
       /* show name of destination for cross-references */
