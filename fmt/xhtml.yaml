@@ -534,10 +534,19 @@ output: |
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-      <meta name="date" content="<%= $date %>"/>
-      <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
       <meta name="generator" content="<%= ERBook::DISPLAY %>"/>
-      <title><%= $title.to_s.to_inline_xhtml %></title>
+
+      <% if $title %>
+        <title><%= $title.to_s.to_inline_xhtml %></title>
+      <% end %>
+
+      <% if $authors %>
+        <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
+      <% end %>
+
+      <% if $date %>
+        <meta name="date" content="<%= $date %>"/>
+      <% end %>
 
       <% if $feeds %>
         <% $feeds.each_pair do |url, fmt| %>
@@ -605,18 +614,27 @@ output: |
       <% if header = @types['header'].first %>
         <%= header.output %>
       <% else %>
-        <%= $logo if defined? $logo %>
-        <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
-        <h2 class="authors"><%=
-          $authors.map do |(name, url)|
-            if url
-              %{<a href="#{url}">#{name}</a>}
-            else
-              name
-            end
-          end.join(', ')
-        %></h2>
-        <h3 class="date"><%= $date %></h3>
+        <%= $logo if $logo %>
+
+        <% if $title %>
+          <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
+        <% end %>
+
+        <% if $authors %>
+          <h2 class="authors"><%=
+            $authors.map do |name, url|
+              if url
+                %{<a href="#{url}">#{name}</a>}
+              else
+                name
+              end
+            end.join(', ')
+          %></h2>
+        <% end %>
+
+        <% if $date %>
+          <h3 class="date"><%= $date %></h3>
+        <% end %>
       <% end %>
       <%= node = @types['header_inside_below'].first and node.output %>
       </div>
