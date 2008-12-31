@@ -1,0 +1,377 @@
+<% part "Formats" do %>
+  This part describes the default formats provided along with <%= $project %>. The <%= xref "SpecFile", "format specification files" %> for these formats can be found in the <tt>fmt/</tt> directory of the <%= $project %> installation directory (see <%= xref "Manifest" %>).
+
+  These formats are meant to serve as working examples. If you require more functionality from one of these formats, simply make a copy of the corresponding format specification file and edit the copy to suit your needs. If you would like to contribute or discuss your enhancements to these default formats, you can <%= xref "License", "contact the author" %>.
+
+  <% chapter "XHTML (web page)", "xhtml" do %>
+    This format generates a _monolithic_ XHTML document that allows users to easily search for a particular topic using nothing more than their web browser's built-in text search mechanism. This facilitates offline reading, where an Internet search engine is not available.
+
+    In the XHTML document, you will notice that the numbers of chapters, sections, figures, admonitions, etc. are hyperlinks that take you back to the corresponding place in the table of contents. These links make it easy to navigate the XHTML document, especially for users of text-only web browsers.
+
+    Furthermore, the XHTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of web browsers that support CSS3 selectors will notice that all hyperlinks have been expanded to include their target URL next to them.  Try the "print preview" function of your web browser to see how the XHTML document would appear when printed.
+
+    <% section "Text to XHTML conversion" do %>
+      The <tt>lib/<%= $program %>/to_xhtml.rb</tt> file inside <%= $project %>'s installation directory (see <%= xref "Manifest" %>) defines the following methods:
+
+      * `String#to_xhtml` - Transforms this string into XHTML while ensuring that the result contains one or more block-level elements at the root.
+
+      * `String.to_inline_xhtml` - Transforms this string into an *inline* XHTML string (one that does not contain any block-level XHTML elements at the root).
+
+      The default implementation of the `String#to_xhtml` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>to_xhtml.rb</tt> file and adjust the source code of the default `String#to_xhtml` and `String.to_inline_xhtml` methods accordingly.
+
+      For example, if you replace the entire <tt>to_xhtml.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
+
+      <code>
+      class String
+        # Transforms this string into XHTML while ensuring that the
+        # result contains one or more block-level elements at the root.
+        def to_xhtml
+          '<p style="border: thin solid red">' + self + '</p>'
+        end
+
+        # Transforms this string into an *inline* XHTML string (one that
+        # does not contain any block-level XHTML elements at the root).
+        def to_inline_xhtml
+          self
+        end
+      end
+      </code>
+
+      In addition to supporting Markdown syntax, the default implementation has some additional features which are described in the following subsections.
+
+      <% section "Syntax coloring for source code" do %>
+        Syntax coloring is _automatically added_ to source code found inside the **&lt;code&gt;** and **&lt;/code&gt;** HTML tags.  The syntax coloring library, [CodeRay](http://coderay.rubychan.de), currently supports the following programming languages:
+        * Ruby
+        * C
+        * Delphi
+        * HTML
+        * RHTML (Rails)
+        * Nitro-XHTML
+
+        <% section "Specifying the programming language" do %>
+          Because different programming languages have different syntax coloring schemes, you can specify the language of your source code using the `lang` attribute to ensure that only the appropriate coloring scheme is used. Note that unless the `lang` attribute is specified, _Ruby_ is assumed to be the programming language of all source code by default.
+
+          <% sampleCode = %q{
+          # Ruby ###########################
+          def hello
+            puts "Hello world!"
+          end
+
+
+          /* C ****************************/
+          #include <stdio.h>
+          int main(int argc, char **argv) {
+            printf("Hello world!\n");
+            return 0;
+          }
+
+
+          <!-- HTML ----------------------->
+          <html>
+            <body>
+              Hello world!
+            <body>
+          </html>
+          } %>
+
+          For example, here is some source code _without_ the `lang` attribute:
+
+          <code><%= verbatim sampleCode %></code>
+
+          And here is the same source code with a `lang="c"` attribute:
+
+          <code lang="c"><%= verbatim sampleCode %></code>
+
+          And here is the same source code with a `lang="html"` attribute:
+
+          <code lang="html"><%= verbatim sampleCode %></code>
+        <% end %>
+      <% end %>
+
+      <% section "Smart sizing of source code" do %>
+        Source code is _automatically sized_ to be displayed as either a line or paragraph of text, depending on whether it contains line breaks.
+
+        For example, here is a single line <code>life = true or false</code> of code. And here is a paragraph <code>life =
+        true or
+        false</code> of code.
+      <% end %>
+
+      <% section "Protecting verbatim text" do %>
+        Sometimes you just need to protect some text from being mangled by the text-to-XHTML conversion process . In such cases, you can wrap the text you want to proctect within **&lt;noformat&gt;** and **&lt;/noformat&gt;** tags.
+      <% end %>
+    <% end %>
+
+    <% section "Parameters" do %>
+      The XHTML format accepts the following document parameters.  To disable the default value for a particular parameter, simply set that parameter to `nil`.  For example, to disable the `$authors` parameter, you would write `$authors = nil` in your input document.
+
+      | Parameter   | Type     | Default value                   | Description                                                                                                                                                                                                 |
+      | ---------   | ----     | -------------                   | -----------                                                                                                                                                                                                 |
+      | `$title`    | `String` | `"$title"`                      | Title of the document.                                                                                                                                                                                      |
+      | `$subtitle` | `String` | `"$subtitle"`                   | Secondary title of the document.                                                                                                                                                                            |
+      | `$authors`  | `Hash`   | `{"$authors" => nil}`           | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided `String#to_xml_entities` method like this: `{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_xml_entities }` |
+      | `$date`     | `String` | `Time.now.strftime("%d %B %Y")` | Date when the document was written.                                                                                                                                                                         |
+      | `$logo`     | `String` | `nil`                           | Arbitrary content that goes above the document title in the default header.                                                                                                                                 |
+      | `$feeds`    | `Hash`   | `nil`                           | A mapping of feed URL to feed format. Here is an example: <code>$feeds = { "my_rss_feed.xml" => "rss", "my_atom_feed.xml" => "atom" }</code>                                                                |
+    <% end %>
+
+    <% section "Methods" do %>
+      The XHTML format provides the following methods. In the method declarations shown below,
+      * a pound sign (#) indicates that the method is an *instance method*, meaning that it can only be invoked on instances of a class, not on the classes themselves.
+      * a double colon sign (::) indicates that the method is a *class method*, meaning that it can only be invoked on a class.
+
+      <%
+        # load library for parsing method documentation
+        require 'erbook/rdoc'
+
+        RDoc::TopLevel.parse @format['code']
+        RDoc::TopLevel.parse_file 'lib/erbook/to_xhtml.rb'
+        RDoc::TopLevel.all_methods.each do |m|
+          paragraph "`#{m.decl}`" do
+            m.comment_html
+          end
+        end
+      %>
+    <% end %>
+
+    <% chapter "Nodes", "xhtml.nodes" do %>
+      Unless otherwise noted, all nodes defined by the XHTML format accept two arguments, in this order:
+      1.  a required *title* for the node
+      2.  an optional *unique identifier* for the node
+
+      The second argument is used by the cross-referencing nodes (see <%= xref "xhtml.nodes.xref" %> and <%= xref "xhtml.nodes.cite" %>), which allow you to refer to another node in the document by its unique identifier.
+
+      Furthermore, <%= xref "SpecFile.nodes", "node definitions" %> in the XHTML format have two additional parameters:
+
+      | Parameter | Type    | Description                                           |
+      | --------- | ----    | -----------                                           |
+      | toc       | Boolean | Include this node in the **Table of Contents** (TOC)? |
+      | lof       | Boolean | Include this node in the **List of Figures** (LOF)?   |
+
+      <% section "Structural nodes" do %>
+        The nodes described in this section form the overall structure of the output document.
+
+        <% section "header", "xhtml.nodes.header" do %>
+          This node overrides the logo, title, list of authors, and date when the document was written, all of which are shown at the top of the document.
+        <% end %>
+
+        <% section "footer", "xhtml.nodes.footer" do %>
+          This node overrides (1) the date when this document was generated and (2) the hyperlink to the <%= $project %> website, shown at the bottom of the document. The hyperlink is there as a way of saying thanks for <%= $project %>, the _wonderful_ little utility you have grown so fond of! ;-)
+        <% end %>
+
+        <% section "abstract", "xhtml.nodes.abstract" do %>
+          A summary of the entire document.  This is what most readers will _skim_ through, if you are lucky.  Alas, nobody reads entire documents these days! :-(
+        <% end %>
+
+        <% section "xref", "xhtml.nodes.xref" do %>
+          A cross-reference; a hyperlink that takes you to any node in the document.
+
+          The first argument of this node is either the unique identifier or the user-defined title of the node you wish to cross-reference. If no nodes in the document have the given identifier or user-defined title, then an error will be raised.
+
+          The second argument of this node overrides the default link text of the cross-reference.
+
+          For example, this node in the input document:
+
+              <%%= xref "SpecFile" %>
+
+          appears in the output document like this: <%= xref "SpecFile" %>.
+
+          As another example, this node in the input document:
+
+              <%%= xref "SpecFile", "custom link text" %>
+
+          appears in the output document like this: <%= xref "SpecFile", "custom link text" %>.
+        <% end %>
+      <% end %>
+
+      <% section "Organizational nodes" do %>
+        The nodes described in this section are meant to help organize the document's content logically.  Based on how deeply these nodes are nested in the document, their heading will be larger (shallow depth) or smaller (deep depth).
+
+        <% section "part", "xhtml.nodes.part" do %>
+          A collection of chapters.
+
+          <% part "An example" do %>
+            This is how a **part** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "chapter", "xhtml.nodes.chapter" do %>
+          A collection of sections.
+
+          <% chapter "An example" do %>
+            This is how a **chapter** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "section", "xhtml.nodes.section" do %>
+          A collection of paragraphs about a particular topic.
+
+          <% section "An example" do %>
+            This is how a **section** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "paragraph", "xhtml.nodes.paragraph" do %>
+          A collection of sentences about a particular idea.
+
+          <% paragraph "An example" do %>
+            This is how a **paragraph** node appears.  Notice that there is no LaTeX-style index number in the heading of this **paragraph** node.
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% section "Admonition nodes" do %>
+        An admonition is basically a box that is indented more deeply than the text surrounding it.  It is typically used to convey extraneous or pertinent information about the application of ideas discussed in the surrounding text.
+
+        I like to follow the KDE guidelines<%= cite "KDE.admonitions" %> when determining which admonition to use in my documents.
+
+        <% reference "KDE.admonitions" do %>
+          L. Watts, "Admonitions: Tips, hints, and Warnings", in _The KDE DocBook Authors guide_, Chapter 13, \[Online document], 22 September 2004 (Revision 1.00.00), \[cited 8 December 2007], Available at <%= hyperlink "http://l10n.kde.org/docs/markup/tips-hints-etc.html" %>
+        <% end %>
+
+        <% section "warning", "xhtml.nodes.warning" do %>
+          Use a **warning** node when "data loss could occur if you follow the procedure being described." <%= cite "KDE.admonitions" %>
+
+          <% warning "An example" do %>
+            This is how a **warning** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "caution", "xhtml.nodes.caution" do %>
+          bq. A note of caution. Use this for example when the reader may lose easily recovered or replaceable information (e.g. user settings), or when they could cause data loss if they don't correctly follow the procedure being outlined. <%= cite "KDE.admonitions" %>
+
+          <% caution "An example" do %>
+            This is how a **caution** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "important", "xhtml.nodes.important" do %>
+          Use an **important** node when:
+
+          bq. When there is no danger of data loss, but you wish to make clear to the reader a consequence that isn't immediately obvious (e.g. when changing the font for one instance of a program also changes the default setting, and this isn't clear from the GUI.) <%= cite "KDE.admonitions" %>
+
+          <% important "An example" do %>
+            This is how a **important** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "note", "xhtml.nodes.note" do %>
+          Use a **note** node to convey:
+
+          bq. Information the user should be aware of, but is peripheral to the actual task being described. <%= cite "KDE.admonitions" %>
+
+          <% note "An example" do %>
+            This is how a **note** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "tip", "xhtml.nodes.tip" do %>
+          Use a **tip** node when:
+
+          bq. When you're giving a hint to make things easier or more productive for the reader. <%= cite "KDE.admonitions" %>
+
+          <% tip "An example" do %>
+            This is how a **tip** node appears.
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% section "Auxilary materials" do %>
+        <% section "figure", "xhtml.nodes.figure" do %>
+          A diagram, sketch, image, or illustration; something that visually depicts an idea or thought.
+
+          <% figure "An example" do %>
+            This is how a **figure** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "table", "xhtml.nodes.table" do %>
+          Information (typically measurement data) represented in tabular form for easy reading, comparison, and analysis.
+
+          <% table "An example" do %>
+            This is how a **table** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "example", "xhtml.nodes.example" do %>
+          A sample application of an idea or thought.
+
+          <% example "An example" do %>
+            This is how a **example** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "equation", "xhtml.nodes.equation" do %>
+          A mathematical equation or formula.
+
+          <% equation "An example" do %>
+            This is how a **equation** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "procedure", "xhtml.nodes.procedure" do %>
+          An outline; a series of steps outlining some kind of process.
+
+          <% procedure "An example" do %>
+            This is how a **procedure** node appears.
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% section "Bibliographical nodes" do %>
+        The nodes in this section deal with attribution of ideas---an important weapon against plagiarism.
+
+        <% section "reference", "xhtml.nodes.reference" do %>
+          This node stores bibliography information about an information source that is relevant to your document.
+
+          If you wish to cite a certain source in several places in your document, start by creating a **reference** node first and then use a **cite** node (see <%= xref "xhtml.nodes.cite" %>) to perform the citation.
+
+          <% paragraph "An example" do %>
+            See <%= xref "xhtml.nodes.reference.example" %> for an example of how a **reference** node appears.
+          <% end %>
+
+          <% reference "xhtml.nodes.reference.example" do %>
+            This is how a **reference** node appears.
+          <% end %>
+        <% end %>
+
+        <% section "cite", "xhtml.nodes.cite" do %>
+          A citation to a **reference** node (see <%= xref "xhtml.nodes.reference" %>) in the document's bibliography.
+
+          The first argument of this node is the unique identifier of the reference node you wish to cite. You can specify additional arguments to give more detail about the citation.
+
+          For example, this node in the input document:
+
+              <%%= cite "xhtml.nodes.reference.example" %>
+
+          appears in the output document like this: <%= cite "xhtml.nodes.reference.example" %>
+
+          As another example, this node in the input document:
+
+              <%%= cite "xhtml.nodes.reference.example", "chapter 10", "page 53", "..." %>
+
+          appears in the output document like this: <%= cite "xhtml.nodes.reference.example", "chapter 10", "page 53", "..." %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <% patches_are_welcome = "This format is not yet implemented.  Patches are welcome! :-)" %>
+
+  <% chapter "Plain text", "text" do %>
+    <%= patches_are_welcome %>
+
+    <%= hyperlink "http://en.wikipedia.org/wiki/Plain_text" %>
+  <% end %>
+
+  <% chapter "LaTeX (PDF)", "latex" do %>
+    <%= patches_are_welcome %>
+
+    <%= hyperlink "http://www.latex-project.org" %>
+  <% end %>
+
+  <% chapter "UNIX manual page", "man" do %>
+    <%= patches_are_welcome %>
+
+    <%= hyperlink "http://en.wikipedia.org/wiki/Man_page" %>
+  <% end %>
+<% end %>

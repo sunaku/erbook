@@ -1,0 +1,97 @@
+<% chapter "Introduction" do %>
+  <% eruby_url = "http://en.wikipedia.org/wiki/ERuby" %>
+
+  <% project_summary do %>
+    **<%= $project %>** is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>) that allow scripting and dynamic content generation.
+
+    A working <%= xref "xhtml", "XHTML (web page)" %> format is provided, while <%= xref "latex", "LaTeX (PDF)" %>, <%= xref "man", "UNIX manual page" %>, and <%= xref "text", "plain text" %> formats are planned... <%= xref "License", "patches are welcome" %>!
+  <% end %>
+
+  **<%= $project %>** is exciting because:
+  * Its documents are scriptable [eRuby templates](<%= eruby_url %>).
+  * It lets you <%= xref "HelloWorld", "define your own document formats" %>.
+  * Its core contains less than 300 lines of code.
+
+  These features distinguish **<%= $project %>** from the competition, which offers neither scriptable documents nor definable document formats:
+  * [DocBook](http://www.docbook.org)
+  * [Deplate](http://deplate.sourceforge.net)
+  * [SiSU](http://www.jus.uio.no/sisu/SiSU/)
+  * [AsciiDoc](http://www.methods.co.nz/asciidoc/)
+  * [txt2tags](http://txt2tags.sourceforge.net)
+  * [Grutatxt](http://www.triptico.com/software/grutatxt.html)
+
+  <% section "Logistics" do %>
+    * <%= xref "history", "Release notes" %> --- history of project releases.
+    * [Source code](http://github.com/sunaku/<%= $program %>) --- obtain via [Git](http://git.or.cz) or browse online.
+    * [API reference](api/index.html) --- documentation for source code.
+
+    To get help or provide feedback, simply
+    <%= xref "License", "contact the authors" %>.
+
+    <% paragraph "Version numbers" do %>
+      **<%= $project %>** releases are numbered in *major.minor.patch*
+      form according to the [RubyGems rational versioning
+      policy](http://www.rubygems.org/read/chapter/7), which
+      can be summarized thus:
+
+      <table markdown="1">
+        <thead>
+          <tr>
+            <td rowspan="2">What increased in the version number?</td>
+            <td colspan="3">The increase indicates that the release:</td>
+          </tr>
+          <tr>
+            <th>Is backward compatible?</th>
+            <th>Has new features?</th>
+            <th>Has bug fixes?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>major</th>
+            <td style="background-color: #FFE4E1;">No</td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <th>minor</th>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <th>patch</th>
+            <td>Yes</td>
+            <td style="background-color: #FFE4E1;">No</td>
+            <td>Yes</td>
+          </tr>
+        </tbody>
+      </table>
+    <% end %>
+  <% end %>
+
+  <% section "License" do %>
+    <%# include ../LICENSE #%>
+  <% end %>
+
+  <% section "Credits" do %>
+    <%= $logo = "![#{$project} logo](#{$program}.png)".to_inline_xhtml %>
+    <%# include README #%>
+  <% end %>
+
+  <% section "Reviews" do %>
+    Vitor Peres in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/283052):
+
+    > I actually felt like printing \[this manual], because it's just so well-thought typographically... Even if \[**<%= $project %>**] weren't great by itself, I'd feel good just looking at the manual.
+
+
+    Ara T. Howard in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/282949):
+
+    > \[this manual is] a insanely complete and nice looking bit of documentation \[... **<%= $project %>**] looks like a great project
+
+
+    Martin DeMello in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/283304):
+
+    > Very nice work indeed!
+  <% end %>
+<% end %>

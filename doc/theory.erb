@@ -1,0 +1,186 @@
+<% chapter "Theory of operation" do %>
+  When you run <%= $project %>, it does the following:
+
+  1.  Loads the <%= xref "SpecFile", "format specification file" %>.
+
+  2.  Creates an **input document** by:
+
+      * Reading the input (the content of either the input file or the standard input stream) into memory.
+
+      * Evaluating <%= xref "include", "include directives" %> in the input.
+
+  3.  Transforms the input document into a **processed document** by:
+
+      * Building a **document tree** data structure from <%= xref "Nodes", "nodes" %> present in the input document.
+
+      * Replacing every node in the input document with the result of its <%= xref "SpecFile.nodes.output", "node output template" %>.
+
+  4.  Transforms the processed document into an **output document** according to the <%= xref "SpecFile.output", "document output template" %>.
+
+  5.  Prints the output document to the standard output stream.
+
+  Although there is only one document being processed here, we refer to it using three distinct terms: **input**, **processed**, and **output**; because the content of the document changes radically with every transformation.
+
+  <% section "Nodes" do %>
+    A node is a block of text that appears like this:
+
+        <%% node_type node_argument1, node_argument2, ... do |node_object| %>
+          node_content
+        <%% end %>
+
+    Or like this:
+
+        <%% node_type node_argument1, node_argument2, ... do %>
+          node_content
+        <%% end %>
+
+    Or like this:
+
+        <%%= node_type node_argument1, node_argument2, ... %>
+
+    Alternatively, you may omit the leading "<" and trailing "%>" characters from an eRuby directive if the directive spans an _entire_ line.  So, the above examples become:
+
+        %% node_type node_argument1, node_argument2, ... do |node_object|
+          node_content
+        %% end
+
+    And:
+
+        %% node_type node_argument1, node_argument2, ... do
+          node_content
+        %% end
+
+    And:
+
+        %%= node_type node_argument1, node_argument2, ...
+
+    Technically, nodes are Ruby method invocations composed of the following:
+
+    | Component                             | Description                                                                                          |
+    | ---------                             | -----------                                                                                          |
+    | `node_type`                           | name of the method being invoked                                                                     |
+    | `node_argument1, node_argument2, ...` | arguments for the method invocation                                                                  |
+    | `node_content`                        | a block argument being passed to the method invocation                                               |
+    | `node_object`                         | a `ERBook::Document::Node` object (see <%= xref "Node.class" %>) representing this method invocation |
+
+    A <%= xref "SpecFile", "format specification file" %> defines what types of nodes an input document may use.
+
+    <% section "The `ERBook::Document::Node` class", "Node.class" do %>
+      When <%= $project %> builds a document tree from the nodes in an input document, it stores information about these nodes into `ERBook::Document::Node` objects.  A `ERBook::Document::Node` object has the following properties (methods):
+
+      | Property | Type                                | Description                                                                                                                                                |
+      | -------- | ----                                | -----------                                                                                                                                                |
+      | type     | `String`                            | Name of the type of this node.                                                                                                                             |
+      | args     | `Array`                             | Arguments passed to this node.                                                                                                                             |
+      | content  | `String`                            | The block of text passed to this node.                                                                                                                     |
+      | output   | `String`                            | Result of the node output template for the content of this node.                                                                                           |
+      | digest   | `String`                            | A unique identifier for the content of this node.                                                                                                          |
+      | trace    | `Array`                             | A stack trace describing the location of this node in the input document.                                                                                  |
+      | index    | `String`                            | A LaTeX-style section number for this node.  This property is only present if the **index** parameter is enabled in the definition of this type of node.   |
+      | number   | `Integer`                           | An order-of-occurrence number for this node.  This property is only present if the **number** parameter is enabled in the definition of this type of node. |
+      | depth    | `Integer`                           | Distance from the root of the document tree to this node.                                                                                                  |
+      | parent   | `ERBook::Document::Node`            | The `ERBook::Document::Node` object which contains this node. The value of this property will be `nil` if this node is a root of the document tree.        |
+      | children | `Array` of `ERBook::Document::Node` | List of child nodes from the document tree.                                                                                                                |
+
+      Furthermore, the `ERBook::Document::Node` class is derived from [Ruby's `OpenStruct` class](http://www.ruby-doc.org/stdlib/libdoc/ostruct/rdoc/classes/OpenStruct.html), so you can define new properties for `ERBook::Document::Node` objects dynamically.
+    <% end %>
+  <% end %>
+
+  <% section "Format specification file", "SpecFile" do %>
+    A format specification file is a plain-text file marked up in [YAML syntax](http://yaml4r.sourceforge.net/cookbook/). Through the following parameters, it defines (1) what types of nodes an input document may contain, (2) how the content of those nodes is transformed into output, and (3) how the processed document is transformed into the output document.
+
+    | Parameter | Type     | Description                                                                                                                                                                                                                                        |
+    | --------- | ----     | -----------                                                                                                                                                                                                                                        |
+    | desc      | `String` | A short description of the output format.                                                                                                                                                                                                          |
+    | code      | `String` | Ruby code that will be loaded before the input document is processed. This source code will be evaluated inside the main <%= $project %> executable, so any file-system or path-dependent portions of this source code should take appropriate precautions. |
+    | nodes     | Hash     | A listing of <%= xref "SpecFile.nodes", "node definitions" %>.                                                                                                                                                                                     |
+    | output    | `String` | An eRuby template for the final output document. See <%= xref "SpecFile.output" %>.                                                                                                                                                                |
+
+    <%
+      # XXX: "declare" this local variable here (in the parent
+      #      scope) because it is initialized and used in two
+      #      different child scopes that exist at different depths
+      common_template_vars = nil
+    %>
+
+    <% section "Node definition", "SpecFile.nodes" do %>
+      A node definition is a mapping from a name (the "node type") to the following set of parameters:
+
+      | Parameter | Type     | Description                                                                              |
+      | --------- | ----     | -----------                                                                              |
+      | index     | Boolean  | Assign a LaTeX-style section number to this node?                                        |
+      | number    | Boolean  | Assign an order-of-occurrence number to this node?                                       |
+      | silent    | Boolean  | Suppress the output of this node?                                                        |
+      | output    | `String` | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>. |
+
+      You may define additional parameters in a node definition if you want.
+
+      <% section "Node output template", "SpecFile.nodes.output" do %>
+        A node output template (the **output** parameter in a node definition) is an eRuby template that transforms a node's content into output.  During the processing stage, <%= $project %> replaces all nodes in the input document with the result of this template _unless_ the **silent** parameter is enabled in this node's definition.
+
+        The following variables are available for use in this template:
+
+        | Variable | Type                                | Description                                                                                      |
+        | -------- | ----                                | -----------                                                                                      |
+        | `@node`  | `ERBook::Document::Node`            | The node for which this template is being evaluated.                                             |
+        <%= common_template_vars = %{
+        | `@roots` | `Array` of `ERBook::Document::Node` | All root nodes in the document tree.                                                             |
+        | `@nodes` | `Array` of `ERBook::Document::Node` | All nodes in the document tree.                                                                  |
+        | `@types` | `Hash`                              | Mapping from node type (`String`) to array of `ERBook::Document::Node` objects having that type. |
+        | `@spec`  | `Hash`                              | Data from the format specification file.                                                         |
+
+        #{PROJECT} also provides the following mappings inside the `@spec` variable:
+
+        | Expression     | Type     | Description                                    |
+        | ----------     | ----     | -----------                                    |
+        | `@spec[:name]` | `String` | Short-hand name of the current format.         |
+        | `@spec[:file]` | `String` | Path of the current format specification file. |
+        }.lstrip.gsub(/^ +/, '')
+        %>
+      <% end %>
+    <% end %>
+
+    <% section "Document output template", "SpecFile.output" do %>
+      A document output template (the **output** parameter in a format specification file) is an eRuby template that transforms a processed document into the final output document.
+
+      The following variables are available for use in this template:
+
+      | Variable   | Type     | Description                        |
+      | --------   | ----     | -----------                        |
+      | `@content` | `String` | Content of the processed document. |
+      <%= common_template_vars %>
+    <% end %>
+
+    <% section "Creating your own document format", "HelloWorld" do %>
+      Here is a working example to help you digest all that you've learned so far about format specification files. A few things to notice in this example are:
+
+      * We define a `generate_name()` method in <%= xref "HelloWorld.spec" %> and make use of it in the <%= xref "HelloWorld.input" %>. This shows how to provide format-specific functionality to an input document.
+
+      * We define a `$style` variable in <%= xref "HelloWorld.input" %> and make use of it in <%= xref "HelloWorld.spec" %>.  This shows how to pass parameters from an input document to your format specification file.
+
+      To run this example:
+
+      1.  Save the code shown in <%= xref "HelloWorld.spec" %> to a file named <tt>HelloWorld.spec</tt>
+
+      2.  Save the text shown in <%= xref "HelloWorld.input" %> to a file named <tt>HelloWorld.input</tt>
+
+      3.  Run this command:
+
+              <%= $program %> HelloWorld.spec HelloWorld.input > HelloWorld.output
+
+      4.  Examine the <tt>HelloWorld.output</tt> file to your satisfaction!
+
+      <% example "HelloWorld format specification file", "HelloWorld.spec" do %>
+        <code lang="rhtml"><%= verbatim File.read('doc/HelloWorld.spec') %></code>
+      <% end %>
+
+      <% example "Input document for HelloWorld format", "HelloWorld.input" do %>
+        <code lang="rhtml"><%= verbatim File.read('doc/HelloWorld.input') %></code>
+      <% end %>
+
+      <% example "Output of HelloWorld format", "HelloWorld.output" do %>
+        <%= `ruby bin/#{PROGRAM} -u doc/HelloWorld.spec doc/HelloWorld.input` %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

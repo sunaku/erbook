@@ -1,0 +1,62 @@
+<% chapter "Setup" do %>
+  <% section "Requirements" do %>
+    Your system needs the following software to run **<%= $project %>**.
+
+    | Software                        | Description               | Notes                               |
+    | --------                        | -----------               | -----                               |
+    | [Ruby](http://ruby-lang.org)    | Ruby language interpreter | Version 1.8.7 or newer is required. |
+    | [RubyGems](http://rubygems.org) | Ruby packaging system     | Version 1.0.0 or newer is required. |
+  <% end %>
+
+  <% section "Installation" do %>
+    You can install **<%= $project %>** by running this command:
+
+        gem install <%= $program %>
+
+    To check whether the installation was sucessful, run this command:
+
+        <%= $program %> -v
+
+    If the installation was successful, you will see output like this:
+
+    <pre><%= verbatim `ruby bin/#{$program} -v` %></pre>
+
+    Otherwise, you can <%= xref "License", "contact the author" %> for help.
+  <% end %>
+
+  <% section "Manifest" do %>
+    You will see the following items inside **<%= $project %>**'s installation directory, whose path you can determine by running this command:
+
+        <%= $program %> -v
+
+    * <tt>bin/</tt>
+
+      * <tt><%= $program %></tt> --- the main **<%= $project %>** executable.
+
+    * <tt>fmt/</tt> --- contains the predefined set of <%= xref "SpecFile", "format specification files" %>. If you ever need to install your custom format specification file globally, then put it inside this directory.
+
+    <% ERBook::FORMAT_FILES.each do |file| %>
+      * <tt><%= File.basename(file) %></tt> --- <%= YAML.load_file(file)['desc'] %>
+    <% end %>
+
+    * <tt>lib/</tt>
+
+      * <tt><%= $program %>.rb</tt> --- the main **<%= $project %>** library.
+
+      * <tt><%= $program %>/</tt>
+
+        * <tt>to_xhtml.rb</tt> --- provides methods (see <%= xref "Text to XHTML conversion" %>) for the <%= xref "xhtml" %> format.
+
+        * <tt>rdoc.rb</tt> --- provides RDoc parse trees to Ruby code.
+
+    * <tt>doc/</tt> --- contains this manual and other documentation.
+
+      * <tt><%= $program %>.svg</tt> --- source file of the **<%= $project %>** logo.
+
+      * <tt>index.erb</tt> --- source file of this manual.
+
+      * <tt>api/</tt> --- API reference documentation.
+
+    * <tt>LICENSE</tt> --- project license and copyright notice.
+  <% end %>
+<% end %>

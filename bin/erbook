@@ -1,7 +1,5 @@
 #!/usr/bin/ruby -w
 #
-# erbook is an extensible document processor based on eRuby.
-#
 # * The standard input stream will be read if an input file is not specified.
 #
 # * The final output document will be written to the standard output stream.
@@ -15,52 +13,29 @@
 #   erbook [Option...] FormatFile [InputFile]
 #
 
-require File.join(File.dirname(__FILE__), '..', 'lib', 'erbook')
+require 'rubygems'
+require 'inochi'
 
-# XXX: the basename() is for being launched by a RubyGems executable
-if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
-  require 'yaml'
-
-  ##
-  # command line
-  #
-  
-  begin require 'rubygems' rescue LoadError end
-  require 'trollop'
-
-  options = Trollop.options do
-    # show program description located at the top of this file
-    banner File.read(__FILE__)[/\A.*?^$\n/m].
-           gsub(/^# ?/, '').sub(/\A.*?\n/, '')
-    banner ''
-
+# command line
+  options = Inochi.main :ERBook do
     # show list of available formats
-    banner 'FormatName:'
+    text 'FormatName:'
+
+    require 'yaml'
     ERBook::FORMAT_FILES.each do |file|
       name = File.basename(file, '.yaml')
       desc = YAML.load_file(file)['desc'] rescue nil
       banner '%16s:   %s' % [name, desc]
     end
-    banner ''
+
+    text ''
 
     # show list of command-line options
-    banner 'Option:'
+    text 'Option:'
     opt :unindent, 'Unindent node content hierarchically'
-
-    # show program version information
-    version [
-      "project: #{ERBook::PROJECT}",
-      "version: #{ERBook::VERSION}",
-      "release: #{ERBook::RELEASE}",
-      "website: #{ERBook::WEBSITE}",
-      "install: #{ERBook::INSTALL_DIR}",
-    ].join("\n")
   end
 
-  ##
-  # program body
-  #
- 
+# program body
   format = ARGV.shift or
   raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
 
@@ -72,4 +47,3 @@ if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
   end
 
   puts ERBook::Document.new(format, input_text, input_file, options)
-end
