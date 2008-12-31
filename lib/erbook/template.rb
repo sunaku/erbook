@@ -5,8 +5,14 @@ module ERBook
   # buffer (which contains the result of template evaluation thus
   # far) and provides sandboxing for isolated template rendering.
   #
-  # Single-line, eRuby directives (lines that begin
-  # with '%') are supported by this template.
+  # In addition to the standard <% eRuby %> directives, this template supports:
+  #
+  # * Lines that begin with '%' are treated as normal eRuby directives.
+  #
+  # * Special <%#include FILE_TO_INCLUDE #%> directives are replaced by the
+  #   result of reading and evaluating the FILE_TO_INCLUDE in the current
+  #   context.
+  #
   class Template < ERB
     # The result of template evaluation thus far.
     attr_reader :buffer
@@ -25,6 +31,36 @@ module ERBook
     # safe_level::  See safe_level in ERB::new().
     #
     def initialize source, input, unindent = false, safe_level = nil
+      # expand all "include" directives in the input
+      begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
+        file, line = $1, $`.count("\n").next
+
+        # provide more accurate stack trace for
+        # errors originating from included files.
+        #
+        # NOTE: eRuby does NOT seem to provide line numbers for trace
+        #       entries that are deeper than the input document itself
+        #
+        "<%
+          begin
+            %>#{File.read file}<%
+          rescue Exception => err
+            bak = err.backtrace
+
+            # set the input document's originating line number to
+            # where this file was included in the input document
+            top = bak.find {|t| t =~ /#{/#{source}/}:\\d+$/ }
+            top.sub! %r{\\d+$}, '#{line}'
+
+            # add a stack trace entry mentioning this included file
+            ins = bak.index top
+            bak.insert ins, #{file.inspect}
+
+            raise err
+          end
+        %>"
+      end
+
       # convert "% at beginning of line" usage into <% normal %> usage
       input.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
       input.gsub! %r{^([ \t]*)%%}, '\1%'

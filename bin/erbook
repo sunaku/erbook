@@ -109,36 +109,6 @@ module ERBook
       end
 
       begin
-        # expand all "include" directives in the input
-          begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
-            file, line = $1, $`.count("\n").next
-
-            # provide more accurate stack trace for
-            # errors originating from included files.
-            #
-            # NOTE: eRuby does NOT seem to provide line numbers for trace
-            #       entries that are deeper than the input document itself
-            #
-            "<%
-              begin
-                %>#{File.read file}<%
-              rescue Exception => err
-                bak = err.backtrace
-
-                # set the input document's originating line number to
-                # where this file was included in the input document
-                top = bak.find {|t| t =~ /#{/#{input_file}/}:\\d+$/ }
-                top.sub! %r/\\d+$/, '#{line}'
-
-                # add a stack trace entry mentioning this included file
-                ins = bak.index top
-                bak.insert ins, #{file.inspect}
-
-                raise err
-              end
-            %>"
-          end
-
         # create sandbox for input evaluation
           template = Template.new(input_file, input, opts[:unindent])
 
