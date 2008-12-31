@@ -119,7 +119,7 @@ class String
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail
           end
 
-        escaped = ERBook.digest(original)
+        escaped = ERBook::Document.digest(original)
         escapes[escaped] = original
 
         escaped

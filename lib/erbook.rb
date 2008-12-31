@@ -11,3 +11,6 @@ module ERBook
   FORMATS_DIR = File.join INSTALL_DIR, 'fmt'
   FORMAT_FILES = Dir[File.join(FORMATS_DIR, '*.yaml')]
 end
+
+$LOAD_PATH.unshift File.dirname(__FILE__)
+require 'erbook/document'

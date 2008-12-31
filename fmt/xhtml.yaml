@@ -74,7 +74,7 @@ code: |
       end
     end
 
-    class Node
+    class Document::Node
       # Returns the user-defined title for this node's content.
       def title
         @title ||= args[0]

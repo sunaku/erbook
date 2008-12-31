@@ -15,211 +15,61 @@
 #   erbook [Option...] FormatFile [InputFile]
 #
 
-$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
-require 'erbook'
-require 'erbook/template'
+require File.join(File.dirname(__FILE__), '..', 'lib', 'erbook')
 
-module ERBook
-  # Prints the given message and raises the given error.
-  def ERBook.error message, error = $!
-    STDERR.printf "%s:\n\n", message
-    raise error
+# XXX: the basename() is for being launched by a RubyGems executable
+if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
+  require 'yaml'
+
+  ##
+  # command line
+  #
+  
+  begin require 'rubygems' rescue LoadError end
+  require 'trollop'
+
+  options = Trollop.options do
+    # show program description located at the top of this file
+    banner File.read(__FILE__)[/\A.*?^$\n/m].
+           gsub(/^# ?/, '').sub(/\A.*?\n/, '')
+    banner ''
+
+    # show list of available formats
+    banner 'FormatName:'
+    ERBook::FORMAT_FILES.each do |file|
+      name = File.basename(file, '.yaml')
+      desc = YAML.load_file(file)['desc'] rescue nil
+      banner '%16s:   %s' % [name, desc]
+    end
+    banner ''
+
+    # show list of command-line options
+    banner 'Option:'
+    opt :unindent, 'Unindent node content hierarchically'
+
+    # show program version information
+    version [
+      "project: #{ERBook::PROJECT}",
+      "version: #{ERBook::VERSION}",
+      "release: #{ERBook::RELEASE}",
+      "website: #{ERBook::WEBSITE}",
+      "install: #{ERBook::INSTALL_DIR}",
+    ].join("\n")
   end
 
-  require 'digest/sha1'
-  # Returns a digest of the given string that
-  # will not be altered by String#to_xhtml.
-  def ERBook.digest input
-    Digest::SHA1.hexdigest(input.to_s).
+  ##
+  # program body
+  #
+ 
+  format = ARGV.shift or
+  raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
 
-    # XXX: surround all digits with alphabets so
-    #      Maruku doesn't change them into HTML
-    gsub(/\d/, 'z\&z')
+  if input_file = ARGV.shift
+    input_text = File.read(input_file)
+  else
+    input_file = 'STDIN'
+    input_text = STDIN.read
   end
 
-  require 'ostruct'
-  class Node < OpenStruct
-    # deprecated in Ruby 1.8; removed in Ruby 1.9
-    undef id if respond_to? :id
-    undef type if respond_to? :type
-  end
-
-  # XXX: the basename() is for being launched by a RubyGems executable
-  if __FILE__ == $0 or File.basename(__FILE__) == File.basename($0)
-    require 'yaml'
-
-    # parse command-line options
-      begin require 'rubygems' rescue LoadError end
-      require 'trollop'
-
-      opts = Trollop::options do
-        # show program description located at the top of this file
-        banner File.read(__FILE__)[/\A.*?^$\n/m].
-               gsub(/^# ?/, '').sub(/\A.*?\n/, '')
-        banner ''
-
-        # show list of available formats
-        banner 'FormatName:'
-        ERBook::FORMAT_FILES.each do |file|
-          name = File.basename(file, '.yaml')
-          desc = YAML.load_file(file)['desc'] rescue nil
-          banner '%16s:   %s' % [name, desc]
-        end
-        banner ''
-
-        # show list of command-line options
-        banner 'Option:'
-        opt :unindent, 'Unindent node content hierarchically'
-
-        # show program version information
-        version [
-          "project: #{ERBook::PROJECT}",
-          "version: #{ERBook::VERSION}",
-          "release: #{ERBook::RELEASE}",
-          "website: #{ERBook::WEBSITE}",
-          "install: #{ERBook::INSTALL_DIR}",
-        ].join("\n")
-      end
-
-    # load format specification file
-      spec_file = ARGV.shift or
-        raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
-
-      File.file? spec_file or
-        spec_file = File.join(ERBook::FORMATS_DIR, spec_file + '.yaml')
-
-      begin
-        spec_data = YAML.load_file(spec_file)
-        spec_data[:file] = File.expand_path(spec_file)
-        spec_data[:name] = File.basename(spec_file).sub(/\..*?$/, '')
-
-        if spec_data.key? 'code'
-          eval spec_data['code'].to_s, TOPLEVEL_BINDING, "#{spec_file}:code"
-        end
-
-      rescue Exception
-        error "Could not load format specification file #{spec_file.inspect}"
-      end
-
-    # load input document
-      if input_file = ARGV.shift
-        input = File.read input_file
-      else
-        input_file, input = 'STDIN', STDIN.read
-      end
-
-      begin
-        # create sandbox for input evaluation
-          template = Template.new(input_file, input, opts[:unindent])
-
-          template_vars = {
-            :@spec  => spec_data,
-            :@roots => roots = [], # root nodes of all trees
-            :@nodes => nodes = [], # all nodes in the forest
-            :@types => types = Hash.new {|h,k| h[k] = []}, # nodes by type
-          }.each_pair {|k,v| template.instance_variable_set(k, v) }
-
-          node_defs = spec_data['nodes'].each_pair do |type, defn|
-            # XXX: using a string because define_method()
-            #      does not accept a block until Ruby 1.9
-            template.instance_eval %{
-              def #{type} *node_args, &node_content
-                node = Node.new(
-                  :type => #{type.inspect},
-                  :args => node_args,
-                  :trace => caller,
-                  :children => []
-                )
-                @nodes << node
-                @types[node.type] << node
-
-                # calculate occurrence number for this node
-                if #{defn['number']}
-                  @count ||= Hash.new {|h,k| h[k] = []}
-                  node.number = (@count[node.type] << node).length
-                end
-
-                @stack ||= []
-
-                # assign node family
-                if parent = @stack.last
-                  parent.children << node
-                  node.parent = parent
-                  node.depth = parent.depth.next
-
-                  # calculate latex-style index number for this node
-                  if #{defn['index']}
-                    branches = parent.children.select {|n| n.index}
-                    node.index = [parent.index, branches.length.next].join('.')
-                  end
-                else
-                  @roots << node
-                  node.parent = nil
-                  node.depth = 0
-
-                  # calculate latex-style index number for this node
-                  if #{defn['index']}
-                    branches = @roots.select {|n| n.index}
-                    node.index = branches.length.next.to_s
-                  end
-                end
-
-                # assign node content
-                if block_given?
-                  @stack.push node
-                  content = content_from_block(node, &node_content)
-                  @stack.pop
-
-                  digest = ERBook.digest(content)
-                  self.buffer << digest
-                else
-                  content = nil
-                  digest = ERBook.digest(node.object_id)
-                end
-
-                node.content = content
-                node.digest = digest
-
-                digest
-              end
-            },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
-          end
-
-        # build the document tree
-          document = template.instance_eval { result binding }
-
-          # replace nodes with output
-          expander = lambda do |n, buf|
-            # calculate node output
-            source = "#{spec_file}:nodes:#{n.type}:output"
-            n.output = Template.new(
-              source, node_defs[n.type]['output'].to_s.chomp
-            ).render_with(template_vars.merge(:@node => n))
-
-            # replace node with output
-            if node_defs[n.type]['silent']
-              buf[n.digest] = ''
-              buf = n.output
-            else
-              buf[n.digest] = n.output
-            end
-
-            # repeat for all child nodes
-            n.children.each {|c| expander[c, buf] }
-          end
-
-          roots.each {|n| expander[n, document] }
-
-      rescue Exception => e
-        # omit erbook internals from the stack trace
-        e.backtrace.reject! {|t| t =~ /^#{$0}:\d+/ } unless $DEBUG
-
-        puts input # so the user can debug the line numbers in the stack trace
-        error "Could not process input document #{input_file.inspect}"
-      end
-
-    # emit output document
-      puts Template.new("#{spec_file}:output", spec_data['output'].to_s).
-           render_with(template_vars.merge(:@content => document))
-  end
+  puts ERBook::Document.new(format, input_text, input_file, options)
 end
