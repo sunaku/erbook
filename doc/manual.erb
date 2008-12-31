@@ -19,10 +19,11 @@
   log_url = File.join(ERBook::WEBSITE, 'log')
 
   # parameters for the XHTML format
-  $title   = "#{ERBook::DISPLAY} user manual"
-  $authors = { 'Suraj N. Kurapati' => 'http://snk.tuxfamily.org' }
-  $feeds   = { ann_url => :rss }
-  $logo    = '![erbook logo](erbook.png)'.to_xhtml
+  $title    = "#{ERBook::DISPLAY} user manual"
+  $subtitle = ERBook::SUMMARY
+  $authors  = { 'Suraj N. Kurapati' => 'http://snk.tuxfamily.org' }
+  $feeds    = { ann_url => :rss }
+  $logo     = '![erbook logo](erbook.png)'.to_xhtml
 
   def introduction
     %{
@@ -550,6 +551,7 @@
       | Parameter   | Type     | Default value                   | Description                                                                                                                                                                                                 |
       | ---------   | ----     | -------------                   | -----------                                                                                                                                                                                                 |
       | `$title`    | `String` | `"$title"`                      | Title of the document.                                                                                                                                                                                      |
+      | `$subtitle` | `String` | `"$subtitle"`                   | Secondary title of the document.                                                                                                                                                                            |
       | `$authors`  | `Hash`   | `{"$authors" => nil}`           | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided `String#to_xml_entities` method like this: `{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_xml_entities }` |
       | `$date`     | `String` | `Time.now.strftime("%d %B %Y")` | Date when the document was written.                                                                                                                                                                         |
       | `$logo`     | `String` | `nil`                           | Arbitrary content that goes above the document title in the default header.                                                                                                                                 |

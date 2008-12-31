@@ -471,9 +471,10 @@ nodes:
 output: |
   <%
     # set default parameter values
-    $title   = '$title' unless defined? $title
-    $authors = {'$authors' => nil} unless defined? $authors
-    $date    = Time.now.strftime("%d %B %Y") unless defined? $date
+    $title    = '$title' unless defined? $title
+    $subtitle = '$subtitle' unless defined? $subtitle
+    $authors  = {'$authors' => nil} unless defined? $authors
+    $date     = Time.now.strftime("%d %B %Y") unless defined? $date
 
     abstract = @types['abstract'].first
 
@@ -618,6 +619,10 @@ output: |
 
         <% if $title %>
           <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
+        <% end %>
+
+        <% if $subtitle %>
+          <h2 class="subtitle"><%= $subtitle.to_s.to_inline_xhtml %></h2>
         <% end %>
 
         <% if $authors %>
