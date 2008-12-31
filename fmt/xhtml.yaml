@@ -729,6 +729,8 @@ styles:
 
       em
       {
+          font-family       : <%= @spec['fonts']['serif'] %>;
+          font-size         : 105%;
       }
 
       hr
