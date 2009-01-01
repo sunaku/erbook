@@ -1,6 +1,8 @@
 require 'erb'
+require 'pathname'
 
 module ERBook
+  ##
   # An eRuby template which allows access to the underlying result
   # buffer (which contains the result of template evaluation thus
   # far) and provides sandboxing for isolated template rendering.
@@ -9,9 +11,15 @@ module ERBook
   #
   # * Lines that begin with '%' are treated as normal eRuby directives.
   #
-  # * Special <%#include FILE_TO_INCLUDE #%> directives are replaced by the
-  #   result of reading and evaluating the FILE_TO_INCLUDE in the current
-  #   context.
+  # * Include directives (<%#include YOUR_PATH #%>) are replaced by the result
+  #   of reading and evaluating the YOUR_PATH file in the current context.
+  #
+  #   * Unless YOUR_PATH is an absolute path, it is treated as being
+  #     relative to the file which contains the include directive.
+  #
+  #   * Errors originating from included files are given a proper
+  #     stack trace which shows the chain of inclusion plus any
+  #     further trace steps originating from the included file itself.
   #
   # * eRuby directives delimiting Ruby blocks (<% ...  do %>
   #   ...  <% end %>) can be heirarchically unindented by the
@@ -27,8 +35,7 @@ module ERBook
     #   so that the user can better determine the source of an error.
     #
     # @param [String] input
-    #   A string containing eRuby directives.  This
-    #   string will be modified by this method!
+    #   A string containing eRuby directives.
     #
     # @param [boolean] unindent
     #   If true, then all content blocks will be unindented hierarchically,
@@ -39,34 +46,92 @@ module ERBook
     #
     def initialize source, input, unindent = false, safe_level = nil
       # expand all "include" directives in the input
-      begin end while input.gsub! %r{<%#\s*include\s+(.+?)\s*#%>} do
-        file, line = $1, $`.count("\n").next
+      expander = lambda do |src_file, src_text, path_stack, stack_trace|
+        src_path = File.expand_path(src_file)
+        src_line = 1 # line number of the current include directive in src_file
 
-        # provide more accurate stack trace for
-        # errors originating from included files.
-        #
-        # NOTE: eRuby does NOT seem to provide line numbers for trace
-        #       entries that are deeper than the input document itself
-        #
-        "<%
-          begin
-            %>#{File.read file}<%
-          rescue Exception => err
-            bak = err.backtrace
+        chunks = src_text.split(/<%#\s*include\s+(.+?)\s*#%>/)
 
-            # set the input document's originating line number to
-            # where this file was included in the input document
-            top = bak.find {|t| t =~ /#{/#{source}/}:\\d+$/ }
-            top.sub! %r{\\d+$}, '#{line}'
+        path_stack.push src_path
+        chunks.each_with_index do |chunk, i|
+          # even number: chunk is not an include directive
+          if i & 1 == 0
+            src_line += chunk.count("\n")
 
-            # add a stack trace entry mentioning this included file
-            ins = bak.index top
-            bak.insert ins, #{file.inspect}
+          # odd number: chunk is the target of the include directive
+          else
+            # resolve correct path of target file
+              dst_file = chunk
 
-            raise err
+              unless Pathname.new(dst_file).absolute?
+                # target is relative to the file in
+                # which the include directive exists
+                dst_file = File.join(File.dirname(src_file), dst_file)
+              end
+
+              dst_path = File.expand_path(dst_file)
+
+            # include the target file
+              if path_stack.include? dst_file
+                raise "Cannot include #{dst_file.inspect} at #{src_file.inspect}:#{src_line} because that would cause an infinite loop in the inclusion stack: #{path_stack.inspect}."
+              else
+                stack_trace.push "#{src_path}:#{src_line}"
+                dst_text = eval('File.read dst_file', binding, src_file, src_line)
+
+                # recursively expand any include directives within
+                # the expansion of the current include directive
+                dst_text = expander[dst_file, dst_text, path_stack, stack_trace]
+
+                # provide more accurate stack trace for
+                # errors originating from included files
+                line_var = "__erbook_var_#{dst_file.object_id.abs}__"
+                dst_text = %{<%
+                  #{line_var} = __LINE__ + 2 # content is 2 newlines below
+                  begin
+                    %>#{dst_text}<%
+                  rescue Exception => err
+                    bak = err.backtrace
+
+                    top = []
+                    found_top = false
+                    prev_line = nil
+
+                    bak.each do |step|
+                      if step =~ /^#{/#{source}/}:(\\d+)(.*)/
+                        line, desc = $1, $2
+                        line = line.to_i - #{line_var} + 1
+
+                        if line > 0 and line != prev_line
+                          top << "#{dst_path}:\#{line}\#{desc}"
+                          found_top = true
+                          prev_line = line
+                        end
+                      elsif !found_top
+                        top << step
+                      end
+                    end
+
+                    if found_top
+                      bak.replace top
+                      bak.concat #{stack_trace.reverse.inspect}
+                    end
+
+                    raise err
+                  end
+                %>}
+
+                stack_trace.pop
+              end
+
+              chunks[i] = dst_text
           end
-        %>"
+        end
+        path_stack.pop
+
+        chunks.join
       end
+
+      input = expander[source, input, [], []]
 
       # convert "% at beginning of line" usage into <% normal %> usage
       input.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
