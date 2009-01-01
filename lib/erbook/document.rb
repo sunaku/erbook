@@ -5,19 +5,34 @@ require 'erbook/template'
 
 module ERBook
   class Document
-    attr_reader :format, :roots, :nodes, :nodes_by_type
+    # Data from the format specification file.
+    attr_reader :format
+
+    # All root nodes in the document.
+    attr_reader :roots
+
+    # All nodes in the document.
+    attr_reader :nodes
+
+    # All nodes in the document arranged by node type.
+    attr_reader :nodes_by_type
 
     ##
-    # format::      either the short-hand name of a built-in format
-    #               or the path to a format specification file
+    # @param [String] format
+    #   Either the short-hand name of a built-in format
+    #   or the path to a format specification file.
     #
-    # input_text::  the body of the input document
+    # @param [String] input_text
+    #   The body of the input document.
     #
-    # input_file::  name of the file from which the input document originated
+    # @param [String] input_file
+    #   Name of the file from which the input document originated.
     #
-    # options::     a Hash containing overrides for the following parameters:
+    # @param [Hash] options
+    #   Additional method parameters:
     #
-    #               :unindent => unindent node content hierarchically?
+    #   [boolean] :unindent =>
+    #     If true, all node content is unindented hierarchically.
     #
     def initialize format, input_text, input_file, options = {}
       # process format specification

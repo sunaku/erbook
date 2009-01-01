@@ -13,22 +13,29 @@ module ERBook
   #   result of reading and evaluating the FILE_TO_INCLUDE in the current
   #   context.
   #
+  # * eRuby directives delimiting Ruby blocks (<% ...  do %>
+  #   ...  <% end %>) can be heirarchically unindented by the
+  #   crown margin of the opening (<% ...  do %>) delimiter.
+  #
   class Template < ERB
     # The result of template evaluation thus far.
     attr_reader :buffer
 
-    # source::      String that replaces the ambiguous '(erb)'
-    #               identifier in stack traces, so that the user
-    #               can better determine the source of an error.
+    ##
+    # @param [String] source
+    #   Replacement for the ambiguous '(erb)' identifier in stack traces;
+    #   so that the user can better determine the source of an error.
     #
-    # input::       String containing eRuby directives.  This
-    #               string will be modified by this method!
+    # @param [String] input
+    #   A string containing eRuby directives.  This
+    #   string will be modified by this method!
     #
-    # unindent::    If true, then all content blocks will be
-    #               unindented hierarchically, by the leading
-    #               space of their 'do' and 'end' delimiters.
+    # @param [boolean] unindent
+    #   If true, then all content blocks will be unindented hierarchically,
+    #   by the leading space of their 'do' and 'end' delimiters.
     #
-    # safe_level::  See safe_level in ERB::new().
+    # @param safe_level
+    #   See safe_level in ERB::new().
     #
     def initialize source, input, unindent = false, safe_level = nil
       # expand all "include" directives in the input
