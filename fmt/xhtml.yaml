@@ -258,215 +258,196 @@ code: |
 
 
 nodes:
-  ##
   # Structure
-  #
+    header: &header
+      toc: false
+      lof: false
+      index: false
+      number: false
+      silent: true
+      output: <%= @node.content_xhtml %>
 
-  header: &header
-    toc: false
-    lof: false
-    index: false
-    number: false
-    silent: true
-    output: <%= @node.content_xhtml %>
+    header_outside_above: &header_insert
+      toc: false
+      lof: false
+      index: false
+      number: false
+      silent: true
+      output: <div class="<%= @node.type %>"><%= @node.content_xhtml %></div>
 
-  header_outside_above: &header_insert
-    toc: false
-    lof: false
-    index: false
-    number: false
-    silent: true
-    output: <div class="<%= @node.type %>"><%= @node.content_xhtml %></div>
+    header_inside_above:  *header_insert
+    header_inside_below:  *header_insert
+    header_outside_below: *header_insert
 
-  header_inside_above:  *header_insert
-  header_inside_below:  *header_insert
-  header_outside_below: *header_insert
+    footer:               *header
+    footer_outside_above: *header_insert
+    footer_inside_above:  *header_insert
+    footer_inside_below:  *header_insert
+    footer_outside_below: *header_insert
 
-  footer:               *header
-  footer_outside_above: *header_insert
-  footer_inside_above:  *header_insert
-  footer_inside_below:  *header_insert
-  footer_outside_below: *header_insert
+    abstract:
+      toc: false
+      lof: false
+      index: false
+      number: false
+      silent: true
+      output: |
+        <div id="<%= @node.type_label %>">
+          <h1 class="title"><%= @node.type_label_here_link %></h1>
+          <%= @node.content_xhtml_div %>
+        </div>
 
-  abstract:
-    toc: false
-    lof: false
-    index: false
-    number: false
-    silent: true
-    output: |
-      <div id="<%= @node.type_label %>">
-        <h1 class="title"><%= @node.type_label_here_link %></h1>
-        <%= @node.content_xhtml_div %>
-      </div>
-
-  ##
   # Organization
-  #
+    part: &latex
+      toc: true
+      lof: false
+      index: true
+      number: true
+      output: |
+        <div class="<%= @node.type %>">
+          <h1 class="title">
+            <%= @node.type_label %>&nbsp;<%= @node.index_link %>
+            <br/>
+            <big><%= @node.title_link %></big>
+          </h1>
+          <%= @node.content_xhtml_div %>
+        </div>
 
-  part: &latex
-    toc: true
-    lof: false
-    index: true
-    number: true
-    output: |
-      <div class="<%= @node.type %>">
-        <h1 class="title">
-          <%= @node.type_label %>&nbsp;<%= @node.index_link %>
-          <br/>
-          <big><%= @node.title_link %></big>
-        </h1>
-        <%= @node.content_xhtml_div %>
-      </div>
+    chapter: *latex
 
-  chapter: *latex
+    section:
+      toc: true
+      lof: false
+      index: true
+      number: true
+      output: |
+        <% depth = [6, @node.depth + 1].min %>
+        <div class="<%= @node.type %>">
+          <h<%= depth %> class="title">
+            <%= @node.index_and_title_link %>
+          </h<%= depth %>>
+          <%= @node.content_xhtml_div %>
+        </div>
 
-  section:
-    toc: true
-    lof: false
-    index: true
-    number: true
-    output: |
-      <% depth = [6, @node.depth + 1].min %>
-      <div class="<%= @node.type %>">
-        <h<%= depth %> class="title">
-          <%= @node.index_and_title_link %>
-        </h<%= depth %>>
-        <%= @node.content_xhtml_div %>
-      </div>
+    paragraph:
+      toc: false
+      lof: false
+      index: false
+      number: false
+      output: |
+        <div id="<%= @node.here_frag %>" class="<%= @node.type %>">
+          <p class="title"><%= @node.title_link %></p>
+          <%= @node.content_xhtml_div %>
+        </div>
 
-  paragraph:
-    toc: false
-    lof: false
-    index: false
-    number: false
-    output: |
-      <div id="<%= @node.here_frag %>" class="<%= @node.type %>">
-        <p class="title"><%= @node.title_link %></p>
-        <%= @node.content_xhtml_div %>
-      </div>
-
-  ##
   # Admonitions
-  #
+    tip: &admonition
+      toc: false
+      lof: true
+      index: false
+      number: true
+      output: |
+        <div class="<%= @node.type %>">
+          <p class="title"><%= @node.number_and_title_link %></p>
+          <div class="content"><%= ICON_BY_NAME[@node.type].to_xhtml %><%= @node.content_xhtml %></div>
+        </div>
 
-  tip: &admonition
-    toc: false
-    lof: true
-    index: false
-    number: true
-    output: |
-      <div class="<%= @node.type %>">
-        <p class="title"><%= @node.number_and_title_link %></p>
-        <div class="content"><%= ICON_BY_NAME[@node.type].to_xhtml %><%= @node.content_xhtml %></div>
-      </div>
+    note: *admonition
+    caution: *admonition
+    warning: *admonition
+    important: *admonition
 
-  note: *admonition
-  caution: *admonition
-  warning: *admonition
-  important: *admonition
-
-  ##
   # Auxilary materials (formal blocks)
   # see http://www.sagehill.net/docbookxsl/FormalTitles.html
-  #
+    figure: &formal
+      toc: false
+      lof: true
+      index: false
+      number: true
+      output: |
+        <div class="<%= @node.type %>">
+          <p class="title"><%= @node.number_and_title_link %></p>
+          <%= @node.content_xhtml_div %>
+        </div>
 
-  figure: &formal
-    toc: false
-    lof: true
-    index: false
-    number: true
-    output: |
-      <div class="<%= @node.type %>">
-        <p class="title"><%= @node.number_and_title_link %></p>
-        <%= @node.content_xhtml_div %>
-      </div>
+    table: *formal
+    example: *formal
+    equation: *formal
+    procedure: *formal
 
-  table: *formal
-  example: *formal
-  equation: *formal
-  procedure: *formal
-
-
-  ##
   # cross-references
-  #
+    xref:
+      toc: false
+      lof: false
+      index: false
+      number: false
+      output: |
+        <%=
+          scope = @nodes.select {|n| n.content}
 
-  xref:
-    toc: false
-    lof: false
-    index: false
-    number: false
-    output: |
-      <%=
-        scope = @nodes.select {|n| n.content}
+          target = scope.find {|n| n.id == @node.args[0]} || # id has 1st priority
+                   scope.find {|n| n.title == @node.args[0]}
 
-        target = scope.find {|n| n.id == @node.args[0]} || # id has 1st priority
-                 scope.find {|n| n.title == @node.args[0]}
+          if target
+            prefix = "#{target.type_label} #{target.index || target.number}"
 
-        if target
-          prefix = "#{target.type_label} #{target.index || target.number}"
+            title_text =
+              if target.type == 'reference'
+                prefix
+              else
+                [prefix, target.title].compact.join('. ')
+              end
 
-          title_text =
-            if target.type == 'reference'
-              prefix
-            else
-              [prefix, target.title].compact.join('. ')
-            end
+            title_auto = @node.args.length < 2
 
-          title_auto = @node.args.length < 2
+            title_xhtml =
+              if title_auto
+                title_text
+              else
+                @node.args[1].to_s
+              end.to_inline_xhtml
 
-          title_xhtml =
-            if title_auto
-              title_text
-            else
-              @node.args[1].to_s
-            end.to_inline_xhtml
+            %{<a class="#{@node.type}" href="##{target.here_frag}"#{
+              %( title="#{title_text}") unless title_auto
+            }>#{title_xhtml}</a>}
+          else
+            raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
+          end
+        %>
 
-          %{<a class="#{@node.type}" href="##{target.here_frag}"#{
-            %( title="#{title_text}") unless title_auto
-          }>#{title_xhtml}</a>}
-        else
-          raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
-        end
-      %>
-
-  ##
   # Bibliography
-  #
+    reference:
+      toc: false
+      lof: false
+      index: false
+      number: true
+      silent: true
 
-  reference:
-    toc: false
-    lof: false
-    index: false
-    number: true
-    silent: true
+    cite:
+      toc: false
+      lof: false
+      index: false
+      number: false
+      output: |
+        <%=
+          target = @types['reference'].find {|n| n.title == @node.args[0]}
 
-  cite:
-    toc: false
-    lof: false
-    index: false
-    number: false
-    output: |
-      <%=
-        target = @types['reference'].find {|n| n.title == @node.args[0]}
+          if target
+            '<sup>[%s]</sup>' % [
 
-        if target
-          '<sup>[%s]</sup>' % [
+              '<a class="%s" href="#%s">%s</a>' % [
+                @node.type,
+                target.here_frag,
+                target.number
+              ],
 
-            '<a class="%s" href="#%s">%s</a>' % [
-              @node.type,
-              target.here_frag,
-              target.number
-            ],
+              *@node.args[1..-1]
 
-            *@node.args[1..-1]
-
-          ].join(', ')
-        else
-          raise ArgumentError, "invalid citation for #{@node.title.inspect}", @node.trace
-        end
-      %>
+            ].join(', ')
+          else
+            raise ArgumentError, "invalid citation for #{@node.title.inspect}", @node.trace
+          end
+        %>
 
 output: |
   <%
@@ -742,7 +723,6 @@ styles:
     }
 
     /* emphasis */
-
       blockquote
       {
           color             : #333;
@@ -763,7 +743,6 @@ styles:
       }
 
     /* source code */
-
       tt,
       code,
       pre
@@ -773,7 +752,6 @@ styles:
       }
 
     /* hyperlinks */
-
       a > img
       {
           border            : none;
@@ -785,7 +763,6 @@ styles:
       }
 
     /* headings */
-
       h1,
       h2,
       h3,
@@ -850,7 +827,6 @@ styles:
       }
 
     /* tables */
-
       table
       {
           border-collapse   : collapse; /* no spacing between cell borders */
@@ -874,7 +850,6 @@ styles:
       }
 
     /* document structure */
-
       #nav
       {
           text-align        : center;
@@ -958,7 +933,6 @@ styles:
       }
 
     /* document nodes */
-
       .part    > .title,
       .chapter > .title
       {
@@ -1091,7 +1065,6 @@ styles:
     }
 
     /* source code */
-
       tt
       {
           background-color  : #F0F8FF;
@@ -1115,7 +1088,6 @@ styles:
       }
 
     /* hyperlinks */
-
       a
       {
           text-decoration   : none;
@@ -1160,7 +1132,6 @@ styles:
 
   print: |
     /* source code */
-
       tt
       {
           font-weight       : normal;
@@ -1172,7 +1143,6 @@ styles:
       }
 
     /* headings */
-
       h1,
       h2,
       h3,
@@ -1185,7 +1155,6 @@ styles:
       }
 
     /* hyperlinks */
-
       /* blend all hyperlinks with normal text */
       a:link,
       a:visited
@@ -1225,7 +1194,6 @@ styles:
       }
 
     /* document structure */
-
       #nav,
       #lof
       {
@@ -1241,7 +1209,6 @@ styles:
       }
 
     /* document nodes */
-
       .part    > .title > big,
       .chapter > .title > big
       {

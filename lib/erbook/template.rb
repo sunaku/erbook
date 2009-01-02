@@ -46,127 +46,127 @@ module ERBook
     #
     def initialize source, input, unindent = false, safe_level = nil
       # expand all "include" directives in the input
-      expander = lambda do |src_file, src_text, path_stack, stack_trace|
-        src_path = File.expand_path(src_file)
-        src_line = 1 # line number of the current include directive in src_file
+        expander = lambda do |src_file, src_text, path_stack, stack_trace|
+          src_path = File.expand_path(src_file)
+          src_line = 1 # line number of the current include directive in src_file
 
-        chunks = src_text.split(/<%#\s*include\s+(.+?)\s*#%>/)
+          chunks = src_text.split(/<%#\s*include\s+(.+?)\s*#%>/)
 
-        path_stack.push src_path
-        chunks.each_with_index do |chunk, i|
-          # even number: chunk is not an include directive
-          if i & 1 == 0
-            src_line += chunk.count("\n")
+          path_stack.push src_path
+          chunks.each_with_index do |chunk, i|
+            # even number: chunk is not an include directive
+            if i & 1 == 0
+              src_line += chunk.count("\n")
 
-          # odd number: chunk is the target of the include directive
-          else
-            # resolve correct path of target file
-              dst_file = chunk
+            # odd number: chunk is the target of the include directive
+            else
+              # resolve correct path of target file
+                dst_file = chunk
 
-              unless Pathname.new(dst_file).absolute?
-                # target is relative to the file in
-                # which the include directive exists
-                dst_file = File.join(File.dirname(src_file), dst_file)
-              end
+                unless Pathname.new(dst_file).absolute?
+                  # target is relative to the file in
+                  # which the include directive exists
+                  dst_file = File.join(File.dirname(src_file), dst_file)
+                end
 
-              dst_path = File.expand_path(dst_file)
+                dst_path = File.expand_path(dst_file)
 
-            # include the target file
-              if path_stack.include? dst_file
-                raise "Cannot include #{dst_file.inspect} at #{src_file.inspect}:#{src_line} because that would cause an infinite loop in the inclusion stack: #{path_stack.inspect}."
-              else
-                stack_trace.push "#{src_path}:#{src_line}"
-                dst_text = eval('File.read dst_file', binding, src_file, src_line)
+              # include the target file
+                if path_stack.include? dst_file
+                  raise "Cannot include #{dst_file.inspect} at #{src_file.inspect}:#{src_line} because that would cause an infinite loop in the inclusion stack: #{path_stack.inspect}."
+                else
+                  stack_trace.push "#{src_path}:#{src_line}"
+                  dst_text = eval('File.read dst_file', binding, src_file, src_line)
 
-                # recursively expand any include directives within
-                # the expansion of the current include directive
-                dst_text = expander[dst_file, dst_text, path_stack, stack_trace]
+                  # recursively expand any include directives within
+                  # the expansion of the current include directive
+                  dst_text = expander[dst_file, dst_text, path_stack, stack_trace]
 
-                # provide more accurate stack trace for
-                # errors originating from included files
-                line_var = "__erbook_var_#{dst_file.object_id.abs}__"
-                dst_text = %{<%
-                  #{line_var} = __LINE__ + 2 # content is 2 newlines below
-                  begin
-                    %>#{dst_text}<%
-                  rescue Exception => err
-                    bak = err.backtrace
+                  # provide more accurate stack trace for
+                  # errors originating from included files
+                  line_var = "__erbook_var_#{dst_file.object_id.abs}__"
+                  dst_text = %{<%
+                    #{line_var} = __LINE__ + 2 # content is 2 newlines below
+                    begin
+                      %>#{dst_text}<%
+                    rescue Exception => err
+                      bak = err.backtrace
 
-                    top = []
-                    found_top = false
-                    prev_line = nil
+                      top = []
+                      found_top = false
+                      prev_line = nil
 
-                    bak.each do |step|
-                      if step =~ /^#{/#{source}/}:(\\d+)(.*)/
-                        line, desc = $1, $2
-                        line = line.to_i - #{line_var} + 1
+                      bak.each do |step|
+                        if step =~ /^#{/#{source}/}:(\\d+)(.*)/
+                          line, desc = $1, $2
+                          line = line.to_i - #{line_var} + 1
 
-                        if line > 0 and line != prev_line
-                          top << "#{dst_path}:\#{line}\#{desc}"
-                          found_top = true
-                          prev_line = line
+                          if line > 0 and line != prev_line
+                            top << "#{dst_path}:\#{line}\#{desc}"
+                            found_top = true
+                            prev_line = line
+                          end
+                        elsif !found_top
+                          top << step
                         end
-                      elsif !found_top
-                        top << step
                       end
+
+                      if found_top
+                        bak.replace top
+                        bak.concat #{stack_trace.reverse.inspect}
+                      end
+
+                      raise err
                     end
+                  %>}
 
-                    if found_top
-                      bak.replace top
-                      bak.concat #{stack_trace.reverse.inspect}
-                    end
+                  stack_trace.pop
+                end
 
-                    raise err
-                  end
-                %>}
-
-                stack_trace.pop
-              end
-
-              chunks[i] = dst_text
+                chunks[i] = dst_text
+            end
           end
+          path_stack.pop
+
+          chunks.join
         end
-        path_stack.pop
 
-        chunks.join
-      end
-
-      input = expander[source, input, [], []]
+        input = expander[source, input, [], []]
 
       # convert "% at beginning of line" usage into <% normal %> usage
-      input.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
-      input.gsub! %r{^([ \t]*)%%}, '\1%'
+        input.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
+        input.gsub! %r{^([ \t]*)%%}, '\1%'
 
       # unindent node content hierarchically
-      if unindent
-        tags = input.scan(/<%(?:.(?!<%))*?%>/m)
-        margins = []
-        result = []
+        if unindent
+          tags = input.scan(/<%(?:.(?!<%))*?%>/m)
+          margins = []
+          result = []
 
-        buffer = input
-        tags.each do |tag|
-          chunk, buffer = buffer.split(tag, 2)
-          chunk << tag
+          buffer = input
+          tags.each do |tag|
+            chunk, buffer = buffer.split(tag, 2)
+            chunk << tag
 
-          # perform unindentation
-          result << chunk.gsub(/^#{margins.last}/, '')
+            # perform unindentation
+            result << chunk.gsub(/^#{margins.last}/, '')
 
-          # prepare for next unindentation
-          case tag
-          when /<%[^%=].*?\bdo\b.*?%>/m
-            margins.push buffer[/^[ \t]*(?=\S)/]
+            # prepare for next unindentation
+            case tag
+            when /<%[^%=].*?\bdo\b.*?%>/m
+              margins.push buffer[/^[ \t]*(?=\S)/]
 
-          when /<%\s*end\s*%>/m
-            margins.pop
+            when /<%\s*end\s*%>/m
+              margins.pop
+            end
           end
-        end
-        result << buffer
+          result << buffer
 
-        input = result.join
-      end
+          input = result.join
+        end
 
       # silence the code-only <% ... %> directive, just like PHP does
-      input.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
+        input.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
 
       # use @buffer to store the result of the ERB template
       super input, safe_level, nil, :@buffer
