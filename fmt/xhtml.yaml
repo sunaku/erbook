@@ -383,10 +383,11 @@ nodes:
       number: false
       output: |
         <%=
-          scope = @nodes.select {|n| n.content}
+          query, label = @node.args
 
-          target = scope.find {|n| n.id == @node.args[0]} || # id has 1st priority
-                   scope.find {|n| n.title == @node.args[0]}
+          scope = @nodes.select {|n| n.content }
+          target = scope.find {|n| n.id == query } || # id has 1st priority
+                   scope.find {|n| n.title == query }
 
           if target
             prefix = "#{target.type_label} #{target.index || target.number}"
@@ -404,8 +405,8 @@ nodes:
               if title_auto
                 title_text
               else
-                @node.args[1].to_s
-              end.to_inline_xhtml
+                label
+              end.to_s.to_inline_xhtml
 
             %{<a class="#{@node.type}" href="##{target.here_frag}"#{
               %( title="#{title_text}") unless title_auto

@@ -1,6 +1,4 @@
 require 'yaml'
-require 'ostruct'
-require 'digest/sha1'
 require 'erbook/template'
 
 module ERBook
@@ -101,7 +99,7 @@ module ERBook
 
                     # calculate latex-style index number for this node
                     if #{defn['index']}
-                      branches = parent.children.select {|n| n.index}
+                      branches = parent.children.select {|n| n.index }
                       node.index = [parent.index, branches.length.next].join('.')
                     end
                   else
@@ -111,7 +109,7 @@ module ERBook
 
                     # calculate latex-style index number for this node
                     if #{defn['index']}
-                      branches = @roots.select {|n| n.index}
+                      branches = @roots.select {|n| n.index }
                       node.index = branches.length.next.to_s
                     end
                   end
@@ -163,12 +161,15 @@ module ERBook
         end
     end
 
+    ##
     # Returns the output of this document.
+    #
     def to_s
       Template.new("#{@format_file}:output", @format['output'].to_s).
       render_with(@template_vars.merge(:@content => @processed_document))
     end
 
+    require 'ostruct'
     class Node < OpenStruct
       # deprecated in Ruby 1.8; removed in Ruby 1.9
       undef id if respond_to? :id
@@ -180,8 +181,11 @@ module ERBook
       end
     end
 
+    require 'digest/sha1'
+    ##
     # Returns a digest of the given string that
     # will not be altered by String#to_xhtml.
+    #
     def Document.digest input
       Digest::SHA1.hexdigest(input.to_s).
 
@@ -192,7 +196,9 @@ module ERBook
 
     private
 
+    ##
     # Prints the given message and raises the given error.
+    #
     def error message, error = $!
       STDERR.printf "%s:\n\n", message
       raise error
