@@ -136,7 +136,7 @@ module ERBook
           # evaluate the input & build the document tree
             @processed_document = template.instance_eval { result binding }
 
-            # replace nodes with output
+            # replace node placeholders with their corresponding output
             expander = lambda do |n, buf|
               # calculate node output
               source = "#{@format_file}:nodes:#{n.type}:output"
@@ -144,16 +144,11 @@ module ERBook
                 source, @node_defs[n.type]['output'].to_s.chomp
               ).render_with(@template_vars.merge(:@node => n))
 
-              # replace node with output
-              if @node_defs[n.type]['silent']
-                buf[n.digest] = ''
-                buf = n.output
-              else
-                buf[n.digest] = n.output
-              end
+              # expand all child nodes in this node's output
+              n.children.each {|c| expander[c, n.output] }
 
-              # repeat for all child nodes
-              n.children.each {|c| expander[c, buf] }
+              # replace this node's placeholder with its output in the buffer
+              buf[n.digest] = @node_defs[n.type]['silent'] ? '' : n.output
             end
 
             @roots.each {|n| expander[n, @processed_document] }
