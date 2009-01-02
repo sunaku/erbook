@@ -77,8 +77,12 @@ module ERBook
                   node = Node.new(
                     :type => #{type.inspect},
                     :args => node_args,
-                    :trace => caller,
-                    :children => []
+                    :children => [],
+
+                    # omit erbook internals from the stack trace
+                    :trace => caller.reject {|t|
+                      [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
+                    }
                   )
                   @nodes << node
                   @types[node.type] << node
@@ -153,10 +157,7 @@ module ERBook
 
             @roots.each {|n| expander[n, @processed_document] }
 
-        rescue Exception => e
-          # omit erbook internals from the stack trace
-          e.backtrace.reject! {|t| t =~ /^#{__FILE__}:\d+/ } unless $DEBUG
-
+        rescue Exception
           puts input_text # so the user can debug line numbers in the stack trace
           error "Could not process input document #{input_file.inspect}"
         end
