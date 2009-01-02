@@ -341,7 +341,7 @@ nodes:
     index: false
     number: false
     output: |
-      <div class="<%= @node.type %>">
+      <div id="<%= @node.here_frag %>" class="<%= @node.type %>">
         <p class="title"><%= @node.title_link %></p>
         <%= @node.content_xhtml_div %>
       </div>
