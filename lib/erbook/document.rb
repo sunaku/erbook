@@ -172,6 +172,11 @@ module ERBook
       # deprecated in Ruby 1.8; removed in Ruby 1.9
       undef id if respond_to? :id
       undef type if respond_to? :type
+
+      # Returns the output of this node.
+      def to_s
+        output
+      end
     end
 
     # Returns a digest of the given string that
