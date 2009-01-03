@@ -137,9 +137,6 @@ module ERBook
       input.gsub! %r{^([ \t]*)(%[=# \t].*)$}, '\1<\2 %>'
       input.gsub! %r{^([ \t]*)%%}, '\1%'
 
-      # silence the code-only <% ... %> directive, just like PHP does
-      input.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
-
       # unindent node content hierarchically
       if unindent
         tags = input.scan(/<%(?:.(?!<%))*?%>/m)
@@ -167,6 +164,9 @@ module ERBook
 
         input = result.join
       end
+
+      # silence the code-only <% ... %> directive, just like PHP does
+      input.gsub! %r{^[ \t]*(<%[^%=]((?!<%).)*?[^%]%>)[ \t]*\r?\n}m, '\1'
 
       # use @buffer to store the result of the ERB template
       super input, safe_level, nil, :@buffer
