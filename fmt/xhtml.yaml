@@ -608,7 +608,7 @@ output: |
         <% end %>
 
         <% if $authors %>
-          <h2 class="authors"><%=
+          <h3 class="authors"><%=
             $authors.map do |name, url|
               if url
                 %{<a href="#{url}">#{name}</a>}
@@ -616,7 +616,7 @@ output: |
                 name
               end
             end.join(', ')
-          %></h2>
+          %></h3>
         <% end %>
 
         <% if $date %>
