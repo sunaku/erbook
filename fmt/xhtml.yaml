@@ -258,10 +258,21 @@ code: |
 
 
 nodes:
+  # object model
+    node:
+      toc: false
+      lof: false
+      depth: false
+      index: false
+      number: false
+      silent: false
+      output: <%= @node.content_xhtml %>
+
   # Structure
     header: &header
       toc: false
       lof: false
+      depth: false
       index: false
       number: false
       silent: true
@@ -270,6 +281,7 @@ nodes:
     header_outside_above: &header_insert
       toc: false
       lof: false
+      depth: false
       index: false
       number: false
       silent: true
@@ -288,6 +300,7 @@ nodes:
     abstract:
       toc: false
       lof: false
+      depth: false
       index: false
       number: false
       silent: true
@@ -301,8 +314,10 @@ nodes:
     part: &latex
       toc: true
       lof: false
+      depth: true
       index: true
       number: true
+      silent: false
       output: |
         <div class="<%= @node.type %>">
           <h1 class="title">
@@ -318,8 +333,10 @@ nodes:
     section:
       toc: true
       lof: false
+      depth: true
       index: true
       number: true
+      silent: false
       output: |
         <% depth = [6, @node.depth + 1].min %>
         <div class="<%= @node.type %>">
@@ -332,8 +349,10 @@ nodes:
     paragraph:
       toc: false
       lof: false
+      depth: false
       index: false
       number: false
+      silent: false
       output: |
         <div id="<%= @node.here_frag %>" class="<%= @node.type %>">
           <p class="title"><%= @node.title_link %></p>
@@ -344,8 +363,10 @@ nodes:
     tip: &admonition
       toc: false
       lof: true
+      depth: true
       index: false
       number: true
+      silent: false
       output: |
         <div class="<%= @node.type %>">
           <p class="title"><%= @node.number_and_title_link %></p>
@@ -362,8 +383,10 @@ nodes:
     figure: &formal
       toc: false
       lof: true
+      depth: true
       index: false
       number: true
+      silent: false
       output: |
         <div class="<%= @node.type %>">
           <p class="title"><%= @node.number_and_title_link %></p>
@@ -379,8 +402,10 @@ nodes:
     xref:
       toc: false
       lof: false
+      depth: true
       index: false
       number: false
+      silent: false
       output: |
         <%=
           query, label = @node.args
@@ -420,6 +445,7 @@ nodes:
     reference:
       toc: false
       lof: false
+      depth: false
       index: false
       number: true
       silent: true
@@ -427,8 +453,10 @@ nodes:
     cite:
       toc: false
       lof: false
+      depth: false
       index: false
       number: false
+      silent: false
       output: |
         <%=
           target = @types['reference'].find {|n| n.title == @node.args[0]}
@@ -467,6 +495,9 @@ output: |
 
     # compute table of contents
       toc_builder = lambda do |n|
+        nested = n.children.inject('') {|s,c| s << toc_builder[c] }
+        nested = nil if nested.empty?
+
         if @spec['nodes'][n.type]['toc']
           entry = '%s<a id="%s" href="#%s">%s</a>' % [
             (n.index.to_s + '&nbsp;&nbsp;' if n.index),
@@ -474,12 +505,11 @@ output: |
             n.here_frag,
             n.title.to_s.to_inline_xhtml
           ]
-          nested = n.children.inject('') {|s,c| s << toc_builder[c] }
 
-          %{<li>#{entry}#{ "<ul>#{nested}</ul>" unless nested.empty? }</li>}
+          %{<li>#{entry}#{"<ul>#{nested}</ul>" if nested}</li>}
         else
-          ''
-        end
+          nested
+        end.to_s
       end
 
       toc = @roots.inject('') {|s,n| s << toc_builder[n] }
