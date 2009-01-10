@@ -186,6 +186,16 @@
       <% section "Organizational nodes" do %>
         The nodes described in this section are meant to help organize the document's content logically.  Based on how deeply these nodes are nested in the document, their heading will be larger (shallow depth) or smaller (deep depth).
 
+        <% section "node", "xhtml.nodes.node" do %>
+          A placeholder that simply passes its content to the output.
+
+          This node has no real use in the writing of a document.  It mainly helps programmers define "virtual" nodes that simply wrap some user-provided content.  Programmers can then manipluate the content of those virtual nodes when processing the document.
+
+          <% node "An example" do %>
+            This is how a **node** node appears.
+          <% end %>
+        <% end %>
+
         <% section "part", "xhtml.nodes.part" do %>
           A collection of chapters.
 
