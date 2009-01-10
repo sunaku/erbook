@@ -64,7 +64,8 @@ module ERBook
               :@roots => @roots = [], # root nodes of all trees
               :@nodes => @nodes = [], # all nodes in the forest
               :@types => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
-              :@stack => [],
+              :@stack => [], # stack for all nodes
+              :@index => [], # stack for nodes having index only
             }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
             @node_defs.each_pair do |type, defn|
@@ -95,12 +96,14 @@ module ERBook
                   if parent = @stack.last
                     parent.children << node
                     node.parent = parent
-                    node.depth = parent.depth.next
+                    node.depth = parent.depth
+                    node.depth += 1 if #{defn['depth']}
 
                     # calculate latex-style index number for this node
                     if #{defn['index']}
+                      parent = @index.last
                       branches = parent.children.select {|n| n.index }
-                      node.index = [parent.index, branches.length.next].join('.')
+                      node.index = [parent.index, branches.length + 1].join('.')
                     end
                   else
                     @roots << node
@@ -110,15 +113,17 @@ module ERBook
                     # calculate latex-style index number for this node
                     if #{defn['index']}
                       branches = @roots.select {|n| n.index }
-                      node.index = branches.length.next.to_s
+                      node.index = (branches.length + 1).to_s
                     end
                   end
 
                   # assign node content
                   if block_given?
+                    @index.push node if #{defn['index']}
                     @stack.push node
                     content = content_from_block(node, &node_content)
                     @stack.pop
+                    @index.pop if #{defn['index']}
 
                     digest = Document.digest(content)
                     self.buffer << digest
