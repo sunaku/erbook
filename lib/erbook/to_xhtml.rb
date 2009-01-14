@@ -50,6 +50,10 @@ class String
       while html.gsub! %r{(<pre>)<code>(.*?)</code>(</pre>)}m, '\1\2\3'
       end
 
+      # allow user to type <pre> blocks on single lines
+      # without affecting the display of their content
+      html.gsub! %r{(<pre>)[ \t]*\r?\n|\r?\n[ \t]*(</pre>)}, '\1\2'
+
       # ensure tables have a border: this *greatly* improves
       # readability in text-based web browsers like w3m and lynx
       html.gsub! %r/<table\b/, '\& border="1"'
