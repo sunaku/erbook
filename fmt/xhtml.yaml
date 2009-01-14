@@ -141,6 +141,37 @@ code: |
         "#{index_link}&nbsp;&nbsp;#{title_link}"
       end
 
+      # Returns a hyperlink to this node.
+      #
+      # @param [String] label
+      #   Optional label (may contain XHTML) for the hyperlink.
+      #
+      #   If not specified, the title and designation of
+      #   this node will be used as the label instead.
+      #
+      def xref_link label = nil
+        prefix = [type_label, index || number].compact.join(' ')
+
+        title_text =
+          if type == 'reference'
+            prefix
+          else
+            [prefix, title].compact.join('. ')
+          end
+
+        title_xhtml =
+          if label
+            label
+          else
+            title_text
+          end.to_s.to_inline_xhtml
+
+        %{<a class="xref" href="##{here_frag}"#{
+          %( title="#{ERB::Util.h title_text}") if label
+        }>#{title_xhtml}</a>}
+      end
+
+
       ##
       # URI fragments
       #
@@ -415,27 +446,7 @@ nodes:
                    scope.find {|n| n.title == query }
 
           if target
-            prefix = "#{target.type_label} #{target.index || target.number}"
-
-            title_text =
-              if target.type == 'reference'
-                prefix
-              else
-                [prefix, target.title].compact.join('. ')
-              end
-
-            title_auto = @node.args.length < 2
-
-            title_xhtml =
-              if title_auto
-                title_text
-              else
-                label
-              end.to_s.to_inline_xhtml
-
-            %{<a class="#{@node.type}" href="##{target.here_frag}"#{
-              %( title="#{title_text}") unless title_auto
-            }>#{title_xhtml}</a>}
+            target.xref_link label
           else
             raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
           end
