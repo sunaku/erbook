@@ -515,7 +515,7 @@ output: |
         nested = n.children.inject('') {|s,c| s << toc_builder[c] }
         nested = nil if nested.empty?
 
-        if @spec['nodes'][n.type]['toc']
+        if n.defn['toc']
           entry = '%s<a id="%s" href="#%s">%s</a>' % [
             (n.index.to_s + '&nbsp;&nbsp;' if n.index),
             n.list_frag,

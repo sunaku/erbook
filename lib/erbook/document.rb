@@ -68,76 +68,88 @@ module ERBook
               :@index => [], # stack for nodes having index only
             }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
-            @node_defs.each_pair do |type, defn|
+            class << template
+              private
+
+              # Handles the method call from a node
+              # placeholder in the input document.
+              def __node__ node_type, *node_args, &node_content
+                node = Node.new(
+                  :type => node_type,
+                  :defn => @spec['nodes'][node_type],
+                  :args => node_args,
+                  :children => [],
+
+                  # omit erbook internals from the stack trace
+                  :trace => caller.reject {|t|
+                    [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
+                  }
+                )
+                @nodes << node
+                @types[node.type] << node
+
+                # calculate occurrence number for this node
+                if node.defn['number']
+                  @count ||= Hash.new {|h,k| h[k] = []}
+                  node.number = (@count[node.type] << node).length
+                end
+
+                # assign node family
+                if parent = @stack.last
+                  parent.children << node
+                  node.parent = parent
+                  node.depth = parent.depth
+                  node.depth += 1 if node.defn['depth']
+
+                  # calculate latex-style index number for this node
+                  if node.defn['index']
+                    parent = @index.last
+                    branches = parent.children.select {|n| n.index }
+                    node.index = [parent.index, branches.length + 1].join('.')
+                  end
+                else
+                  @roots << node
+                  node.parent = nil
+                  node.depth = 0
+
+                  # calculate latex-style index number for this node
+                  if node.defn['index']
+                    branches = @roots.select {|n| n.index }
+                    node.index = (branches.length + 1).to_s
+                  end
+                end
+
+                # assign node content
+                if block_given?
+                  @index.push node if node.defn['index']
+                  @stack.push node
+                  content = content_from_block(node, &node_content)
+                  @stack.pop
+                  @index.pop if node.defn['index']
+
+                  digest = Document.digest(content)
+                  self.buffer << digest
+                else
+                  content = nil
+                  digest = Document.digest(node.object_id)
+                end
+
+                node.content = content
+                node.digest = digest
+
+                digest
+              end
+            end
+
+            @node_defs.each_key do |type|
               # XXX: using a string because define_method()
               #      does not accept a block until Ruby 1.9
+              file, line = __FILE__, __LINE__ + 1
               template.instance_eval %{
                 def #{type} *node_args, &node_content
-                  node = Node.new(
-                    :type => #{type.inspect},
-                    :args => node_args,
-                    :children => [],
-
-                    # omit erbook internals from the stack trace
-                    :trace => caller.reject {|t|
-                      [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
-                    }
-                  )
-                  @nodes << node
-                  @types[node.type] << node
-
-                  # calculate occurrence number for this node
-                  if #{defn['number']}
-                    @count ||= Hash.new {|h,k| h[k] = []}
-                    node.number = (@count[node.type] << node).length
-                  end
-
-                  # assign node family
-                  if parent = @stack.last
-                    parent.children << node
-                    node.parent = parent
-                    node.depth = parent.depth
-                    node.depth += 1 if #{defn['depth']}
-
-                    # calculate latex-style index number for this node
-                    if #{defn['index']}
-                      parent = @index.last
-                      branches = parent.children.select {|n| n.index }
-                      node.index = [parent.index, branches.length + 1].join('.')
-                    end
-                  else
-                    @roots << node
-                    node.parent = nil
-                    node.depth = 0
-
-                    # calculate latex-style index number for this node
-                    if #{defn['index']}
-                      branches = @roots.select {|n| n.index }
-                      node.index = (branches.length + 1).to_s
-                    end
-                  end
-
-                  # assign node content
-                  if block_given?
-                    @index.push node if #{defn['index']}
-                    @stack.push node
-                    content = content_from_block(node, &node_content)
-                    @stack.pop
-                    @index.pop if #{defn['index']}
-
-                    digest = Document.digest(content)
-                    self.buffer << digest
-                  else
-                    content = nil
-                    digest = Document.digest(node.object_id)
-                  end
-
-                  node.content = content
-                  node.digest = digest
-
-                  digest
+                  __node__ #{type.inspect}, *node_args, &node_content
                 end
-              },  __FILE__, Kernel.caller.first[/\d+/].to_i.next
+              }, file, line
             end
 
           # evaluate the input & build the document tree
