@@ -93,11 +93,6 @@ code: |
         type.to_s.capitalize
       end
 
-      def type_label_here_link #:nodoc:
-        s = type_label
-        here_link s, s
-      end
-
       # Returns the title of this node as XHTML.
       def title_xhtml
         title.to_s.to_inline_xhtml
@@ -115,18 +110,18 @@ code: |
 
       # Returns a hyperlink to this node containing its title.
       def title_link title = nil
-        here_link here_frag, title || title_xhtml
+        title || title_xhtml
       end
 
       # Returns a hyperlink to this node
       # containing its LaTeX-style index number.
       def index_link
-        list_link here_frag, list_frag, index
+        index
       end
 
       # Returns a hyperlink to this node containing its occurrence number.
       def number_link
-        list_link here_frag, list_frag, [type_label, number].compact.join(' ')
+        [type_label, number].compact.join(' ')
       end
 
       # Returns a hyperlink to this node containing
@@ -139,6 +134,22 @@ code: |
       # its LaTeX-style index number and its title.
       def index_and_title_link #:nodoc:
         "#{index_link}&nbsp;&nbsp;#{title_link}"
+      end
+
+      # Returns a navigation menu relative to this node.
+      def navigation
+        list_sign = '&equiv;'  # IDENTICAL TO
+        here_sign = '&#x25CE;' # BULLSEYE
+        prev_sign = '&#x25B3;' # #FFFFFF UP-POINTING TRIANGLE
+        next_sign = '&#x25BD;' # #FFFFFF DOWN-POINTING TRIANGLE
+
+        list_link = defn['toc'] || defn['lof'] ? %{<a class="list" title="Return to contents" href="##{list_frag}">#{list_sign}</a>} : list_sign
+        here_link = %{<a class="here" title="Permanent link to here" href="##{here_frag}">#{here_sign}</a>}
+
+        prev_link = prev_node ? prev_node.xref_link(prev_sign) : prev_sign
+        next_link = next_node ? next_node.xref_link(next_sign) : next_sign
+
+        %{<span id="#{here_frag}" class="nav">#{list_link}#{prev_link}#{next_link}#{here_link}</span><br style="display: none"/>}
       end
 
       # Returns a hyperlink to this node.
@@ -200,16 +211,6 @@ code: |
       # of contents / list of figures that points this node.
       def list_frag #:nodoc:
         @list_frag ||= "rev:#{here_frag}"
-      end
-
-      private
-
-      def here_link here_frag, label #:nodoc:
-        %{<a class="here" title="Permanent link to this section" href="##{here_frag}">#{label}</a>}
-      end
-
-      def list_link here_frag, list_frag, label #:nodoc:
-        %{<a class="list" title="Return to table of contents" id="#{here_frag}" href="##{list_frag}">#{label}</a>}
       end
     end
 
@@ -340,7 +341,8 @@ nodes:
       silent: true
       output: |
         <div id="<%= @node.type_label %>">
-          <h1 class="title"><%= @node.type_label_here_link %></h1>
+          <%= @node.navigation %>
+          <h1 class="title"><%= @node.type_label %></h1>
           <%= @node.content_xhtml_div %>
         </div>
 
@@ -354,6 +356,7 @@ nodes:
       silent: false
       output: |
         <div class="<%= @node.type %>">
+          <%= @node.navigation %>
           <h1 class="title">
             <%= @node.type_label %>&nbsp;<%= @node.index_link %>
             <br/>
@@ -374,6 +377,7 @@ nodes:
       output: |
         <% depth = [6, @node.depth + 1].min %>
         <div class="<%= @node.type %>">
+          <%= @node.navigation %>
           <h<%= depth %> class="title">
             <%= @node.index_and_title_link %>
           </h<%= depth %>>
@@ -388,7 +392,8 @@ nodes:
       number: false
       silent: false
       output: |
-        <div id="<%= @node.here_frag %>" class="<%= @node.type %>">
+        <div class="<%= @node.type %>">
+          <%= @node.navigation %>
           <p class="title"><%= @node.title_link %></p>
           <%= @node.content_xhtml_div %>
         </div>
@@ -403,8 +408,12 @@ nodes:
       silent: false
       output: |
         <div class="<%= @node.type %>">
+          <%= @node.navigation %>
           <p class="title"><%= @node.number_and_title_link %></p>
-          <div class="content"><%= ICON_BY_NAME[@node.type].to_xhtml %><%= @node.content_xhtml %></div>
+          <div class="content">
+            <%= ICON_BY_NAME[@node.type].to_xhtml %>
+            <%= @node.content_xhtml %>
+          </div>
         </div>
 
     note: *admonition
@@ -423,6 +432,7 @@ nodes:
       silent: false
       output: |
         <div class="<%= @node.type %>">
+          <%= @node.navigation %>
           <p class="title"><%= @node.number_and_title_link %></p>
           <%= @node.content_xhtml_div %>
         </div>
@@ -616,6 +626,7 @@ output: |
       </style>
     </head>
     <body>
+    <div id="body">
       <%
         # menu of links to link sections
         nav = [
@@ -753,6 +764,7 @@ output: |
       <%= node = @types['footer_inside_below'].first and node.output %>
       </div>
       <%= node = @types['footer_outside_below'].first and node.output %>
+    </div>
     </body>
   </html>
 
@@ -764,13 +776,14 @@ fonts:
 
 styles:
 - all: |
-    body
-    {
-        color               : #000000;
-        background-color    : #FFFFFF;
-        line-height         : 1.5em;
-        font-family         : <%= @spec['fonts']['sans-serif'] %>;
-    }
+    /* general */
+      body
+      {
+          color             : #000000;
+          background-color  : #FFFFFF;
+          line-height       : 1.5em;
+          font-family       : <%= @spec['fonts']['sans-serif'] %>;
+      }
 
     /* emphasis */
       blockquote
@@ -890,7 +903,7 @@ styles:
           padding           : 1em;
           border            : 1px solid #bbb;
           vertical-align    : top;
-          background-color  : inherit;
+          background-color  : #FFFFFF;
           _background-color : #FFFFFF; /* for IE6 */
       }
 
@@ -900,6 +913,7 @@ styles:
       }
 
     /* document structure */
+      /* global navigation menu at the top of the page */
       #nav
       {
           text-align        : center;
@@ -1051,6 +1065,20 @@ styles:
           margin            : 3em;
       }
 
+      .tip       .nav,
+      .note      .nav,
+      .caution   .nav,
+      .warning   .nav,
+      .important .nav,
+      .figure    .nav,
+      .table     .nav,
+      .example   .nav,
+      .equation  .nav,
+      .procedure .nav
+      {
+          margin-left       : -7.65em;
+      }
+
       .tip       > .content,
       .note      > .content,
       .caution   > .content,
@@ -1107,12 +1135,63 @@ styles:
       }
 
 - screen: |
-    body
-    {
+    /* general */
+      body
+      {
+          margin            : 0;
+          padding           : 0;
+          padding-left      : 10em; /* room for local navigation menus */
+          padding-right     : 10em; /* keep #body visually centered */
+          background-color  : #808080;
+      }
+
+      /* the actual content of the <body> element */
+      #body
+      {
           margin            : auto;
-          max-width         : 36em;
+          max-width         : 38em;
+
+          background-color  : #FFFFFF;
+          border-left       : 0.35em solid #696969;
+          border-right      : 0.35em solid #696969;
+          padding           : 2em;
+      }
+
+    /* document structure */
+      /* mini navigation menu beside every block node */
+      .nav
+      {
+          width             : 4em;
+          float             : left; /* detach from main content */
+          margin-left       : -6.075em;
+
+          font-size         : 1.9em;
+          letter-spacing    : 0.25em;
+          text-align        : center;
+
+          color             : #696969; /* same colors to hide non-links */
+          background-color  : #696969;
           padding           : 0.5em;
-    }
+          margin-top        : -0.5em;
+      }
+
+      .nav:target,
+      .nav:hover
+      {
+        color               : #333; /* same colors to hide non-links */
+        background-color    : #333;
+      }
+
+      .nav a:link,
+      .nav a:visited
+      {
+          color             : #D3D3D3;
+      }
+
+      .nav a:hover {
+        color               : #9ACD32;
+        text-decoration     : none;
+      }
 
     /* source code */
       tt
@@ -1159,25 +1238,9 @@ styles:
       }
 
       a.here,
-      a.list
+      a.link
       {
           color             : #000000;
-      }
-
-      a:target,
-      a:target *,
-      *:target a.list
-      {
-          background-color  : #FF4500 !important;
-          color             : #FFFFFF !important;
-      }
-
-      a:target,
-      *:target a.list
-      {
-          padding           : 0.1em;
-          font-weight       : bolder;
-          text-decoration   : none;
       }
 
 - print: |
@@ -1245,6 +1308,7 @@ styles:
 
     /* document structure */
       #nav,
+      .nav,
       #lof
       {
           display           : none;
