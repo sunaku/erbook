@@ -143,7 +143,16 @@ module ERBook
           # evaluate the input & build the document tree
             @processed_document = template.instance_eval { result binding }
 
-            # replace node placeholders with their corresponding output
+          # chain block-level nodes together for local navigation
+            block_nodes = @nodes.reject {|n| @node_defs[n.type]['inline'] }
+
+            require 'enumerator'
+            block_nodes.each_cons(2) do |a, b|
+              a.next_node = b
+              b.prev_node = a
+            end
+
+          # replace node placeholders with their corresponding output
             expander = lambda do |n, buf|
               # calculate node output
               source = "#{@format_file}:nodes:#{n.type}:output"

@@ -106,12 +106,13 @@
     <% section "Node definition", "SpecFile.nodes" do %>
       A node definition is a mapping from a name (the "node type") to the following set of parameters:
 
-      | Parameter | Type     | Description                                                                              |
-      | --------- | ----     | -----------                                                                              |
-      | index     | Boolean  | Assign a LaTeX-style section number to this node?                                        |
-      | number    | Boolean  | Assign an order-of-occurrence number to this node?                                       |
-      | silent    | Boolean  | Suppress the output of this node?                                                        |
-      | output    | `String` | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>. |
+      | Parameter | Type     | Description                                                                               |
+      | --------- | ----     | -----------                                                                               |
+      | index     | Boolean  | Assign a LaTeX-style section number to this node?                                         |
+      | number    | Boolean  | Assign an order-of-occurrence number to this node?                                        |
+      | silent    | Boolean  | Suppress the output of this node?                                                         |
+      | output    | `String` | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.  |
+      | inline    | Boolean  | Is node's output an in-line string of text that can be embedded anywhere in the document? |
 
       You may define additional parameters in a node definition if you want.
 

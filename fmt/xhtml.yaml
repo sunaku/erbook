@@ -297,6 +297,7 @@ nodes:
       index: false
       number: false
       silent: false
+      inline: true
       output: <%= @node.content_xhtml %>
 
   # Structure
@@ -307,6 +308,7 @@ nodes:
       index: false
       number: false
       silent: true
+      inline: true
       output: <%= @node.content_xhtml %>
 
     header_outside_above: &header_insert
@@ -316,6 +318,7 @@ nodes:
       index: false
       number: false
       silent: true
+      inline: true
       output: <div class="<%= @node.type %>"><%= @node.content_xhtml %></div>
 
     header_inside_above:  *header_insert
@@ -437,6 +440,7 @@ nodes:
       index: false
       number: false
       silent: false
+      inline: true
       output: |
         <%=
           query, label = @node.args
@@ -460,6 +464,7 @@ nodes:
       index: false
       number: true
       silent: true
+      inline: true
 
     cite:
       toc: false
@@ -468,6 +473,7 @@ nodes:
       index: false
       number: false
       silent: false
+      inline: true
       output: |
         <%=
           target = @types['reference'].find {|n| n.title == @node.args[0]}
