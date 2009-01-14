@@ -76,7 +76,7 @@ class String
   # applied.  Otherwise, the programming language is assumed to be ruby.
   def thru_coderay #:nodoc:
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
-      atts, code = $2, CGI.unescapeHTML($3)
+      atts, code = $2, CGI.unescapeHTML($3).sub(/\A\r?\n/, '')
       lang = atts[/\blang=('|")(.*?)\1/i, 2] || :ruby
 
       html = CodeRay.scan(code, lang).html(:css => :style)
