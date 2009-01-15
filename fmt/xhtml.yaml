@@ -381,7 +381,7 @@ nodes:
         </div>
 
     paragraph:
-      toc: false
+      toc: true
       lof: false
       depth: false
       index: false
