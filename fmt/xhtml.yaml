@@ -584,10 +584,12 @@ output: |
         <% end %>
       <% end %>
 
-      <% @spec['styles'].each_pair do |media, style| %>
-        <style type="text/css" media="<%= media %>">
-        <![CDATA[<%= ERB.new(style).result(binding) %>]]>
-        </style>
+      <% @spec['styles'].each do |style| %>
+        <% style.each_pair do |media, code| %>
+          <style type="text/css" media="<%= media %>">
+          <![CDATA[<%= ERB.new(code).result(binding) %>]]>
+          </style>
+        <% end %>
       <% end %>
 
       <style type="text/css" media="screen">
@@ -761,7 +763,7 @@ fonts:
   monospace:  Monaco, Consolas, "Lucida Console", monospace
 
 styles:
-  all: |
+- all: |
     body
     {
         color               : #000000;
@@ -1104,7 +1106,7 @@ styles:
           _margin           : auto; /* for IE6 */
       }
 
-  screen: |
+- screen: |
     body
     {
           margin            : auto;
@@ -1178,7 +1180,7 @@ styles:
           text-decoration   : none;
       }
 
-  print: |
+- print: |
     /* source code */
       tt
       {
