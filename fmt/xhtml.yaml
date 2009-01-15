@@ -595,7 +595,7 @@ output: |
       <style type="text/css" media="screen">
       <![CDATA[
         /* decorate external hyperlinks with a visual indicator */
-        a:not([href^="#"])
+        a[href]:not([href^="#"])
         {
             background          : <%= ICON_BY_NAME['link'].data_css %>;
             background-position : center right;
@@ -1214,8 +1214,8 @@ styles:
       }
 
       /* emphasize external and cross-reference hyperlinks */
-      a:not([href^="#"]):link,
-      a:not([href^="#"]):visited,
+      a[href]:not([href^="#"]):link,
+      a[href]:not([href^="#"]):visited,
       a.xref[title]:link,
       a.xref[title]:visited
       {
@@ -1225,7 +1225,7 @@ styles:
       }
 
       /* show URL of destination for external hyperlinks */
-      a:not([href^="#"]):after
+      a[href]:not([href^="#"]):after
       {
           content           : " " attr(href);
           font-family       : <%= @spec['fonts']['monospace'] %>;
