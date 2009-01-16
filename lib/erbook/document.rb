@@ -60,12 +60,12 @@ module ERBook
             template = Template.new(input_file, input_text, options[:unindent])
 
             @template_vars = {
-              :@spec  => @format,
-              :@roots => @roots = [], # root nodes of all trees
-              :@nodes => @nodes = [], # all nodes in the forest
-              :@types => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
-              :@stack => [], # stack for all nodes
-              :@index => [], # stack for nodes having index only
+              :@format        => @format,
+              :@roots         => @roots = [], # root nodes of all trees
+              :@nodes         => @nodes = [], # all nodes in the forest
+              :@nodes_by_type => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
+              :@node_stack    => [], # stack for all nodes
+              :@index_stack   => [], # stack for nodes having index only
             }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
             class << template
@@ -76,7 +76,7 @@ module ERBook
               def __node__ node_type, *node_args, &node_content
                 node = Node.new(
                   :type => node_type,
-                  :defn => @spec['nodes'][node_type],
+                  :defn => @format['nodes'][node_type],
                   :args => node_args,
                   :children => [],
 
@@ -86,7 +86,7 @@ module ERBook
                   }
                 )
                 @nodes << node
-                @types[node.type] << node
+                @nodes_by_type[node.type] << node
 
                 # calculate occurrence number for this node
                 if node.defn['number']
@@ -95,7 +95,7 @@ module ERBook
                 end
 
                 # assign node family
-                if parent = @stack.last
+                if parent = @node_stack.last
                   parent.children << node
                   node.parent = parent
                   node.depth = parent.depth
@@ -103,7 +103,7 @@ module ERBook
 
                   # calculate latex-style index number for this node
                   if node.defn['index']
-                    parent = @index.last
+                    parent = @index_stack.last
                     branches = parent.children.select {|n| n.index }
                     node.index = [parent.index, branches.length + 1].join('.')
                   end
@@ -121,11 +121,11 @@ module ERBook
 
                 # assign node content
                 if block_given?
-                  @index.push node if node.defn['index']
-                  @stack.push node
+                  @index_stack.push node if node.defn['index']
+                  @node_stack.push node
                   content = content_from_block(node, &node_content)
-                  @stack.pop
-                  @index.pop if node.defn['index']
+                  @node_stack.pop
+                  @index_stack.pop if node.defn['index']
 
                   digest = Document.digest(content)
                   self.buffer << digest

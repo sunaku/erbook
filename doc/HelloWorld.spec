@@ -59,6 +59,6 @@ nodes:
       </dl>
 
 output: |
-  Welcome to the "<%= @spec[:name] %>" format.
+  Welcome to the "<%= @format[:name] %>" format.
   <%= @content %>
   That's all folks!

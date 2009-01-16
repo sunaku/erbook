@@ -121,21 +121,21 @@
 
         The following variables are available for use in this template:
 
-        | Variable | Type                                | Description                                                                                      |
-        | -------- | ----                                | -----------                                                                                      |
-        | `@node`  | `ERBook::Document::Node`            | The node for which this template is being evaluated.                                             |
+        | Variable         | Type                                | Description                                                                                      |
+        | --------         | ----                                | -----------                                                                                      |
+        | `@node`          | `ERBook::Document::Node`            | The node for which this template is being evaluated.                                             |
         <%= common_template_vars = %{
-        | `@roots` | `Array` of `ERBook::Document::Node` | All root nodes in the document tree.                                                             |
-        | `@nodes` | `Array` of `ERBook::Document::Node` | All nodes in the document tree.                                                                  |
-        | `@types` | `Hash`                              | Mapping from node type (`String`) to array of `ERBook::Document::Node` objects having that type. |
-        | `@spec`  | `Hash`                              | Data from the format specification file.                                                         |
+        | `@roots`         | `Array` of `ERBook::Document::Node` | All root nodes in the document tree.                                                             |
+        | `@nodes`         | `Array` of `ERBook::Document::Node` | All nodes in the document tree.                                                                  |
+        | `@nodes_by_type` | `Hash`                              | Mapping from node type (`String`) to array of `ERBook::Document::Node` objects having that type. |
+        | `@format`        | `Hash`                              | Data from the format specification file.                                                         |
 
-        #{PROJECT} also provides the following mappings inside the `@spec` variable:
+        #{PROJECT} also provides the following mappings inside the `@format` variable:
 
-        | Expression     | Type     | Description                                    |
-        | ----------     | ----     | -----------                                    |
-        | `@spec[:name]` | `String` | Short-hand name of the current format.         |
-        | `@spec[:file]` | `String` | Path of the current format specification file. |
+        | Expression       | Type     | Description                                    |
+        | ----------       | ----     | -----------                                    |
+        | `@format[:name]` | `String` | Short-hand name of the current format.         |
+        | `@format[:file]` | `String` | Path of the current format specification file. |
         }.lstrip.gsub(/^ +/, '')
         %>
       <% end %>
