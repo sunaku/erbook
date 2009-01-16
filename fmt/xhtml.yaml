@@ -668,7 +668,9 @@ output: |
       <% if header = @types['header'].first %>
         <%= header.output %>
       <% else %>
-        <%= $logo if $logo %>
+        <% if $logo %>
+          <div class="logo"><%= $logo %></div>
+        <% end %>
 
         <% if $title %>
           <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
@@ -931,6 +933,7 @@ styles:
           text-align        : center;
       }
 
+      .logo,
       .header_outside_above,
       #header,
       .header_outside_below
