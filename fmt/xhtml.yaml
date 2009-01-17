@@ -1229,7 +1229,11 @@ styles:
           border            : 1px solid #b1d827;
           background-color  : #F5FFDF;
           padding           : 1em;
-          overflow          : auto;
+
+          /* fit container to content; no overflow! */
+          display           : inline-block;
+          margin            : 0;
+          min-width         : 92.5%;
       }
 
       /* output of the syntax coloring library */
