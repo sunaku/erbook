@@ -1166,56 +1166,6 @@ styles:
           padding           : 2em;
       }
 
-    /* document structure */
-      /* mini navigation menu beside every block node */
-      .nav
-      {
-          width             : 4em;
-          float             : left; /* detach from main content */
-          margin-left       : -6.075em;
-
-          font-size         : 1.9em;
-          letter-spacing    : 0.25em;
-          text-align        : center;
-
-          color             : #696969; /* same colors to hide non-links */
-          background-color  : #696969;
-          padding           : 0.5em;
-          margin-top        : -0.5em;
-      }
-
-      .nav:target,
-      .nav:hover
-      {
-        color               : #333; /* same colors to hide non-links */
-        background-color    : #333;
-      }
-
-      .nav a:link,
-      .nav a:visited
-      {
-          color             : #D3D3D3;
-      }
-
-      .nav a:hover {
-        color               : #9ACD32;
-        text-decoration     : none;
-      }
-
-      /* global navigation menu at the top of the page */
-      #nav
-      {
-          font-size         : 1em;
-          letter-spacing    : 0;
-          width             : 8.5em;
-          margin-left       : -11.5em;
-      }
-
-      #nav li
-      {
-          list-style-type   : none;
-      }
-
     /* source code */
       tt
       {
@@ -1264,10 +1214,65 @@ styles:
           color             : #800080;
       }
 
-      a.here,
-      a.link
+      #toc a:target:after,
+      #lof a:target:after,
+      #nav a:target:after
       {
-          color             : #000000;
+          content           : "★"; /* &#x2605; */
+          color             : #FF0000;
+          font-size         : x-large;
+          padding-left      : 0.125em;
+      }
+
+    /* document structure */
+      /* mini navigation menu beside every block node */
+      .nav
+      {
+          width             : 4em;
+          float             : left; /* detach from main content */
+          margin-left       : -6.075em;
+
+          font-size         : 1.9em;
+          letter-spacing    : 0.25em;
+          text-align        : center;
+
+          color             : #696969; /* same colors to hide non-links */
+          background-color  : #696969;
+          padding           : 0.5em;
+          margin-top        : -0.5em;
+      }
+
+      .nav:target,
+      .nav:hover
+      {
+          color             : #333; /* same colors to hide non-links */
+          background-color  : #333;
+      }
+
+      .nav a:link,
+      .nav a:visited
+      {
+          color             : #D3D3D3;
+      }
+
+      .nav a:hover,
+      #nav a:target:after {
+          color             : #9ACD32;
+          text-decoration   : none;
+      }
+
+      /* global navigation menu at the top of the page */
+      #nav
+      {
+          font-size         : 1em;
+          letter-spacing    : 0;
+          width             : 8.5em;
+          margin-left       : -11.5em;
+      }
+
+      #nav li
+      {
+          list-style-type   : none;
       }
 
 - print: |
@@ -1361,4 +1366,3 @@ styles:
       {
           _padding-bottom   : 0.5em; /* for IE6 */
       }
-
