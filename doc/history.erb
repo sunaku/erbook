@@ -1,4 +1,62 @@
 <% chapter "Project history", "history" do %>
   <% project_history do %>
+    <% section "Version 6.0.0 (2009-01-19)" do %>
+      This release improves the appearance & usability of the XHTML format, refactors the core logic into reusable libraries, fixes some bugs and improves variable names.
+
+      <% paragraph "Incompatible changes" do %>
+        * Renamed `@types` to `@nodes_by_type` and `@spec` to `@format` in XHTML format.
+
+        * Moved the core logic of the **erbook** executable into the `ERBook::Document` and `ERBook::Document::Template` classes.
+      <% end %>
+
+      <% paragraph "New features" do %>
+        * Addded navigation menus beside every segment in the user manual.  These menus allow you to jump to the next/previous segment, whereas previously you always had to go back to the table of contents and select a new segment.
+
+        * A star is drawn beside a reverse jump target in the table of contents, so the user can continue where they left off.
+
+        * Added "inline" node definition parameter (see <%= xref "SpecFile.nodes" %>).
+
+        * Added `$subtitle` parameter to XHTML format.
+
+        * Document parameters for the XHTML format, such as `$title`, can now be disabled by setting them to `nil`.
+
+        * Relative file paths can now be specified in <%%#include#%> directives.
+
+        * Added a "node" node (see <%= xref "xhtml.nodes.node" %>), which serves as a pass-through container, in the XHTML format.
+
+        * Allow user to type `<pre>` blocks on single lines without affecting the display of their content.
+
+        * Initial newline in the body of `<code>` is now stripped.  This allows users to write their code blocks normally:
+
+            &lt;code&gt;<br/>
+            foo<br/>
+            bar<br/>
+            &lt;/code&gt;<br/>
+
+            Instead of abnormally to avoid an extra leading newline:
+
+            &lt;code&gt;foo<br/>
+            bar<br/>
+            &lt;/code&gt;<br/>
+
+        * Paragraph nodes are now included in the table of contents.
+      <% end %>
+
+      <% paragraph "Bug fixes" do %>
+        * Input to unindentation algorithm was being partially unindented beforehand by the logic that silences code-only eRuby directives.  This corrupted the unindentation algorithm's output in some cases.
+
+        * `<pre>` blocks now expand to fit their content in the XHTML format.  No more scrollbars!
+
+        * `<a/>` without href was treated as external hyperlink.
+      <% end %>
+
+      <% paragraph "Housekeeping" do %>
+        * Revised the project logo to emphasize the owl mascot.
+
+        * Replaced dull MediaWiki hyperlink colors with more lively colors in XHTML format.
+
+        * Wrote more API documentation and use [<%= Inochi::PROJECT %>](<%= Inochi::WEBSITE %>) to simplify project maintenance.
+      <% end %>
+    <% end %>
   <% end %>
 <% end %>
