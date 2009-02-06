@@ -180,7 +180,7 @@ code: |
           if type == 'reference'
             prefix
           else
-            [prefix, title].compact.join('. ')
+            [prefix, (%{"#{title}"} if title)].compact.join('. ')
           end
 
         title_xhtml =
