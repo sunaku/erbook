@@ -1,17 +1,17 @@
 <% chapter "Usage" do %>
   <% section "Command-line interface" do %>
-    <pre><%= `ruby bin/erbook -h` %></pre>
+    <pre><%= `ruby bin/#{$program} -h` %></pre>
 
-    The first command-line argument to erbook is either the name of a predefined format (FormatName) or the path to a <%= xref "SpecFile", "format specification file" %> (FormatFile).
+    The first command-line argument to **<%= $project %>** is either the name of a predefined format (FormatName) or the path to a <%= xref "SpecFile", "format specification file" %> (FormatFile).
 
-    Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the erbook installation directory (see <%= xref "Manifest" %>).
+    Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the **<%= $project %>** installation directory (see <%= xref "Manifest" %>).
 
     <% section "Saving the output to a file" do %>
       Simply redirect the standard ouput stream (STDOUT) to a file like this:
 
-          erbook > YOUR_PATH_HERE
+          <%= $program %> > YOUR_PATH_HERE
 
-      In the above example, **YOUR\_PATH\_HERE** is the path of the file in which the output should be saved.
+      In the above example, *YOUR\_PATH\_HERE* is the path of the file in which the output should be saved.
 
       <% important "Save XHTML output as <tt>.xhtml</tt>" do %>
         When you use the XHTML format, ensure that the file extension of your saved output document is either <tt>.xhtml</tt> or <tt>.xml</tt>. Alternatively, ensure that your saved output document is served to web browsers under the <tt>application/xhtml+xml</tt> mime type.
@@ -26,14 +26,14 @@
 
         <%%# include YOUR_PATH_HERE #%>
 
-    In the above example, **YOUR\_PATH\_HERE** is the path of the file whose content you wish to insert into the input document.
+    In the above example, *YOUR\_PATH\_HERE* is the path of the file whose content you wish to insert into the input document.
 
     You can divide a large document into separate files for easier editing and stitch them together, dynamically, into a single document using the **include** directive.
   <% end %>
 
   <% section "Unindenting nodes hierarchically" do %>
-    When writing erbook documents, I prefer to indent the content of nodes according to their depth because my [text editor of choice](http://jedit.org) automatically folds blocks of text based on indentation.
+    When writing **<%= $project %>** documents, I prefer to indent the content of nodes according to their depth because my [text editor of choice](http://jedit.org) automatically folds blocks of text based on indentation.
 
-    If you also prefer to write documents in this way, be sure to pass the <tt>--unindent</tt> option to **erbook** so that the indentation will not affect the resulting output.
+    If you also prefer to write documents in this way, be sure to pass the <tt>--unindent</tt> option to **<%= $project %>** so that the indentation will not affect the resulting output.
   <% end %>
 <% end %>

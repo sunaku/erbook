@@ -504,19 +504,12 @@ nodes:
       inline: true
       output: |
         <%=
-          target = @nodes_by_type['reference'].find {|n| n.title == @node.args[0]}
+          target = @nodes_by_type['reference'].find {|n| n.title == @node.title }
 
           if target
             '<sup>[%s]</sup>' % [
-
-              '<a class="%s" href="#%s">%s</a>' % [
-                @node.type,
-                target.here_frag,
-                target.number
-              ],
-
+              target.xref_link(target.number),
               *@node.args[1..-1]
-
             ].join(', ')
           else
             raise ArgumentError, "invalid citation for #{@node.title.inspect}", @node.trace

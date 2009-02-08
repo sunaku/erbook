@@ -9,8 +9,8 @@
 #
 # Usage:
 #
-#   erbook [Option...] FormatName [InputFile]
-#   erbook [Option...] FormatFile [InputFile]
+#   erbook [Options] FormatName [InputFile]
+#   erbook [Options] FormatFile [InputFile]
 #
 
 require 'rubygems'
@@ -25,13 +25,12 @@ require 'inochi'
     ERBook::FORMAT_FILES.each do |file|
       name = File.basename(file, '.yaml')
       desc = YAML.load_file(file)['desc'] rescue nil
-      banner '%16s:   %s' % [name, desc]
+      banner '%8s:  %s' % [name, desc]
     end
-
     text ''
 
     # show list of command-line options
-    text 'Option:'
+    text 'Options:'
     opt :unindent, 'Unindent node content hierarchically'
   end
 
