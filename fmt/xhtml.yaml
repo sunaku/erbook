@@ -817,7 +817,7 @@ styles:
       {
           height            : 0;
           border            : 0;
-          border-top        : 2px solid #FF0000;
+          border-top        : thin dashed #000000;
       }
 
     /* source code */
