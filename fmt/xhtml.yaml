@@ -1286,7 +1286,7 @@ styles:
       .nav a:link,
       .nav a:visited
       {
-          color             : #D3D3D3;
+          color             : #C0C0C0;
       }
 
       .nav a:hover,
