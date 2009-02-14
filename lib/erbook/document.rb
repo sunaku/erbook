@@ -64,8 +64,7 @@ module ERBook
               :@roots         => @roots = [], # root nodes of all trees
               :@nodes         => @nodes = [], # all nodes in the forest
               :@nodes_by_type => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
-              :@node_stack    => [], # stack for all nodes
-              :@index_stack   => [], # stack for nodes having index only
+              :@stack         => [], # stack for all nodes
             }.each_pair {|k,v| template.instance_variable_set(k, v) }
 
             class << template
@@ -95,7 +94,7 @@ module ERBook
                 end
 
                 # assign node family
-                if parent = @node_stack.last
+                if parent = @stack.last
                   parent.children << node
                   node.parent = parent
                   node.depth = parent.depth
@@ -103,9 +102,10 @@ module ERBook
 
                   # calculate latex-style index number for this node
                   if node.defn['index']
-                    parent = @index_stack.last
-                    branches = parent.children.select {|n| n.index }
-                    node.index = [parent.index, branches.length + 1].join('.')
+                    ancestry = @stack.reverse.find {|n| n.defn['index'] }.index
+                    branches = node.parent.children.select {|n| n.index }
+
+                    node.index = [ancestry, branches.length + 1].join('.')
                   end
                 else
                   @roots << node
@@ -121,11 +121,9 @@ module ERBook
 
                 # assign node content
                 if block_given?
-                  @index_stack.push node if node.defn['index']
-                  @node_stack.push node
+                  @stack.push node
                   content = content_from_block(node, &node_content)
-                  @node_stack.pop
-                  @index_stack.pop if node.defn['index']
+                  @stack.pop
 
                   digest = Document.digest(content)
                   self.buffer << digest
