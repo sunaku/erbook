@@ -3,8 +3,8 @@ require 'inochi'
 
 Inochi.init :ERBook,
   :program => 'erbook',
-  :version => '6.0.1',
-  :release => '2009-01-19',
+  :version => '6.1.0',
+  :release => '2009-02-14',
   :website => 'http://snk.tuxfamily.org/lib/erbook/',
   :tagline => 'Extensible document processor based on eRuby',
   :require => {

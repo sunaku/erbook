@@ -1,5 +1,29 @@
 <% chapter "History" do %>
   <% project_history do %>
+    <% section "Version 6.1.0 (2009-02-14)" do %>
+      <% paragraph "New features" do %>
+        * Added translations for English phrases used in the XHTML format (see the <tt>lang/</tt> directory).
+
+          You can choose which language to translate into by setting your LANG environment variable or by supplying the <tt>--locale</tt> option to the **<%= $program %>** executable.
+
+        * Reduced brightness of links in local navigation menus; it was distracting from the main text of the document.
+
+        * Draw the HTML &lt;hr/&gt; element as a dashed black line, instead of a *glaring* red line.
+      <% end %>
+
+      <% paragraph "Bug fixes" do %>
+        * LaTeX-style index numbers were calculated incorrectly for descendants of the "node" node.
+      <% end %>
+
+      <% paragraph "Housekeeping" do %>
+        * Add release notes for past releases... two years have already passed since I started this project!  Where did the time go?
+
+        * List all contributors in the <%= xref "Credits", "Credits section" %> and make project logo a hyperlink to that section so interested people can quickly learn the source of the logo.
+
+        * Mention that project license is ISC for reader's convenience.
+      <% end %>
+    <% end %>
+
     <% section "Version 6.0.1 (2009-01-19)" do %>
       This release reattempts to fix the [circular dependency problem](http://www.ruby-forum.com/topic/176173#771281) that occurred when installing either **<%= Inochi::PROJECT %>** or **<%= $project %>**.
     <% end %>
