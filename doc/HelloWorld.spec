@@ -1,7 +1,7 @@
 desc: An example format.
 
 code: |
-  class ERBook::Node
+  class ERBook::Document::Node
     def name
       # dynamically compute (and store)
       # the name of this node on demand
