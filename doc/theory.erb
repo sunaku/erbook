@@ -1,4 +1,4 @@
-<% chapter "Theory of operation" do %>
+%|chapter "Theory of operation"
   When you run <%= $project %>, it does the following:
 
   1.  Loads the <%= xref "SpecFile", "format specification file" %>.
@@ -6,8 +6,6 @@
   2.  Creates an **input document** by:
 
       * Reading the input (the content of either the input file or the standard input stream) into memory.
-
-      * Evaluating <%= xref "include", "include directives" %> in the input.
 
   3.  Transforms the input document into a **processed document** by:
 
@@ -21,7 +19,7 @@
 
   Although there is only one document being processed here, we refer to it using three distinct terms: **input**, **processed**, and **output**; because the content of the document changes radically with every transformation.
 
-  <% section "Nodes" do %>
+  %|section "Nodes"
     A node is a block of text that appears like this:
 
         <%% node_type node_argument1, node_argument2, ... do |node_object| %>
@@ -65,7 +63,7 @@
 
     A <%= xref "SpecFile", "format specification file" %> defines what types of nodes an input document may use.
 
-    <% section "The `ERBook::Document::Node` class", "Node.class" do %>
+    %|section "The `ERBook::Document::Node` class", "Node.class"
       When <%= $project %> builds a document tree from the nodes in an input document, it stores information about these nodes into `ERBook::Document::Node` objects.  A `ERBook::Document::Node` object has the following properties (methods):
 
       | Property | Type                                | Description                                                                                                                                                |
@@ -83,10 +81,8 @@
       | children | `Array` of `ERBook::Document::Node` | List of child nodes from the document tree.                                                                                                                |
 
       Furthermore, the `ERBook::Document::Node` class is derived from [Ruby's `OpenStruct` class](http://www.ruby-doc.org/stdlib/libdoc/ostruct/rdoc/classes/OpenStruct.html), so you can define new properties for `ERBook::Document::Node` objects dynamically.
-    <% end %>
-  <% end %>
 
-  <% section "Format specification file", "SpecFile" do %>
+  %|section "Format specification file", "SpecFile"
     A format specification file is a plain-text file marked up in [YAML syntax](http://yaml4r.sourceforge.net/cookbook/). Through the following parameters, it defines (1) what types of nodes an input document may contain, (2) how the content of those nodes is transformed into output, and (3) how the processed document is transformed into the output document.
 
     | Parameter | Type     | Description                                                                                                                                                                                                                                        |
@@ -103,7 +99,7 @@
       common_template_vars = nil
     %>
 
-    <% section "Node definition", "SpecFile.nodes" do %>
+    %|section "Node definition", "SpecFile.nodes"
       A node definition is a mapping from a name (the "node type") to the following set of parameters:
 
       | Parameter | Type     | Description                                                                               |
@@ -116,7 +112,7 @@
 
       You may define additional parameters in a node definition if you want.
 
-      <% section "Node output template", "SpecFile.nodes.output" do %>
+      %|section "Node output template", "SpecFile.nodes.output"
         A node output template (the **output** parameter in a node definition) is an eRuby template that transforms a node's content into output.  During the processing stage, <%= $project %> replaces all nodes in the input document with the result of this template _unless_ the **silent** parameter is enabled in this node's definition.
 
         The following variables are available for use in this template:
@@ -138,10 +134,8 @@
         | `@format[:file]` | `String` | Path of the current format specification file. |
         }.lstrip.gsub(/^ +/, '')
         %>
-      <% end %>
-    <% end %>
 
-    <% section "Document output template", "SpecFile.output" do %>
+    %|section "Document output template", "SpecFile.output"
       A document output template (the **output** parameter in a format specification file) is an eRuby template that transforms a processed document into the final output document.
 
       The following variables are available for use in this template:
@@ -150,9 +144,8 @@
       | --------   | ----     | -----------                        |
       | `@content` | `String` | Content of the processed document. |
       <%= common_template_vars %>
-    <% end %>
 
-    <% section "Creating your own document format", "HelloWorld" do %>
+    %|section "Creating your own document format", "HelloWorld"
       Here is a working example to help you digest all that you've learned so far about format specification files. A few things to notice in this example are:
 
       * We define a `generate_name()` method in <%= xref "HelloWorld.spec" %> and make use of it in the <%= xref "HelloWorld.input" %>. This shows how to provide format-specific functionality to an input document.
@@ -171,17 +164,11 @@
 
       4.  Examine the <tt>HelloWorld.output</tt> file to your satisfaction!
 
-      <% example "HelloWorld format specification file", "HelloWorld.spec" do %>
+      %|example "HelloWorld format specification file", "HelloWorld.spec"
         <code lang="rhtml"><%= verbatim File.read('doc/HelloWorld.spec') %></code>
-      <% end %>
 
-      <% example "Input document for HelloWorld format", "HelloWorld.input" do %>
+      %|example "Input document for HelloWorld format", "HelloWorld.input"
         <code lang="rhtml"><%= verbatim File.read('doc/HelloWorld.input') %></code>
-      <% end %>
 
-      <% example "Output of HelloWorld format", "HelloWorld.output" do %>
-        <%= `ruby bin/#{PROGRAM} -u doc/HelloWorld.spec doc/HelloWorld.input` %>
-      <% end %>
-    <% end %>
-  <% end %>
-<% end %>
+      %|example "Output of HelloWorld format", "HelloWorld.output"
+        %= `ruby bin/#{PROGRAM} -u doc/HelloWorld.spec doc/HelloWorld.input`

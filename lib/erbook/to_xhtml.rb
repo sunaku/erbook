@@ -123,7 +123,7 @@ class String
             head << CGI.escapeHTML(CGI.unescapeHTML(body)) << tail
           end
 
-        escaped = ERBook::Document.digest(original)
+        escaped = calc_digest(original)
         escapes[escaped] = original
 
         escaped
@@ -143,5 +143,18 @@ class String
     end
 
     output
+  end
+
+  require 'digest/sha1'
+  ##
+  # Returns a digest of the given string that
+  # will not be altered by String#to_xhtml.
+  #
+  def calc_digest input
+    Digest::SHA1.hexdigest(input.to_s).
+
+    # XXX: surround all digits with alphabets so
+    #      Maruku doesn't change them into HTML
+    gsub(/\d/, 'z\&z')
   end
 end

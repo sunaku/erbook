@@ -1,5 +1,6 @@
 require 'yaml'
 require 'erbook/template'
+require 'digest/sha1'
 
 module ERBook
   class Document
@@ -122,20 +123,13 @@ module ERBook
                 # assign node content
                 if block_given?
                   @stack.push node
-                  content = content_from_block(node, &node_content)
+                  node.content = content_from_block(node, &node_content)
                   @stack.pop
-
-                  digest = Document.digest(content)
-                  self.buffer << digest
-                else
-                  content = nil
-                  digest = Document.digest(node.object_id)
                 end
 
-                node.content = content
-                node.digest = digest
+                self.buffer << node
 
-                digest
+                nil
               end
             end
 
@@ -151,7 +145,8 @@ module ERBook
             end
 
           # evaluate the input & build the document tree
-            @processed_document = template.instance_eval { result binding }
+            template.instance_eval { render(binding) }
+            @processed_document = template.buffer
 
           # chain block-level nodes together for local navigation
             block_nodes = @nodes.reject {|n| @node_defs[n.type]['inline'] }
@@ -162,25 +157,52 @@ module ERBook
               b.prev_node = a
             end
 
-          # replace node placeholders with their corresponding output
-            expander = lambda do |n, buf|
-              # calculate node output
-              source = "#{@format_file}:nodes:#{n.type}:output"
-              n.output = Template.new(
-                source, @node_defs[n.type]['output'].to_s.chomp
+          # calculate output for all nodes
+            actual_output_by_node = {}
+
+            visitor = lambda do |n|
+              #
+              # allow child nodes to calculate their actual
+              # output and to set their identifier as Node#output
+              #
+              # we do this nodes first because this node's
+              # content contains the child nodes' output
+              #
+              n.children.each {|c| visitor.call c }
+
+              # calculate the output for this node
+              actual_output = Template.new(
+                "#{@format_file}:nodes:#{n.type}:output",
+                @node_defs[n.type]['output'].to_s.chomp
               ).render_with(@template_vars.merge(:@node => n))
 
-              # expand all child nodes in this node's output
-              n.children.each {|c| expander[c, n.output] }
+              # reveal child nodes' actual output in this node's actual output
+              n.children.each do |c|
+                actual_output[c.output] = actual_output_by_node[c]
+              end
 
-              # replace this node's placeholder with its output in the buffer
-              buf[n.digest] = @node_defs[n.type]['silent'] ? '' : n.output
+              actual_output_by_node[n] = actual_output
+
+              #
+              # allow the parent node to calculate its actual
+              # output without interference from the output of
+              # this node (Node#to_s is aliased to Node#output)
+              #
+              # this assumes that having this node's string
+              # representation be a consecutive sequence of digits
+              # will not interfere with the text-to-whatever
+              # transformation defined by the format specification
+              #
+              n.output = Digest::SHA1.digest(n.object_id.to_s).unpack('I*').join
             end
 
-            @roots.each {|n| expander[n, @processed_document] }
+            @roots.each {|n| visitor.call n }
+
+            # replace the temporary identifier with each node's actual output
+            @nodes.each {|n| n.output = actual_output_by_node[n] }
 
         rescue Exception
-          puts input_text # so the user can debug line numbers in the stack trace
+          puts input_text # so the user can debug line numbers in stack trace
           error "Could not process input document #{input_file.inspect}"
         end
     end
@@ -190,7 +212,7 @@ module ERBook
     #
     def to_s
       Template.new("#{@format_file}:output", @format['output'].to_s).
-      render_with(@template_vars.merge(:@content => @processed_document))
+      render_with(@template_vars.merge(:@content => @processed_document.join))
     end
 
     require 'ostruct'
@@ -203,19 +225,6 @@ module ERBook
       def to_s
         output
       end
-    end
-
-    require 'digest/sha1'
-    ##
-    # Returns a digest of the given string that
-    # will not be altered by String#to_xhtml.
-    #
-    def Document.digest input
-      Digest::SHA1.hexdigest(input.to_s).
-
-      # XXX: surround all digits with alphabets so
-      #      Maruku doesn't change them into HTML
-      gsub(/\d/, 'z\&z')
     end
 
     private

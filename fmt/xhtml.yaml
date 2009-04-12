@@ -38,6 +38,8 @@ code: |
     end
   end
 
+  require 'erb'
+
   module ERBook
     class Template
       # Protects the given content from the text-to-XHTML conversion process.
@@ -574,44 +576,35 @@ output: |
 
         %{#{ERBook::Document::Node.navigation label, "rev:#{label}", nil, nil}<h2 class="title">#{label}</h2> <ol>#{nested}</ol>}
       end
-  %>
-  <?xml version="1.0" encoding="utf-8"?>
+  %><?xml version="1.0" encoding="utf-8"?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" [
-    <% ICONS.each do |icon| %>
+    %|ICONS.each |icon|
       <!ENTITY <%= icon.entity_name %> "<%= icon.data_uri %>">
-    <% end %>
   ]>
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
       <meta name="generator" content="<%= ERBook::DISPLAY %>"/>
 
-      <% if $title %>
+      % if $title
         <title><%= $title.to_s.to_inline_xhtml %></title>
-      <% end %>
 
-      <% if $authors %>
+      % if $authors
         <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
-      <% end %>
 
-      <% if $date %>
+      % if $date
         <meta name="date" content="<%= $date %>"/>
-      <% end %>
 
-      <% if $feeds %>
-        <% $feeds.each_pair do |url, fmt| %>
+      % if $feeds
+        % $feeds.each_pair do |url, fmt|
           <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
-        <% end %>
-      <% end %>
 
-      <% @format['styles'].each do |style| %>
-        <% style.each_pair do |media, code| %>
+      % @format['styles'].each do |style|
+        % style.each_pair do |media, code|
           <style type="text/css" media="<%= media %>">
-          <![CDATA[<%= ERB.new(code).result(binding) %>]]>
+          <![CDATA[<%~ code %>]]>
           </style>
-        <% end %>
-      <% end %>
 
       <style type="text/css" media="screen">
       <![CDATA[
@@ -646,81 +639,77 @@ output: |
           lof_sections,
           (ERBook::PHRASES['References'] if references)
         ].flatten.compact
-
-        if nav.length > 1
       %>
-      <ul id="nav" class="nav">
-        <% nav.each do |section| %>
-          <li><a id="rev:<%= section %>" href="#<%= section %>"><%= section %></a></li>
-        <% end %>
-      </ul>
-      <% end %>
+      % if nav.length > 1
+        <ul id="nav" class="nav">
+          % nav.each do |section|
+            <li><a id="rev:<%= section %>" href="#<%= section %>"><%= section %></a></li>
+        </ul>
 
       <br style="display: none"/>
       <hr style="display: none"/>
       <br style="display: none"/>
 
-      <%= node = @nodes_by_type['header_outside_above'].first and node.output %>
+
+      %= node = @nodes_by_type['header_outside_above'].first and node.output
+
       <div id="header">
-      <%= node = @nodes_by_type['header_inside_above'].first and node.output %>
-      <% if header = @nodes_by_type['header'].first %>
-        <%= header.output %>
-      <% else %>
-        <% if $logo %>
-          <div class="logo"><%= $logo %></div>
-        <% end %>
+        %= node = @nodes_by_type['header_inside_above'].first and node.output
 
-        <% if $title %>
-          <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
-        <% end %>
+        % if header = @nodes_by_type['header'].first
+          <%= header.output %>
+        % else
+          % if $logo
+            <div class="logo"><%= $logo %></div>
 
-        <% if $subtitle %>
-          <h2 class="subtitle"><%= $subtitle.to_s.to_inline_xhtml %></h2>
-        <% end %>
+          % if $title
+            <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
 
-        <% if $authors %>
-          <h3 class="authors"><%=
-            $authors.map do |name, url|
-              if url
-                %{<a href="#{url}">#{name}</a>}
-              else
-                name
-              end
-            end.join(', ')
-          %></h3>
-        <% end %>
+          % if $subtitle
+            <h2 class="subtitle"><%= $subtitle.to_s.to_inline_xhtml %></h2>
 
-        <% if $date %>
-          <h3 class="date"><%= $date %></h3>
-        <% end %>
-      <% end %>
-      <%= node = @nodes_by_type['header_inside_below'].first and node.output %>
+          % if $authors
+            <h3 class="authors"><%=
+              $authors.map do |name, url|
+                if url
+                  %{<a href="#{url}">#{name}</a>}
+                else
+                  name
+                end
+              end.join(', ')
+            %></h3>
+
+          % if $date
+            <h3 class="date"><%= $date %></h3>
+
+        %= node = @nodes_by_type['header_inside_below'].first and node.output
       </div>
-      <%= node = @nodes_by_type['header_outside_below'].first and node.output %>
 
-      <%= abstract.output if abstract %>
+      %= node = @nodes_by_type['header_outside_below'].first and node.output
+
+
+      %= abstract.output if abstract
 
       <br style="display: none"/>
       <hr style="display: none"/>
       <br style="display: none"/>
 
-      <% unless toc.empty? %>
+
+      % unless toc.empty?
         <div id="toc">
-          <%= ERBook::Document::Node.navigation 'Contents', 'rev:Contents', nil, nil %>
+          <%= ERBook::Document::Node.navigation \
+            'Contents', 'rev:Contents', nil, nil %>
           <h1 class="title"><%= ERBook::PHRASES['Contents'] %></h1>
           <ul>
-            <%= toc %>
+            %= toc
 
-            <% if references %>
-            <li><a id="rev:References" href="#References"><%= ERBook::PHRASES['References'] %></a></li>
-            <% end %>
+            % if references
+              <li><a id="rev:References" href="#References"><%= ERBook::PHRASES['References'] %></a></li>
           </ul>
         </div>
-      <% end %>
 
-      <% unless lof.empty? %>
+      % unless lof.empty?
         <div id="lof"><%= lof %></div>
-      <% end %>
 
       <br style="display: none"/>
       <hr style="display: none"/>
@@ -728,84 +717,83 @@ output: |
 
       <div id="content"><%= @content %></div>
 
-      <% if references %>
-      <div id="bib">
-        <%= ERBook::Document::Node.navigation 'References', 'rev:References', nil, nil %>
-        <h1 class="title"><%= ERBook::PHRASES['References'] %></h1>
-        <ol>
-        <% references.each do |n| %>
-          <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
-        <% end %>
-        </ol>
-      </div>
-      <% end %>
+      % if references
+        <div id="bib">
+          <%= ERBook::Document::Node.navigation \
+              'References', 'rev:References', nil, nil %>
+          <h1 class="title"><%= ERBook::PHRASES['References'] %></h1>
+          <ol>
+          % references.each do |n|
+            <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
+          </ol>
+        </div>
 
       <br style="display: none"/>
       <hr style="display: none"/>
       <br style="display: none"/>
 
-      <%= node = @nodes_by_type['footer_outside_above'].first and node.output %>
+
+      %= node = @nodes_by_type['footer_outside_above'].first and node.output
+
       <div id="footer">
-      <%= node = @nodes_by_type['footer_inside_above'].first and node.output %>
-      <% if footer = @nodes_by_type['footer'].first %>
-        <%= footer.content.to_s.to_xhtml %>
-      <%
-        else
-          ERBook::PHRASES[
-            'Generated by %s on %s.',
-            %{<a href="#{ERBook::WEBSITE}">#{ERBook::DISPLAY}</a>},
-            Time.now
-          ]
-        end
-      %>
-
-      <div id="footer-credits">
-        <%
-          icon_credits = 'The icons shown above are part of %s, which is copyright %s and is distributed under %s.'
-        %>
-        <p>
-          <% ICONS.select {|i| i.origin == 'tango' }.each do |icon| %>
-            <%= icon.to_xhtml %>
-          <% end %>
-
-          <br/>
-
+        %= node = @nodes_by_type['footer_inside_above'].first and node.output
+        % if footer = @nodes_by_type['footer'].first
+          %= footer.content.to_s.to_xhtml
+        % else
           <%=
             ERBook::PHRASES[
-              icon_credits,
-
-              '<a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a>',
-
-              '&copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>',
-
-              '<a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>'
+              'Generated by %s on %s.',
+              %{<a href="#{ERBook::WEBSITE}">#{ERBook::DISPLAY}</a>},
+              Time.now
             ]
           %>
-        </p>
 
-        <p>
-          <% ICONS.select {|i| i.origin == 'mediawiki' }.each do |icon| %>
-            <%= icon.to_xhtml %>
-          <% end %>
-
-          <br/>
-
-          <%=
-            ERBook::PHRASES[
-              icon_credits,
-
-              '<a href="http://www.mediawiki.org/wiki/MediaWiki">MediaWiki</a>',
-
-              '&copy; 2007 <a href="https://www.ohloh.net/projects/mediawiki/contributors">MediaWiki contributors</a>',
-
-              '<a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License, version 2</a>'
-            ]
+        <div id="footer-credits">
+          <%
+            icon_credits = 'The icons shown above are part of %s, which is copyright %s and is distributed under %s.'
           %>
-        </p>
+          <p>
+            % ICONS.select {|i| i.origin == 'tango' }.each do |icon|
+              %= icon.to_xhtml
+
+            <br/>
+
+            <%=
+              ERBook::PHRASES[
+                icon_credits,
+
+                '<a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a>',
+
+                '&copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>',
+
+                '<a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>'
+              ]
+            %>
+          </p>
+
+          <p>
+            % ICONS.select {|i| i.origin == 'mediawiki' }.each do |icon|
+              %= icon.to_xhtml
+
+            <br/>
+
+            <%=
+              ERBook::PHRASES[
+                icon_credits,
+
+                '<a href="http://www.mediawiki.org/wiki/MediaWiki">MediaWiki</a>',
+
+                '&copy; 2007 <a href="https://www.ohloh.net/projects/mediawiki/contributors">MediaWiki contributors</a>',
+
+                '<a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License, version 2</a>'
+              ]
+            %>
+          </p>
+        </div>
+        %= node = @nodes_by_type['footer_inside_below'].first and node.output
       </div>
-      <%= node = @nodes_by_type['footer_inside_below'].first and node.output %>
-      </div>
-      <%= node = @nodes_by_type['footer_outside_below'].first and node.output %>
+
+      %= node = @nodes_by_type['footer_outside_below'].first and node.output
     </div>
     </body>
   </html>

@@ -1,11 +1,10 @@
-<% chapter "Introduction" do %>
-  <% eruby_url = "http://en.wikipedia.org/wiki/ERuby" %>
+% eruby_url = "http://en.wikipedia.org/wiki/ERuby"
 
-  <% project_summary do %>
+%|chapter "Introduction"
+  %|project_summary
     **<%= $project %>** is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>) that allow scripting and dynamic content generation.
 
     A working <%= xref "xhtml", "XHTML (web page)" %> format is provided, while <%= xref "latex", "LaTeX (PDF)" %>, <%= xref "man", "UNIX manual page" %>, and <%= xref "text", "plain text" %> formats are planned... <%= xref "License", "patches are welcome" %>!
-  <% end %>
 
   **<%= $project %>** is exciting because:
   * Its documents are scriptable [eRuby templates](<%= eruby_url %>).
@@ -20,7 +19,7 @@
   * [txt2tags](http://txt2tags.sourceforge.net)
   * [Grutatxt](http://www.triptico.com/software/grutatxt.html)
 
-  <% section "Logistics" do %>
+  %|section "Logistics"
     * <%= xref "History", "Release notes" %> --- history of project releases.
     * [Source code](http://github.com/sunaku/<%= $program %>) --- obtain via [Git](http://git.or.cz) or browse online.
     * [API reference](api/index.html) --- documentation for source code.
@@ -28,7 +27,7 @@
     To get help or provide feedback, simply
     <%= xref "License", "contact the authors" %>.
 
-    <% paragraph "Version numbers" do %>
+    %|paragraph "Version numbers"
       **<%= $project %>** releases are numbered in *major.minor.patch*
       form according to the [RubyGems rational versioning
       policy](http://www.rubygems.org/read/chapter/7), which
@@ -67,16 +66,13 @@
           </tr>
         </tbody>
       </table>
-    <% end %>
-  <% end %>
 
-  <% section "License" do %>
-    <%# include ../LICENSE #%>
-  <% end %>
+  %|section "License"
+    %< "../LICENSE"
 
-  <% section "Credits" do |n| %>
-    <%= $logo = n.xref_link("![#{$project} logo](#{$program}.png)".to_inline_xhtml) %>
-    <%# include README #%>
+  %|section "Credits" |n|
+    %= $logo = n.xref_link("![#{$project} logo](#{$program}.png)".to_inline_xhtml)
+    %< "README"
 
     **<%= $project %>** is made possible by
     <%= xref "History", "contributions" %>
@@ -85,9 +81,8 @@
     * Jens Vierbuchen
     * Maunika Gosike
     * [Zhang Chiyuan](http://lifegoo.pluskid.org)
-  <% end %>
 
-  <% section "Reviews" do %>
+  %|section "Reviews"
     Tom Cloyd in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/327499):
 
     > This documentation is simply gorgeous!
@@ -106,5 +101,3 @@
     Martin DeMello in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/283304):
 
     > Very nice work indeed!
-  <% end %>
-<% end %>
