@@ -3,21 +3,21 @@
 
   1.  Loads the <%= xref "SpecFile", "format specification file" %>.
 
-  2.  Creates an **input document** by:
+  2.  Creates an *input document* by:
 
       * Reading the input (the content of either the input file or the standard input stream) into memory.
 
-  3.  Transforms the input document into a **processed document** by:
+  3.  Transforms the input document into a *processed document* by:
 
-      * Building a **document tree** data structure from <%= xref "Nodes", "nodes" %> present in the input document.
+      * Building a *document tree* data structure from <%= xref "Nodes", "nodes" %> present in the input document.
 
       * Replacing every node in the input document with the result of its <%= xref "SpecFile.nodes.output", "node output template" %>.
 
-  4.  Transforms the processed document into an **output document** according to the <%= xref "SpecFile.output", "document output template" %>.
+  4.  Transforms the processed document into an *output document* according to the <%= xref "SpecFile.output", "document output template" %>.
 
   5.  Prints the output document to the standard output stream.
 
-  Although there is only one document being processed here, we refer to it using three distinct terms: **input**, **processed**, and **output**; because the content of the document changes radically with every transformation.
+  Although there is only one document being processed here, we refer to it using three distinct terms: *input*, *processed*, and *output*; because the content of the document changes radically with every transformation.
 
   %|section "Nodes"
     A node is a block of text that appears like this:

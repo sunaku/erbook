@@ -16,33 +16,31 @@
 require 'rubygems'
 require 'inochi'
 
-# command line
-  options = Inochi.main :ERBook do
-    # show list of available formats
-    text 'FormatName:'
+options = Inochi.main :ERBook do
+  # show list of available formats
+  text 'FormatName:'
 
-    require 'yaml'
-    ERBook::FORMAT_FILES.each do |file|
-      name = File.basename(file, '.yaml')
-      desc = YAML.load_file(file)['desc'] rescue nil
-      banner '%8s:  %s' % [name, desc]
-    end
-    text ''
-
-    # show list of command-line options
-    text 'Options:'
-    opt :unindent, 'Unindent node content hierarchically'
+  require 'yaml'
+  ERBook::FORMAT_FILES.each do |file|
+    name = File.basename(file, '.yaml')
+    desc = YAML.load_file(file)['desc'] rescue nil
+    banner '%8s:  %s' % [name, desc]
   end
+  text ''
 
-# program body
-  format = ARGV.shift or
+  # show list of command-line options
+  text 'Options:'
+  opt :unindent, 'Unindent node content hierarchically'
+end
+
+format = ARGV.shift or
   raise ArgumentError, "Format was not specified.  Run `#{$0} -h` for help."
 
-  if input_file = ARGV.shift
-    input_text = File.read(input_file)
-  else
-    input_file = 'STDIN'
-    input_text = STDIN.read
-  end
+if input_file = ARGV.shift
+  input_text = File.read(input_file)
+else
+  input_file = 'STDIN'
+  input_text = STDIN.read
+end
 
-  puts ERBook::Document.new(format, input_text, input_file, options)
+puts ERBook::Document.new(format, input_text, input_file, options)

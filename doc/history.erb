@@ -1,7 +1,7 @@
-<% chapter "History" do %>
-  <% project_history do %>
-    <% section "Version 6.1.0 (2009-02-14)" do %>
-      <% paragraph "New features" do %>
+%|chapter "History"
+  %|project_history
+    %|section "Version 6.1.0 (2009-02-14)"
+      %|paragraph "New features"
         * Added translations for English phrases used in the XHTML format (see the <tt>lang/</tt> directory).
 
           You can choose which language to translate into by setting your LANG environment variable or by supplying the <tt>--locale</tt> option to the **<%= $program %>** executable.
@@ -9,35 +9,29 @@
         * Reduced brightness of links in local navigation menus; it was distracting from the main text of the document.
 
         * Draw the HTML &lt;hr/&gt; element as a dashed black line, instead of a *glaring* red line.
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * LaTeX-style index numbers were calculated incorrectly for descendants of the "node" node.
-      <% end %>
 
-      <% paragraph "Housekeeping" do %>
+      %|paragraph "Housekeeping"
         * Add release notes for past releases... two years have already passed since I started this project!  Where did the time go?
 
         * List all contributors in the <%= xref "Credits", "Credits section" %> and make project logo a hyperlink to that section so interested people can quickly learn the source of the logo.
 
         * Mention that project license is ISC for reader's convenience.
-      <% end %>
-    <% end %>
 
-    <% section "Version 6.0.1 (2009-01-19)" do %>
-      This release reattempts to fix the [circular dependency problem](http://www.ruby-forum.com/topic/176173#771281) that occurred when installing either **<%= Inochi::PROJECT %>** or **<%= $project %>**.
-    <% end %>
+    %|section "Version 6.0.1 (2009-01-19)"
+      This release reattempts to fix the [circular dependency problem](http://www.ruby-forum.com/topic/176173#771281) that occurred when installing either **<%= Inochi::PROJECT %>** or <%= $project %>.
 
-    <% section "Version 6.0.0 (2009-01-19)" do %>
+    %|section "Version 6.0.0 (2009-01-19)"
       This release improves the appearance & usability of the XHTML format, refactors the core logic into reusable libraries, fixes some bugs and improves variable names.
 
-      <% paragraph "Incompatible changes" do %>
+      %|paragraph "Incompatible changes"
         * Renamed `@types` to `@nodes_by_type` and `@spec` to `@format` in XHTML format.
 
         * Moved the core logic of the **erbook** executable into the `ERBook::Document` and `ERBook::Document::Template` classes.
-      <% end %>
 
-      <% paragraph "New features" do %>
+      %|paragraph "New features"
         * Addded navigation menus beside every segment in the user manual.  These menus allow you to jump to the next/previous segment, whereas previously you always had to go back to the table of contents and select a new segment.
 
         * A star is drawn beside a reverse jump target in the table of contents, so the user can continue where they left off.
@@ -68,30 +62,26 @@
             &lt;/code&gt;<br/>
 
         * Paragraph nodes are now included in the table of contents.
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * Input to unindentation algorithm was being partially unindented beforehand by the logic that silences code-only eRuby directives.  This corrupted the unindentation algorithm's output in some cases.
 
         * `<pre>` blocks now expand to fit their content in the XHTML format.  No more scrollbars!
 
         * `<a/>` without href was treated as external hyperlink.
-      <% end %>
 
-      <% paragraph "Housekeeping" do %>
+      %|paragraph "Housekeeping"
         * Revised the project logo to emphasize the owl mascot.
 
         * Replaced dull MediaWiki hyperlink colors with more lively colors in XHTML format.
 
         * Wrote more API documentation and use [<%= Inochi::PROJECT %>](<%= Inochi::WEBSITE %>) to simplify project maintenance.
-      <% end %>
-    <% end %>
 
-    <% section "Version 5.0.0 (2008-11-22)" do %>
+    %|section "Version 5.0.0 (2008-11-22)"
       This release renames the "html" format to "xhtml", moves previously global stuff into the `ERBook` namespace, improves error reporting and usability, reduces the file size of XHTML output, and fixes some bugs.
 
 
-      <% paragraph "Incompatible changes" do %>
+      %|paragraph "Incompatible changes"
         * Renamed the "html" format to "xhtml" (and all similarly named methods and files) in order to [support custom DTD extensions](http://www.quirksmode.org/bugreports/archives/2005/02/custom_dtds_int_1.html) which reduce the overall file size of the output. See [this note in the user manual](http://snk.tuxfamily.org/lib/erbook/#Save-XHTML-output-as-.xhtml) for the consequences of this change.
 
         * Removed the `$use_icons` parameter from the XHTML format.  Now, icons are always used, whether you like it or not! ;-)
@@ -99,9 +89,8 @@
         * Replaced the implicit `ERB::Util#h` method with a `verbatim()` method in the XHTML format.
 
         * The [Trollop library](http://trollop.rubyforge.org) (used for command-line options parsing) is now required to run erbook.  See the "Setup" section in the user manual for details.
-      <% end %>
 
-      <% paragraph "New features" do %>
+      %|paragraph "New features"
         * Added support for single-line eRuby directives (lines which begin with "%"), both in general and in the <tt>--unindent</tt> option.  See [this section of the user manual](http://snk.tuxfamily.org/lib/erbook/#xhtml.nodes) for examples.
 
         * Enhanced stack traces with information about the input file and also <tt><%%#include#%></tt>-ed files.  This was done at the cost of increasing the number of source lines of code to more than 200 (it is 207 right now).  Oh well, tradeoffs. ;-)
@@ -109,31 +98,26 @@
         * Omitted erbook internals from stack traces (unless in $DEBUG mode).  This helps users concentrate on problems in their input document.
 
         * Used colors for hyperlinks and suffix icon for external hyperlinks from [the MediaWiki software](http://www.mediawiki.org), which powers the famous Wikipedia.
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * Could not jump to examples and admonitions from the list of figures.
 
         * Reorganized icons for the XHTML format to better reflect their origin (the directory layout of the source code of the open-source projects they came from) so that others can easily find them in their original sources.
-      <% end %>
 
-      <% paragraph "Housekeeping" do %>
+      %|paragraph "Housekeeping"
         * Added API documentation for all methods listed in the user manual, while also omitting many irrelevant methods from the list.
-      <% end %>
-    <% end %>
 
-    <% section "Version 4.0.0 (2008-11-15)" do %>
+    %|section "Version 4.0.0 (2008-11-15)"
       This release renames the project, changes the project license, the source repository, and the default text-to-HTML formatting system, refactors the HTML format, and revises the documentation.
 
-      <% paragraph "Contributor kudos" do %>
+      %|paragraph "Contributor kudos"
         * Jens Vierbuchen contributed the the [cartoon owl sitting on a book](http://openclipart.org/media/files/lemmling/9065) drawing that is used in the new project logo:
 
           <%= $logo %>
 
         * Maunika Gosike provided usability feedback to help improve the HTML format.
-      <% end %>
 
-      <% paragraph "Incompatible changes" do %>
+      %|paragraph "Incompatible changes"
         * The "Gerbil" project has been renamed to "erbook" to better reflect its purpose: it allows you to write books and documents using eRuby.
 
         * The project license has been changed from a [custom MIT/copyleft license](http://snk.tuxfamily.org/web/2007-05-02-copyleft-variation-of-mit-license.html) to the more permissive [ISC license](https://www.isc.org/software/license) to make the world a better place! :-)
@@ -141,27 +125,23 @@
         * The project source code repository is now [hosted on GitHub](http://github.com/sunaku/erbook/tree) (and therefore we now use Git instead of Darcs) to ease collaboration.
 
         * [Markdown](http://daringfireball.net/projects/markdown/syntax) is now the default text-to-HTML formatting system for the HTML format.
-      <% end %>
 
-      <% paragraph "New features" do %>
+      %|paragraph "New features"
         * Added admonition icon for HTML <code><blockquote></code> element.
 
         * A visual marker is shown on outgoing (external) hyperlinks.
 
         * Tooltips are shown upon mouse hover for section index and title links which instruct new users how to navigate the web page more efficiently.
-      <% end %>
 
-      <% paragraph "Housekeeping" do %>
+      %|paragraph "Housekeeping"
         * Renamed `Node#url` to `Node#here_frag`.  Also, speak of "frags" rather than "anchors" or "urls" from now on.
 
         * Refactored common logic from node output templates into Node class.
-      <% end %>
-    <% end %>
 
-    <% section "Version 3.1.0 (2008-06-22)" do %>
+    %|section "Version 3.1.0 (2008-06-22)"
       This release improves the HTML format by reducing the output file size, improving on-line usability and document printability (please try the "print preview" function in your browser; the output is simply beautiful!), and repairing some defects.
 
-      <% paragraph "New features" do %>
+      %|paragraph "New features"
         * The file size of the HTML format's output has been significantly reduced by reusing the data for embedded admonition icons through CSS.  So use admonitions generously; they will not bloat the output file size!
 
 
@@ -185,39 +165,32 @@
         * In browsers that support [CSS3 pseudo-class selectors](http://www.w3.org/TR/css3-selectors/#selectors), cross-reference hyperlinks now show the name and index of their destination node.
 
         * Internal hyperlinks (which point to internal URI fragments) that are not cross-references are now shown as normal text to reduce distraction.
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * Cross-reference (xref) hyperlinks to paragraphs were broken due to a missing **id** attribute.
-      <% end %>
 
-      <% paragraph "Housekeeping" do %>
+      %|paragraph "Housekeeping"
         * Removed useless CSS styles and fixed some XHTML validation issues.
-      <% end %>
-    <% end %>
 
-    <% section "Version 3.0.2 (2008-06-08)" do %>
+    %|section "Version 3.0.2 (2008-06-08)"
       This release implements a shorter, faster, better unindentation algorithm which:
       * Allows block beginnings <code lang="rhtml"><%% do %></code> and endings <code lang="rhtml"><%% end %></code> to span multiple lines.
       * Ignores blank lines (which may contain whitespace) after block beginnings.
       * Processes multiple lines per iteration, instead of one line at a time.
-    <% end %>
 
-    <% section "Version 3.0.1 (2008-06-03)" do %>
+    %|section "Version 3.0.1 (2008-06-03)"
       This release repairs the *unindent* feature (it did not consider block beginnings that had block parameters) and adds an error message when block beginnings and endings are unbalanced.
-    <% end %>
 
-    <% section "Version 3.0.0 (2008-06-01)" do %>
+    %|section "Version 3.0.0 (2008-06-01)"
       This release improves the **unindent** feature and changes the **include** directive's syntax.  In related news, the project mailing list has been dismantled in favor of simply contacting the author directly (see e-mail address in LICENSE) to get help or provide feedback.
 
-      <% paragraph "Incompatible changes" do %>
+      %|paragraph "Incompatible changes"
         * The `$unindent` parameter has been replaced by the <tt>--unindent</tt> command-line option, which automatically unindents each line of input by the inner margin of its containing node.
 
         * The **include** directive now has a symmetric # at the closing end:
           <pre><%%# include ... #%></pre>
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * The CSS for the horizontal rule (hr) element should now be consistent in all browsers.
 
         * In the HTML format, whitespace has been added (in CSS) around the following nodes to make them conform more easily with the style of the rest of the document:
@@ -229,21 +202,17 @@
           * `footer_inside_above ` - above the default footer content
           * `footer_inside_below ` - below the default footer content
           * `footer_outside_below` - below the entire footer block
-      <% end %>
-    <% end %>
 
-    <% section "Version 2.1.0 (2008-05-29)" do %>
+    %|section "Version 2.1.0 (2008-05-29)"
       This release adds image embedding methods for the HTML format and no longer appends (through CSS) an asterisk on outgoing hyperlinks.
-    <% end %>
 
-    <% section "Version 2.0.0 (2008-02-03)" do %>
+    %|section "Version 2.0.0 (2008-02-03)"
       This release fixes some bugs, improves the RDoc library, and adds nodes for customization of the default header and footer.
 
-      <% paragraph "Incompatible changes" do %>
+      %|paragraph "Incompatible changes"
         * The <tt>lib/gerbil/rdoc.rb</tt> library has changed!  Read it for details.
-      <% end %>
 
-      <% paragraph "New features" do %>
+      %|paragraph "New features"
         * In the **html** format, added the following nodes which allow you customize the default header and footer whilst preserving the default content:
           * `header_outside_above` - above the entire header block
           * `header_inside_above ` - above the default header content
@@ -253,39 +222,32 @@
           * `footer_inside_above ` - above the default footer content
           * `footer_inside_below ` - below the default footer content
           * `footer_outside_below` - below the entire footer block
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * [Regexp substitution placeholders were being interpreted](http://pluskid.lifegoo.com/?p=263) in node content. In particular, any occurrences of "\0" in a node's content was replaced by a strange SHA1 digest! (Zhang Chiyuan)
 
         * The <tt>lib/gerbil/rdoc.rb</tt> library did not extract method information recursively.
-      <% end %>
 
-      <% paragraph "Housekeeping" do %>
+      %|paragraph "Housekeeping"
         * In the **html** format, added a CSS margin above HTML tables because they were visually colliding with other elements above them.
 
         * Fixed some Ruby code warnings in the **html** format.
-      <% end %>
-    <% end %>
 
-    <% section "Version 1.1.0 (2008-01-22)" do %>
+    %|section "Version 1.1.0 (2008-01-22)"
       This release improves usability and fixes some bugs.
 
-      <% paragraph "New features" do %>
+      %|paragraph "New features"
         * External links are now marked with a &lowast; symbol to help the user distinguish between internal and external links. This is helpful because a user may not wish to follow a link that takes them outside a document, say, when they are reading the document offline, without an Internet connection.
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * Forgot to update some code when I renamed the `RDoc.gen_parse_tree` method in <tt>format/rdoc.rb</tt> during the last release.
 
         * Module methods were omitted by the `RDoc.gen_method_infos` method in <tt>format/rdoc.rb</tt>.
-      <% end %>
-    <% end %>
 
-    <% section "Version 1.0.0 (2008-01-12)" do %>
+    %|section "Version 1.0.0 (2008-01-12)"
       This release makes Gerbil available as a [RubyGem](http://rubygems.org), fixes some bugs, and updates the user guide.
 
-      <% paragraph "Incompatible changes" do %>
+      %|paragraph "Incompatible changes"
         * The <tt>gerbil</tt> file has been moved to <tt>bin/gerbil</tt>.
 
         * The <tt>format/</tt> directory has been renamed to <tt>fmt</tt>.
@@ -299,18 +261,15 @@
         * The <tt>CHANGES.yaml</tt> file has been removed, in favor of [this RSS feed](http://gerbil.rubyforge.org/news.xml).
 
         * The `GENERATOR` object has been renamed to `Gerbil`.
-      <% end %>
 
-      <% paragraph "Bug fixes" do %>
+      %|paragraph "Bug fixes"
         * User guide now says "gem install RedCloth" instead of "gem install redcloth". I don't see why RubyGems requires the correct capitalization, so I [filed a bug report](http://rubyforge.org/tracker/?func=detail&aid=16937&group_id=126&atid=575) about it.
 
         * In the HTML format, images inside descendant nodes of a *figure* node were not properly centered.
 
         * In the HTML format, the `$title` parameter was not converted into HTML.
-      <% end %>
-    <% end %>
 
-    <% section "Version 0.0.1 (2007-12-13)" do %>
+    %|section "Version 0.0.1 (2007-12-13)"
       * Fixed the generation of unique node URI fragments in the HTML format.
       * Added a `$feeds` parameter to the HTML format.
       * Added the <tt>format/rdoc.rb</tt> library for accessing RDoc's parse tree.
@@ -319,9 +278,8 @@
         * added RSS feed for project release announcements
         * improved the ghastly HelloWorld example
       * Added a simple change-log (<tt>CHANGES.yaml</tt>) for the project.
-    <% end %>
 
-    <% section "Version 0.0.0 (2007-12-09)" do %>
+    %|section "Version 0.0.0 (2007-12-09)"
       Dear developers, technical writers, and documentation gurus,
 
       I am proud to announce a new project of mine named "Gerbil"
@@ -343,6 +301,3 @@
       Please note that although the [user guide](http://gerbil.rubyforge.org/guide.html) says you can install Gerbil via RubyGems, currently there is [a bug in RubyGems version 0.9.5](http://rubyforge.org/tracker/index.php?func=detail&aid=16202&group_id=126&atid=575) that prevents me from creating an installable gem without strictly adhering to RubyGems convention of putting executable programs inside a <tt>bin/</tt> directory.
 
       Until this issue is resolved, please download the tarball/zip packages instead.
-    <% end %>
-  <% end %>
-<% end %>

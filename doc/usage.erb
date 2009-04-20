@@ -2,9 +2,9 @@
   %|section "Command-line interface"
     <pre><%= `ruby bin/#{$program} -h` %></pre>
 
-    The first command-line argument to **<%= $project %>** is either the name of a predefined format (FormatName) or the path to a <%= xref "SpecFile", "format specification file" %> (FormatFile).
+    The first command-line argument to <%= $project %> is either the name of a predefined format (FormatName) or the path to a <%= xref "SpecFile", "format specification file" %> (FormatFile).
 
-    Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the **<%= $project %>** installation directory (see <%= xref "Manifest" %>).
+    Predefined formats are simply short-hand names of format specification files located in the <tt>fmt/</tt> subdirectory of the <%= $project %> installation directory (see <%= xref "Manifest" %>).
 
     %|section "Saving the output to a file"
       Simply redirect the standard ouput stream (STDOUT) to a file like this:
@@ -19,6 +19,6 @@
         Otherwise, most web browsers _will not display_ the icons and graphics embedded in the saved XHTML output document because they will treat it as HTML instead of as XML.  See [this QuirksMode.org bug report](http://www.quirksmode.org/bugreports/archives/2005/02/custom_dtds_int_1.html) for details.
 
   %|section "Unindenting nodes hierarchically"
-    When writing **<%= $project %>** documents, I prefer to indent the content of nodes according to their depth because my [text editor of choice](http://jedit.org) automatically folds blocks of text based on indentation.
+    When writing <%= $project %> documents, I prefer to indent the content of nodes according to their depth because my [text editor of choice](http://jedit.org) automatically folds blocks of text based on indentation.
 
-    If you also prefer to write documents in this way, be sure to pass the <tt>--unindent</tt> option to **<%= $project %>** so that the indentation will not affect the resulting output.
+    If you also prefer to write documents in this way, be sure to pass the <tt>--unindent</tt> option to <%= $project %> so that the indentation will not affect the resulting output.

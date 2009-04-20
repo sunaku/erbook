@@ -17,25 +17,26 @@ module ERBook
     attr_reader :nodes_by_type
 
     ##
-    # @param [String] format
+    # ==== Parameters
+    #
+    # [format_name]
     #   Either the short-hand name of a built-in format
     #   or the path to a format specification file.
     #
-    # @param [String] input_text
+    # [input_text]
     #   The body of the input document.
     #
-    # @param [String] input_file
+    # [input_file]
     #   Name of the file from which the input document originated.
     #
-    # @param [Hash] options
-    #   Additional method parameters:
+    # ==== Options
     #
-    #   [boolean] :unindent =>
+    # [:unindent]
     #     If true, all node content is unindented hierarchically.
     #
-    def initialize format, input_text, input_file, options = {}
+    def initialize format_name, input_text, input_file, options = {}
       # process format specification
-        @format_file = format.to_s
+      @format_file = format_name.to_s
 
         File.file? @format_file or
           @format_file = File.join(ERBook::FORMATS_DIR, @format_file + '.yaml')

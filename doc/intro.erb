@@ -2,16 +2,16 @@
 
 %|chapter "Introduction"
   %|project_summary
-    **<%= $project %>** is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>) that allow scripting and dynamic content generation.
+    <%= $project %> is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>) that allow scripting and dynamic content generation.
 
     A working <%= xref "xhtml", "XHTML (web page)" %> format is provided, while <%= xref "latex", "LaTeX (PDF)" %>, <%= xref "man", "UNIX manual page" %>, and <%= xref "text", "plain text" %> formats are planned... <%= xref "License", "patches are welcome" %>!
 
-  **<%= $project %>** is exciting because:
+  <%= $project %> is exciting because:
   * Its documents are scriptable [eRuby templates](<%= eruby_url %>).
   * It lets you <%= xref "HelloWorld", "define your own document formats" %>.
   * Its core contains less than 300 lines of code.
 
-  These features distinguish **<%= $project %>** from the competition, which offers neither scriptable documents nor definable document formats:
+  These features distinguish <%= $project %> from the competition, which offers neither scriptable documents nor definable document formats:
   * [DocBook](http://www.docbook.org)
   * [Deplate](http://deplate.sourceforge.net)
   * [SiSU](http://www.jus.uio.no/sisu/SiSU/)
@@ -28,7 +28,7 @@
     <%= xref "License", "contact the authors" %>.
 
     %|paragraph "Version numbers"
-      **<%= $project %>** releases are numbered in *major.minor.patch*
+      <%= $project %> releases are numbered in *major.minor.patch*
       form according to the [RubyGems rational versioning
       policy](http://www.rubygems.org/read/chapter/7), which
       can be summarized thus:
@@ -74,7 +74,7 @@
     %= $logo = n.xref_link("![#{$project} logo](#{$program}.png)".to_inline_xhtml)
     %< "README"
 
-    **<%= $project %>** is made possible by
+    <%= $project %> is made possible by
     <%= xref "History", "contributions" %>
     from users like you:
 
@@ -90,12 +90,12 @@
 
     Vitor Peres in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/283052):
 
-    > I actually felt like printing \[this manual], because it's just so well-thought typographically... Even if \[**<%= $project %>**] weren't great by itself, I'd feel good just looking at the manual.
+    > I actually felt like printing \[this manual], because it's just so well-thought typographically... Even if \[<%= $project %>] weren't great by itself, I'd feel good just looking at the manual.
 
 
     Ara T. Howard in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/282949):
 
-    > \[This manual is] a insanely complete and nice looking bit of documentation \[... **<%= $project %>**] looks like a great project
+    > \[This manual is] a insanely complete and nice looking bit of documentation \[... <%= $project %>] looks like a great project
 
 
     Martin DeMello in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/283304):

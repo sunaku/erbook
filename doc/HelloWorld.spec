@@ -60,5 +60,7 @@ nodes:
 
 output: |
   Welcome to the "<%= @format[:name] %>" format.
+
   <%= @content %>
+
   That's all folks!

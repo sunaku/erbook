@@ -2,45 +2,28 @@ require 'ember'
 
 module ERBook
   ##
-  # An eRuby template which allows access to the underlying result
+  # eRuby template that provides access to the underlying result
   # buffer (which contains the result of template evaluation thus
   # far) and provides sandboxing for isolated template rendering.
-  #
-  # In addition to the standard <% eRuby %> directives, this template supports:
-  #
-  # * Lines that begin with '%' are treated as normal eRuby directives.
-  #
-  # * Include directives (<%#include YOUR_PATH #%>) are replaced by the result
-  #   of reading and evaluating the YOUR_PATH file in the current context.
-  #
-  #   * Unless YOUR_PATH is an absolute path, it is treated as being
-  #     relative to the file which contains the include directive.
-  #
-  #   * Errors originating from included files are given a proper
-  #     stack trace which shows the chain of inclusion plus any
-  #     further trace steps originating from the included file itself.
-  #
-  # * eRuby directives delimiting Ruby blocks (<% ...  do %>
-  #   ...  <% end %>) can be heirarchically unindented by the
-  #   crown margin of the opening (<% ...  do %>) delimiter.
   #
   class Template < Ember::Template
     # The result of template evaluation thus far.
     attr_reader :buffer
 
     ##
-    # @param [String] source
+    # ==== Parameters
+    #
+    # [source]
     #   Replacement for the ambiguous '(erb)' identifier in stack traces;
     #   so that the user can better determine the source of an error.
     #
-    # @param [String] input
+    # [input]
     #   A string containing eRuby directives.
     #
-    # @param [boolean] unindent
+    # [unindent]
     #   If true, then all content blocks will be unindented hierarchically,
-    #   by the leading space of their 'do' and 'end' delimiters.
     #
-    # @param safe_level
+    # [safe_level]
     #   See safe_level in ERB::new().
     #
     def initialize source, input, unindent = true, safe_level = nil

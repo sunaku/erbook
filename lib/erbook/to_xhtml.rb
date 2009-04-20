@@ -6,6 +6,7 @@
 # and smart source code sizing (block versus inline display).
 
 require 'cgi'
+require 'digest/sha1'
 
 begin
   require 'rubygems'
@@ -28,17 +29,21 @@ class String
   # *verbatim* throughout the text-to-XHTML conversion process.
   VERBATIM_TAGS = %w[noformat]
 
+  ##
   # Transforms this string into an *inline* XHTML string (one that
   # does not contain any block-level XHTML elements at the root).
+  #
   def to_inline_xhtml
     to_xhtml true
   end
 
+  ##
   # Transforms this string into XHTML while ensuring that the
   # result contains one or more block-level elements at the root.
   #
-  # inline:: If true, the resulting XHTML will *not*
-  #          contain a block-level element at the root.
+  # [inline]
+  #   If true, the resulting XHTML will *not*
+  #   contain a block-level element at the root.
   #
   def to_xhtml inline = false
     with_protected_tags(self, VERBATIM_TAGS, true) do |text|
@@ -63,10 +68,12 @@ class String
     end
   end
 
+  ##
   # Returns the result of running this string through Maruku.
   #
-  # inline:: If true, the resulting XHTML will *not*
-  #          be wrapped in a XHTML paragraph element.
+  # [inline]
+  #   If true, the resulting XHTML will *not*
+  #   be wrapped in a XHTML paragraph element.
   #
   def thru_maruku inline = false #:nodoc:
     html = Maruku.new(self).to_html
@@ -74,10 +81,12 @@ class String
     html
   end
 
+  ##
   # Adds syntax coloring to <code> elements in the given text.  If the
   # <code> tag has an attribute lang="...", then that is considered the
   # programming language for which appropriate syntax coloring should be
   # applied.  Otherwise, the programming language is assumed to be ruby.
+  #
   def thru_coderay #:nodoc:
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
       atts, code = $2, CGI.unescapeHTML($3).sub(/\A\r?\n/, '')
@@ -92,13 +101,14 @@ class String
 
   private
 
+  ##
   # Protects the given tags in the given input, passes
   # that protected input to the given block, restores the
   # given tags in the result of the block and returns it.
   #
-  # verbatim:: If true, the content of the elments having the
-  #            given tags will not be temporarily altered so
-  #            that process nested elements can be processed.
+  # [verbatim]
+  #   If true, the content of the elments having the given tags will not be
+  #   temporarily altered so that process nested elements can be processed.
   #
   def with_protected_tags input, tags, verbatim #:nodoc: :yields: input
     raise ArgumentError unless block_given?
@@ -145,7 +155,6 @@ class String
     output
   end
 
-  require 'digest/sha1'
   ##
   # Returns a digest of the given string that
   # will not be altered by String#to_xhtml.
