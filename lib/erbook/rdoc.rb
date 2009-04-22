@@ -1,17 +1,19 @@
 # Workaround for: `rdoc --fmt xml` does not dump information about methods.
 
+require 'rubygems'
+gem 'rdoc', '>= 2.4.3', '< 2.5'
 require 'rdoc/rdoc'
 
 module RDoc
   class TopLevel
     # Returns an array of all classes recorded thus far.
     def self.all_classes
-      @@all_classes.values
+      @all_classes.values
     end
 
     # Returns an array of all modules recorded thus far.
     def self.all_modules
-      @@all_modules.values
+      @all_modules.values
     end
 
     # Returns an array of RDoc::AnyMethod objects
@@ -25,10 +27,10 @@ module RDoc
     def self.refresh_all_classes_and_modules
       visit = lambda do |node|
         if node.is_a? NormalClass or node.is_a? SingleClass
-          @@all_classes[node.full_name] = node
+          @all_classes[node.full_name] = node
 
         elsif node.is_a? NormalModule
-          @@all_modules[node.full_name] = node
+          @all_modules[node.full_name] = node
         end
 
         (node.classes + node.modules).each {|n| visit[n] }
@@ -48,14 +50,15 @@ module RDoc
     # RDoc will ignore the given code string!  :-(
     #
     def self.parse aCodeString, aFileName = __FILE__
-      top = ParserFactory.parser_for(
-        TopLevel.new(aFileName), aFileName,
-        aCodeString, DummyOptions.new, Stats.new
-      ).scan
+      tl = TopLevel.new(aFileName)
+      op = DummyOptions.new
+      st = Stats.new(0)
+
+      result = Parser.for(tl, aFileName, aCodeString, op, st).scan
 
       refresh_all_classes_and_modules
 
-      top
+      result
     end
 
     # Returns a RDoc::TopLevel object containing information
