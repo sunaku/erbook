@@ -822,10 +822,10 @@ styles:
           font-style        : italic;
       }
 
-      em
+      em,
+      strong
       {
           font-family       : <%= @format['fonts']['serif'] %>;
-          font-size         : 105%;
       }
 
       hr
