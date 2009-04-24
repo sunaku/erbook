@@ -5,11 +5,18 @@
 #
 
 hyperlink:  mediawiki-1.13.2/skins/simple/external.png
+here_frag:  tango-icon-theme-0.8.90/16x16/places/start-here.png
 
 # admonitions
-important:  tango-icon-theme-0.8.1/48x48/emblems/emblem-important.png
-warning:    tango-icon-theme-0.8.1/48x48/status/dialog-error.png
-caution:    tango-icon-theme-0.8.1/48x48/status/dialog-warning.png
-note:       tango-icon-theme-0.8.1/48x48/apps/accessories-text-editor.png
-tip:        tango-icon-theme-0.8.1/48x48/status/dialog-information.png
-quote:      tango-icon-theme-0.8.1/48x48/apps/internet-group-chat.png
+important:  tango-icon-theme-0.8.90/48x48/emblems/emblem-important.png
+warning:    tango-icon-theme-0.8.90/48x48/status/dialog-error.png
+caution:    tango-icon-theme-0.8.90/48x48/status/dialog-warning.png
+note:       tango-icon-theme-0.8.90/48x48/apps/accessories-text-editor.png
+tip:        tango-icon-theme-0.8.90/48x48/status/dialog-information.png
+quote:      tango-icon-theme-0.8.90/48x48/apps/internet-group-chat.png
+
+# navigation menu on every heading
+nav_here:   tango-icon-theme-0.8.90/32x32/status/software-update-available.png
+nav_prev:   tango-icon-theme-0.8.90/32x32/actions/go-up.png
+nav_next:   tango-icon-theme-0.8.90/32x32/actions/go-down.png
+nav_list:   tango-icon-theme-0.8.90/32x32/places/start-here.png

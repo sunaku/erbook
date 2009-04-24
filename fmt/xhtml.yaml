@@ -47,6 +47,93 @@ code: |
   require 'erb'
 
   module ERBook
+    ##
+    # Encodes the given input in base64 format.
+    #
+    def ERBook.base_64_encode input #:nodoc:
+      [input].pack('m')
+    end
+
+    ##
+    # Returns a string denoting embedded, base64 encoded data.
+    #
+    def ERBook.base_64_embed data, format #:nodoc:
+      "data:#{format.to_s.downcase};base64,#{data.tr("\n", '')}"
+    end
+
+    ##
+    # Returns a string denoting embedded, base64 encoded image data.
+    #
+    # [format]
+    #   type of image data (e.g. PNG, JPEG, GIF, etc.)
+    #
+    def ERBook.base_64_embed_image_data data, format #:nodoc:
+      base_64_embed data, "image/#{format}"
+    end
+
+    # admonition icons
+
+      ICONS_DIR = File.join(ERBook::FORMATS_DIR, 'xhtml.icons')
+      ICON_DEFS = YAML.load_file File.join(ICONS_DIR, 'index.yaml')
+
+      Icon = Struct.new(:origin, :path, :name, :format, :data)
+      class Icon #:nodoc:
+        ##
+        # Returns a data URI containing embedded image data.
+        #
+        def data_uri
+          ERBook.base_64_embed_image_data self.data, self.format
+        end
+
+        ##
+        # Returns a CSS url() containing embedded image data.
+        #
+        def data_css
+          %{url("#{data_uri}")}
+        end
+
+        ##
+        # Returns a XML entity reference (to this icon's
+        # embedded image data) ready for insertion into XML.
+        #
+        def entity_xml
+          "&#{entity_name};"
+        end
+
+        ##
+        # Returns the name of the XML entity whose
+        # value contains embedded image data.
+        #
+        def entity_name
+          "icon_#{name}"
+        end
+
+        ##
+        # Returns an <img/> tag that renders the image
+        # data embedded as an ENTITY in the html DOCTYPE.
+        #
+        def to_xhtml atts = {}
+          atts[:alt] ||= name
+          atts[:src] = entity_xml
+          atts[:class] = :icon
+          "<img#{atts.to_xml_atts}/>"
+        end
+      end
+
+      ICON_BY_NAME = {}
+
+      ICON_DEFS.each_pair do |name, path|
+        format = File.extname(path).sub('.', '')
+        origin = path[/^\w+/]
+
+        path = File.join(ICONS_DIR, path) # make the path absolute
+        data = base_64_encode File.open(path, 'rb') {|f| f.read }
+
+        ICON_BY_NAME[name] = Icon.new(origin, path, name, format, data)
+      end
+
+      ICONS = ICON_BY_NAME.values
+
     class Template
       ##
       # Protects the given content from the text-to-XHTML conversion process.
@@ -190,30 +277,27 @@ code: |
           )
         end
 
-        LIST_SIGN = '&equiv;'  # identical to
-        HERE_SIGN = '&#x25CE;' # bullseye
-        PREV_SIGN = '&#x25B3;' # white up-pointing triangle
-        NEXT_SIGN = '&#x25BD;' # white down-pointing triangle
-
-        LIST_TEXT = ERBook::PHRASES['Reverse jump to listing']
         HERE_TEXT = ERBook::PHRASES['Jump to this segment']
         PREV_TEXT = ERBook::PHRASES['Jump to previous segment']
         NEXT_TEXT = ERBook::PHRASES['Jump to next segment']
+        LIST_TEXT = ERBook::PHRASES['Reverse jump to listing']
+
+        HERE_SIGN = ICON_BY_NAME['nav_here'].to_xhtml(:alt => '&lowast;')
+        PREV_SIGN = ICON_BY_NAME['nav_prev'].to_xhtml(:alt => '&uarr;')
+        NEXT_SIGN = ICON_BY_NAME['nav_next'].to_xhtml(:alt => '&darr;')
+        LIST_SIGN = ICON_BY_NAME['nav_list'].to_xhtml(:alt => '&equiv;')
 
         ##
         # Calculates a local navigation menu containing links
         # to the given URI fragments (which can be nil).
         #
         def self.navigation here_frag, list_frag, prev_frag, next_frag
-          list_link = list_frag ? %{<a title="#{LIST_TEXT}" href="##{list_frag}">#{LIST_SIGN}</a>} : LIST_SIGN
+          here_link = %{<a title="#{HERE_TEXT}" href="##{here_frag}">#{HERE_SIGN}</a>} if here_frag
+          prev_link = %{<a title="#{PREV_TEXT}" href="##{prev_frag}">#{PREV_SIGN}</a>} if prev_frag
+          next_link = %{<a title="#{NEXT_TEXT}" href="##{next_frag}">#{NEXT_SIGN}</a>} if next_frag
+          list_link = %{<a title="#{LIST_TEXT}" href="##{list_frag}">#{LIST_SIGN}</a>} if list_frag
 
-          here_link = here_frag ? %{<a title="#{HERE_TEXT}" href="##{here_frag}">#{HERE_SIGN}</a>} : HERE_SIGN
-
-          prev_link = prev_frag ? %{<a title="#{PREV_TEXT}" href="##{prev_frag}">#{PREV_SIGN}</a>} : PREV_SIGN
-
-          next_link = next_frag ? %{<a title="#{NEXT_TEXT}" href="##{next_frag}">#{NEXT_SIGN}</a>} : NEXT_SIGN
-
-          %{<a name="#{here_frag}"/><div class="nav" id="#{here_frag}">#{list_link}#{prev_link}#{next_link}#{here_link}</div>}
+          %{<a name="#{here_frag}"/><div class="nav" id="#{here_frag}">#{here_link} #{prev_link} #{next_link} #{list_link}</div>}
         end
 
         ##
@@ -279,93 +363,6 @@ code: |
           @list_frag ||= "rev:#{here_frag}"
         end
     end
-
-    ##
-    # Encodes the given input in base64 format.
-    #
-    def ERBook.base_64_encode input #:nodoc:
-      [input].pack('m')
-    end
-
-    ##
-    # Returns a string denoting embedded, base64 encoded data.
-    #
-    def ERBook.base_64_embed data, format #:nodoc:
-      "data:#{format.to_s.downcase};base64,#{data.tr("\n", '')}"
-    end
-
-    ##
-    # Returns a string denoting embedded, base64 encoded image data.
-    #
-    # [format]
-    #   type of image data (e.g. PNG, JPEG, GIF, etc.)
-    #
-    def ERBook.base_64_embed_image_data data, format #:nodoc:
-      base_64_embed data, "image/#{format}"
-    end
-
-    # admonition icons
-
-      ICONS_DIR = File.join(ERBook::FORMATS_DIR, 'xhtml.icons')
-      ICON_DEFS = YAML.load_file File.join(ICONS_DIR, 'index.yaml')
-
-      Icon = Struct.new(:origin, :path, :name, :format, :data)
-      class Icon #:nodoc:
-        ##
-        # Returns a data URI containing embedded image data.
-        #
-        def data_uri
-          ERBook.base_64_embed_image_data self.data, self.format
-        end
-
-        ##
-        # Returns a CSS url() containing embedded image data.
-        #
-        def data_css
-          %{url("#{data_uri}")}
-        end
-
-        ##
-        # Returns a XML entity reference (to this icon's
-        # embedded image data) ready for insertion into XML.
-        #
-        def entity_xml
-          "&#{entity_name};"
-        end
-
-        ##
-        # Returns the name of the XML entity whose
-        # value contains embedded image data.
-        #
-        def entity_name
-          "icon_#{name}"
-        end
-
-        ##
-        # Returns an <img/> tag that renders the image
-        # data embedded as an ENTITY in the html DOCTYPE.
-        #
-        def to_xhtml atts = {}
-          atts[:alt] ||= name
-          atts[:src] = entity_xml
-          atts[:class] = :icon
-          "<img#{atts.to_xml_atts}/>"
-        end
-      end
-
-      ICON_BY_NAME = {}
-
-      ICON_DEFS.each_pair do |name, path|
-        format = File.extname(path).sub('.', '')
-        origin = path[/^\w+/]
-
-        path = File.join(ICONS_DIR, path) # make the path absolute
-        data = base_64_encode File.open(path, 'rb') {|f| f.read }
-
-        ICON_BY_NAME[name] = Icon.new(origin, path, name, format, data)
-      end
-
-      ICONS = ICON_BY_NAME.values
   end
 
 
@@ -701,10 +698,11 @@ output: |
         ].flatten.compact
       %>
       % if nav.length > 1
-        <ul id="nav" class="nav">
-          % nav.each do |section|
-            <li><a id="rev:<%= section %>" href="#<%= section %>"><%= section %></a></li>
-        </ul>
+        <div id="nav"><%=
+          nav.map do |section|
+            %{<a id="rev:#{ section }" href="##{ section }">#{ section }</a>}
+          end.join(' &middot; ')
+        %></div>
 
       <br style="display: none"/>
       <hr style="display: none"/>
@@ -1009,6 +1007,25 @@ styles:
           text-align        : center;
       }
 
+      #header > .title
+      {
+          font-size         : 2.25em;
+      }
+
+      #header > .subtitle
+      {
+      }
+
+      #header > .authors
+      {
+          margin-top        : 1.625em;
+          margin-bottom     : -0.25em;
+      }
+
+      #header > .date
+      {
+      }
+
       .logo,
       .header_outside_above,
       #header,
@@ -1161,7 +1178,7 @@ styles:
       .equation  .nav,
       .procedure .nav
       {
-          margin-left       : -7.65em;
+          margin-right      : -3em;
       }
 
       .tip       > .content,
@@ -1224,10 +1241,8 @@ styles:
       body
       {
           margin            : 0;
-          padding           : 0;
-          padding-left      : 10em; /* room for local navigation menus */
-          padding-right     : 10em; /* keep #body visually centered */
-          background-color  : #808080;
+          padding           : 0.5em;
+          background-color  : #FFFFFF;
       }
 
       /* the actual content of the <body> element */
@@ -1235,11 +1250,6 @@ styles:
       {
           margin            : auto;
           max-width         : 38em;
-
-          background-color  : #FFFFFF;
-          border-left       : 0.35em solid #696969;
-          border-right      : 0.35em solid #696969;
-          padding           : 2em;
       }
 
     /* source code */
@@ -1290,65 +1300,39 @@ styles:
           color             : #800080;
       }
 
-      #toc a:target:after,
-      #lof a:target:after,
-      #nav a:target:after
+      #toc a:target,
+      #lof a:target,
+      #nav a:target
       {
-          content           : "★"; /* &#x2605; */
-          color             : #FF0000;
-          font-size         : x-large;
-          padding-left      : 0.125em;
+          background          : <%= ICON_BY_NAME['here_frag'].data_css %>;
+          background-position : center right;
+          background-repeat   : no-repeat;
+          padding-right       : 20px;
       }
 
     /* document structure */
       /* mini navigation menu beside every block node */
       .nav
       {
-          width             : 4em;
-          float             : left; /* detach from main content */
-          margin-left       : -6.075em;
-
-          font-size         : 1.9em;
-          letter-spacing    : 0.25em;
-          text-align        : center;
-
-          color             : #696969; /* same colors to hide non-links */
-          background-color  : #696969;
-          padding           : 0.5em;
-          margin-top        : -0.5em;
+          float             : right;
+          margin-top        : -0.25em;
       }
 
-      .nav:target,
-      .nav:hover
+      .nav > a > img
       {
-          color             : #333; /* same colors to hide non-links */
-          background-color  : #333;
+          border-top        : thick solid #FFFFFF;
       }
 
-      .nav a:link,
-      .nav a:visited
+      .nav > a > img:hover
       {
-          color             : #C0C0C0;
-      }
-
-      .nav a:hover,
-      #nav a:target:after {
-          color             : #9ACD32;
-          text-decoration   : none;
+          border-top        : thick solid #FA8072;
       }
 
       /* global navigation menu at the top of the page */
       #nav
       {
-          font-size         : 1em;
-          letter-spacing    : 0;
-          width             : 8.5em;
-          margin-left       : -11.5em;
-      }
-
-      #nav li
-      {
-          list-style-type   : none;
+          margin-bottom     : 4em;
+          text-align        : center;
       }
 
 - print: |
