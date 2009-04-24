@@ -641,7 +641,7 @@ output: |
   ]>
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+      <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>
       <meta name="generator" content="<%= ERBook::DISPLAY %>"/>
 
       % if $title
@@ -660,11 +660,11 @@ output: |
       % @format['styles'].each do |style|
         % style.each_pair do |media, code|
           <style type="text/css" media="<%= media %>">
-          <![CDATA[<%~ code %>]]>
+          /*<![CDATA[*/<%~ code %>/*]]>*/
           </style>
 
       <style type="text/css" media="screen">
-      <![CDATA[
+      /*<![CDATA[*/
         /* decorate external hyperlinks with a visual indicator */
         a[href]:not([href^="#"])
         {
@@ -683,7 +683,7 @@ output: |
             padding-left        : 65px;
             min-height          : 50px;
         }
-      ]]>
+      /*]]>*/
       </style>
     </head>
     <body>
@@ -758,12 +758,7 @@ output: |
           <%= ERBook::Document::Node.navigation \
             'Contents', 'rev:Contents', nil, nil %>
           <h1 class="title"><%= ERBook::PHRASES['Contents'] %></h1>
-          <ul>
-            %= toc
-
-            % if references
-              <li><a id="rev:References" href="#References"><%= ERBook::PHRASES['References'] %></a></li>
-          </ul>
+          <ul><%= toc %></ul>
         </div>
 
       % unless lof.empty?
@@ -848,6 +843,12 @@ output: |
               ]
             %>
           </p>
+
+          <p style="margin-top: 3em">
+            <a href="http://validator.w3.org/check?uri=referer"><img
+                src="http://www.w3.org/Icons/valid-xhtml10-blue"
+                alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+          </p>
         </div>
         %= node = @nodes_by_type['footer_inside_below'].first and node.output
       </div>
@@ -901,6 +902,12 @@ styles:
       {
           font-family       : <%= @format['fonts']['monospace'] %>;
           font-size         : 100%; /* appears like "size: small" otherwise */
+      }
+
+      /* output of the syntax coloring library */
+      code.para
+      {
+          white-space       : pre;
       }
 
     /* hyperlinks */
@@ -1258,7 +1265,8 @@ styles:
           background-color  : #F0F8FF;
       }
 
-      pre
+      pre,
+      code.para
       {
           cursor            : text;
           line-height       : normal;
@@ -1273,7 +1281,8 @@ styles:
       }
 
       /* output of the syntax coloring library */
-      pre.code
+      code.para,
+      pre.para
       {
           background-color  : #FFFFE8;
           border-color      : #EEDD88;

@@ -179,7 +179,15 @@ module ERBook
 
               # reveal child nodes' actual output in this node's actual output
               n.children.each do |c|
-                actual_output[c.output] = actual_output_by_node[c]
+                if @node_defs[c.type]['inline']
+                  actual_output[c.output] = actual_output_by_node[c]
+
+                else
+                  # pull block-level node out of paragraph tag added by Maruku
+                  actual_output.sub! %r/(<p>\s*)?#{Regexp.quote c.output}/ do
+                    actual_output_by_node[c] + $1.to_s
+                  end
+                end
               end
 
               actual_output_by_node[n] = actual_output

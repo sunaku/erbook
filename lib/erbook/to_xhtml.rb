@@ -23,11 +23,17 @@ class String
   # they are being processed by Textile.  By doing this, we
   # avoid unwanted Textile transformations, such as quotation
   # marks becoming curly (&#8192;), in source code.
-  PROTECTED_TAGS = %w[tt code pre]
+  PROTECTED_TAGS = {
+    :pre  => :block,    # tag => is it a block or inline element?
+    :code => :inline,
+    :tt   => :inline
+  }
 
   # The content of these XHTML tags will be preserved
   # *verbatim* throughout the text-to-XHTML conversion process.
-  VERBATIM_TAGS = %w[noformat]
+  VERBATIM_TAGS = {
+    :noformat => :block # tag => is it a block or inline element?
+  }
 
   ##
   # Transforms this string into an *inline* XHTML string (one that
@@ -82,20 +88,40 @@ class String
   end
 
   ##
-  # Adds syntax coloring to <code> elements in the given text.  If the
-  # <code> tag has an attribute lang="...", then that is considered the
-  # programming language for which appropriate syntax coloring should be
-  # applied.  Otherwise, the programming language is assumed to be ruby.
+  # Adds syntax coloring to <code> elements in this string.
+  #
+  # Each <code> element is annotated with a class="line"
+  # or a class="para" attribute, according to whether it
+  # spans a single line or multiple lines of code.
+  #
+  # In the latter case, the <code> element is replaced with a <pre> element
+  # so that its multi-line body appears correctly in text-mode web browsers.
+  #
+  # If a <code> element has a lang="..." attribute,
+  # then that attribute's value is considered to be
+  # the programming language for which appropriate
+  # syntax coloring should be applied.  Otherwise,
+  # the programming language is assumed to be ruby.
   #
   def thru_coderay #:nodoc:
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
-      atts, code = $2, CGI.unescapeHTML($3).sub(/\A\r?\n/, '')
+      elem, atts, code = $1, $2, CGI.unescapeHTML($3).sub(/\A\r?\n/, '')
       lang = atts[/\blang=('|")(.*?)\1/i, 2] || :ruby
 
-      html = CodeRay.scan(code, lang).html(:css => :style)
-      tag = if code =~ /\n/ then :pre else :code end
+      body = CodeRay.scan(code, lang).html(:css => :style)
 
-      %{<#{tag} class="code"#{atts}>#{html}</#{tag}>}
+      if code =~ /\n/
+        span = :para
+        head = "<ins><pre"
+        tail = "</pre></ins>"
+
+      else
+        span = :line
+        head = "<#{elem}"
+        tail = "</#{elem}>"
+      end
+
+      %{#{head} class="#{span}"#{atts}>#{body}#{tail}}
     end
   end
 
@@ -110,14 +136,14 @@ class String
   #   If true, the content of the elments having the given tags will not be
   #   temporarily altered so that process nested elements can be processed.
   #
-  def with_protected_tags input, tags, verbatim #:nodoc: :yields: input
+  def with_protected_tags input, tag_defs, verbatim #:yields: input
     raise ArgumentError unless block_given?
 
     input = input.dup
     escapes = {}
 
     # protect the given tags by escaping them
-    tags.each do |tag|
+    tag_defs.each_key do |tag|
       input.gsub! %r{(<#{tag}.*?>)(.*?)(</#{tag}>)}m do
         head, body, tail = $1, $2, $3
 
@@ -146,9 +172,21 @@ class String
     # restore the protected tags by unescaping them
     until escapes.empty?
       escapes.each_pair do |esc, orig|
-        if output.gsub! esc, orig
-          escapes.delete esc
-        end
+        tag = orig[/<\/(.+?)>\s*\z/, 1].to_sym
+        raise ArgumentError, tag unless tag_defs.key? tag
+
+        restore_ok =
+          case tag_defs[tag]
+          when :inline
+            # process inline elements normally
+            output.gsub! esc, orig
+
+          when :block
+            # pull block-level elements out of paragraph tag added by Maruku
+            output.gsub!(/(<p>\s*)?#{Regexp.quote esc}/){ orig + $1.to_s }
+          end
+
+        escapes.delete esc if restore_ok
       end
     end
 
