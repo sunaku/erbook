@@ -8,9 +8,9 @@ Inochi.init :ERBook,
   :website => 'http://snk.tuxfamily.org/lib/erbook/',
   :tagline => 'Extensible document processor based on eRuby',
   :require => {
-    # gems needed by the default 'xhtml' format
-    'maruku'  => '~> 0.5',
-    'coderay' => '>= 0.7',
+    'maruku'    => '~> 0.5', # for Markdown to XHTML conversion
+    'coderay'   => '>= 0.7', # for syntax coloring of source code
+    'rainpress' => '~> 1',   # for minifying CSS
   }
 
 module ERBook

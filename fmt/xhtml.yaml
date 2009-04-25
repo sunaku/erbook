@@ -659,10 +659,11 @@ output: |
         % $feeds.each_pair do |url, fmt|
           <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
 
+      % require 'rainpress'
       % @format['styles'].each do |style|
         % style.each_pair do |media, code|
           <style type="text/css" media="<%= media %>">
-          /*<![CDATA[*/<%~ code %>/*]]>*/
+          /*<![CDATA[*/<%~ Rainpress.compress(code) %>/*]]>*/
           </style>
 
       <style type="text/css" media="screen">
