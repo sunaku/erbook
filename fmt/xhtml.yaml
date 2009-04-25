@@ -910,7 +910,8 @@ styles:
       }
 
       em,
-      strong
+      strong,
+      dt
       {
           font-family       : <%= @format['fonts']['serif'] %>;
       }
@@ -941,6 +942,13 @@ styles:
       a > img
       {
           border            : none;
+      }
+
+    /* lists */
+      dt
+      {
+          margin-top        : 1.5em;
+          font-weight       : bolder;
       }
 
     /* headings */
