@@ -870,6 +870,10 @@ output: |
             <a href="http://validator.w3.org/check?uri=referer"><img
                 src="http://www.w3.org/Icons/valid-xhtml10-blue"
                 alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3"><img
+              src="http://jigsaw.w3.org/css-validator/images/vcss-blue"
+              alt="Valid CSS!" height="31" width="88" /></a>
           </p>
         </div>
         %= node = @nodes_by_type['footer_inside_below'].first and node.output
@@ -936,11 +940,6 @@ styles:
       a > img
       {
           border            : none;
-      }
-
-      a img
-      {
-          _border           : none; /* for IE6 */
       }
 
     /* headings */
@@ -1022,7 +1021,6 @@ styles:
           border            : 1px solid #bbb;
           vertical-align    : top;
           background-color  : #FFFFFF;
-          _background-color : #FFFFFF; /* for IE6 */
       }
 
       th
@@ -1096,7 +1094,6 @@ styles:
       {
           padding-bottom    : 1em;
           border-left       : thick solid #F5F5F5;
-          _border-left      : none; /* for IE6 */
       }
 
       #toc li ul:hover
@@ -1141,14 +1138,6 @@ styles:
           margin-top        : 0.25em;
       }
 
-      .part    .title big,
-      .chapter .title big
-      {
-          _display          : block; /* for IE6 */
-          _margin-top       : 0.25em; /* for IE6 */
-          _margin-bottom    : 0.75em; /* for IE6 */
-      }
-
       .paragraph > .title,
       .tip       > .title,
       .note      > .title,
@@ -1163,23 +1152,6 @@ styles:
       {
           font-size         : large;
           margin-top        : 2em;
-      }
-
-      .paragraph .title,
-      .tip       .title,
-      .note      .title,
-      .caution   .title,
-      .warning   .title,
-      .important .title,
-      .figure    .title,
-      .table     .title,
-      .example   .title,
-      .equation  .title,
-      .procedure .title
-      {
-          _font-size        : large; /* for IE6 */
-          _font-weight      : bold; /* large is not bold in IE6 */
-          _margin-top       : 2em; /* for IE6 */
       }
 
       .tip      ,
@@ -1234,35 +1206,15 @@ styles:
           margin            : 0 1em 1em 0; /* top right bottom left */
       }
 
-      .tip       .content .icon,
-      .note      .content .icon,
-      .caution   .content .icon,
-      .warning   .content .icon,
-      .important .content .icon
-      {
-          _display          : none; /* IE6 cannot display embedded images */
-      }
-
       .figure > .title
       {
           text-align        : center;
-      }
-
-      .figure .title
-      {
-          _text-align       : center; /* for IE6 */
       }
 
       .figure > .content img
       {
           display           : block;
           margin            : auto;
-      }
-
-      .figure .content img
-      {
-          _display          : block; /* for IE6 */
-          _margin           : auto; /* for IE6 */
       }
 
 - screen: |
@@ -1450,10 +1402,4 @@ styles:
       .chapter > .title > big
       {
           padding-bottom    : 0.5em;
-      }
-
-      .part    .title big,
-      .chapter .title big
-      {
-          _padding-bottom   : 0.5em; /* for IE6 */
       }
