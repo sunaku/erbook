@@ -314,23 +314,16 @@ code: |
         def xref_link label = nil
           prefix = [type_label, index || number].compact.join(' ')
 
-          title_text =
+          caption =
             if type == 'reference'
               prefix
             else
-              [prefix, (%{"#{title}"} if title)].compact.join('. ')
+              [prefix, (%{"#{title}"} if label && title)].compact.join('. ')
             end
 
-          title_xhtml =
-            if label
-              label
-            else
-              title_text
-            end.to_s.to_inline_xhtml
+          label_xhtml = (label || title).to_s.to_inline_xhtml
 
-          %{<a class="xref" href="##{here_frag}"#{
-            %( title="#{::ERB::Util.h title_text}") if label
-          }>#{title_xhtml}</a>}
+          %{<a class="xref" href="##{here_frag}" title="#{::ERB::Util.h caption}">#{label_xhtml}</a>}
         end
 
       # URI fragments
@@ -534,7 +527,7 @@ nodes:
         <%=
           query, label = @node.args
 
-          scope = @nodes.select {|n| n.content }
+          scope  = @nodes.select {|n| n.content }
           target = scope.find {|n| n.id == query } || # id has 1st priority
                    scope.find {|n| n.title == query }
 
