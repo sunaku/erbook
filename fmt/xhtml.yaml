@@ -279,10 +279,10 @@ code: |
           )
         end
 
-        HERE_TEXT = ERBook::PHRASES['Jump to this segment']
-        PREV_TEXT = ERBook::PHRASES['Jump to previous segment']
-        NEXT_TEXT = ERBook::PHRASES['Jump to next segment']
-        LIST_TEXT = ERBook::PHRASES['Reverse jump to listing']
+        HERE_TEXT = ERBook::PHRASES['Focus this segment']
+        PREV_TEXT = ERBook::PHRASES['Focus previous segment']
+        NEXT_TEXT = ERBook::PHRASES['Focus next segment']
+        LIST_TEXT = ERBook::PHRASES['Return to listing']
 
         HERE_SIGN = ICON_BY_NAME['nav_here'].to_xhtml(:alt => '&lowast;')
         PREV_SIGN = ICON_BY_NAME['nav_prev'].to_xhtml(:alt => '&uarr;')
