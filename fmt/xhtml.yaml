@@ -219,7 +219,7 @@ code: |
         # Returns the content of this node as XHTML.
         #
         def content_xhtml
-          content.to_s.to_xhtml
+          content.join.to_xhtml
         end
 
         ##
