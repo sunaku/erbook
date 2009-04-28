@@ -10,7 +10,7 @@ Inochi.init :ERBook,
   :tagline => 'Extensible document processor based on eRuby',
   :require => {
     'maruku'    => '~> 0.5', # for Markdown to XHTML conversion
-    'coderay'   => '>= 0.7', # for syntax coloring of source code
+    'coderay'   => '>= 0.8', # for syntax coloring of source code
     'rainpress' => '~> 1',   # for minifying CSS
   }
 

@@ -11,7 +11,7 @@ require 'digest/sha1'
 begin
   require 'rubygems'
   gem 'maruku', '~> 0.5'
-  gem 'coderay', '>= 0.7'
+  gem 'coderay', '>= 0.8'
 rescue LoadError
 end
 

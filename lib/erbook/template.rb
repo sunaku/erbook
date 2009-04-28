@@ -35,10 +35,10 @@ module ERBook
         :infer_end       => true
 
       if $DEBUG
-        STDERR.puts IO.popen('cat -n', 'w+') do |io|
+        IO.popen('cat -n', 'w+') do |io|
           io.write self.program
           io.close_write
-          io.read
+          STDERR.puts io.read
         end
       end
     end

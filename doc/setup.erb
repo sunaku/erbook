@@ -33,8 +33,8 @@
 
     * <tt>fmt/</tt> --- contains the predefined set of <%= xref "SpecFile", "format specification files" %>. If you ever need to install your custom format specification file globally, then put it inside this directory.
 
-    %|ERBook::FORMAT_FILES.each do |file|
-      * <tt><%= File.basename(file) %></tt> --- <%= YAML.load_file(file)['desc'] %>
+      %|ERBook::FORMAT_FILES.each do |file|
+        <%='  '%>* <tt><%= File.basename(file) %></tt> --- <%= YAML.load_file(file)['desc'] %>
 
     * <tt>lib/</tt>
 
@@ -42,7 +42,7 @@
 
       * <tt><%= $program %>/</tt>
 
-        * <tt>to_xhtml.rb</tt> --- provides methods (see <%= xref "Text to XHTML conversion" %>) for the <%= xref "xhtml" %> format.
+        * <tt>to_xhtml.rb</tt> --- implements <%= xref "Text to XHTML conversion" %> methods for the <%= xref "xhtml" %> format.
 
         * <tt>rdoc.rb</tt> --- provides RDoc parse trees to Ruby code.
 

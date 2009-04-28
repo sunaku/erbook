@@ -78,8 +78,7 @@ code: |
 
       ICON_DEFS = YAML.load_file File.join(ICONS_DIR, 'index.yaml')
 
-      Icon = Struct.new(:origin, :path, :name, :format, :data)
-      class Icon #:nodoc:
+      class Icon < Struct.new(:origin, :path, :name, :format, :data) #:nodoc:
         ##
         # Returns a data URI containing embedded image data.
         #
