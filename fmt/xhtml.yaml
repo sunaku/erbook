@@ -371,6 +371,7 @@ nodes:
       number: false
       silent: false
       inline: true
+      bypass: true
       output: <%= @node.content_xhtml %>
 
   # Structure

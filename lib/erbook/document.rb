@@ -150,7 +150,8 @@ module ERBook
             @processed_document = template.buffer
 
           # chain block-level nodes together for local navigation
-            block_nodes = @nodes.reject {|n| @node_defs[n.type]['inline'] }
+            block_nodes = @nodes.reject {|n| @node_defs[n.type]['bypass'] ||
+                                             @node_defs[n.type]['inline'] }
 
             require 'enumerator'
             block_nodes.each_cons(2) do |a, b|
@@ -179,7 +180,7 @@ module ERBook
 
               # reveal child nodes' actual output in this node's actual output
               n.children.each do |c|
-                if @node_defs[c.type]['inline']
+                if @node_defs[c.type]['inline'] && !@node_defs[c.type]['bypass']
                   actual_output[c.output] = actual_output_by_node[c]
 
                 else
