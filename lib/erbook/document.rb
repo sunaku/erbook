@@ -233,7 +233,7 @@ module ERBook
 
       # Returns the output of this node.
       def to_s
-        output
+        defn['silent'] ? '' : output
       end
     end
 
