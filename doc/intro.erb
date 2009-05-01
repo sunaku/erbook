@@ -1,7 +1,10 @@
 % eruby_url = "http://en.wikipedia.org/wiki/ERuby"
+% api_url = './api/index.html'
+% repo_url = 'http://github.com/sunaku/' + $program
+% repo_scm = '[Git](http://git-scm.com)'
 
 %|chapter "Introduction"
-  %|project_summary
+  %|project
     <%= $project %> is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>) that allow scripting and dynamic content generation.
 
     A working <%= xref "xhtml", "XHTML (web page)" %> format is provided, while <%= xref "latex", "LaTeX (PDF)" %>, <%= xref "man", "UNIX manual page" %>, and <%= xref "text", "plain text" %> formats are planned... <%= xref "License", "patches are welcome" %>!
@@ -19,10 +22,11 @@
   * [txt2tags](http://txt2tags.sourceforge.net)
   * [Grutatxt](http://www.triptico.com/software/grutatxt.html)
 
-  %|section "Logistics"
-    * <%= xref "History", "Release notes" %> --- history of project releases.
-    * [Source code](http://github.com/sunaku/<%= $program %>) --- obtain via [Git](http://git.or.cz) or browse online.
-    * [API reference](api/index.html) --- documentation for source code.
+    %|section "Logistics"
+      * <%= xref "History", "Release notes" %> --- history of project releases.
+      * [Source code](<%= repo_url %>) --- obtain via <%= repo_scm %> or browse online.
+      * [API reference](<%= api_url %>) --- documentation for source code.
+      * [Project home](<%= $website %>) --- the <%= $project %> project home page.
 
     To get help or provide feedback, simply
     <%= xref "License", "contact the authors" %>.
