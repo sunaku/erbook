@@ -82,7 +82,16 @@ class String
   #   be wrapped in a XHTML paragraph element.
   #
   def thru_maruku inline = false #:nodoc:
-    html = Maruku.new(self).to_html
+    #
+    # XXX: add a newline at the beginning of the text to
+    #      prevent Maruku from interpreting the first line
+    #      of text as a parameter definition, which is the
+    #      case if that first line matches /\S{2}: /
+    #
+    #      see this bug report for details:
+    #      http://rubyforge.org/tracker/?func=detail&atid=10735&aid=25697&group_id=2795
+    #
+    html = Maruku.new("\n#{self}").to_html
     html.sub! %r{\A<p>(.*)</p>\Z}, '\1' if inline
     html
   end
