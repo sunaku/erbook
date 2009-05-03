@@ -135,7 +135,7 @@ code: |
 
       ICONS = ICON_BY_NAME.values
 
-    class Template
+    class Template::Sandbox
       ##
       # Protects the given content from the text-to-XHTML conversion process.
       #

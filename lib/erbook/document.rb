@@ -60,6 +60,7 @@ module ERBook
         begin
           # create sandbox for input evaluation
             template = Template.new(input_file, input_text, options[:unindent])
+            sandbox = template.sandbox
 
             @template_vars = {
               :@format        => @format,
@@ -67,86 +68,81 @@ module ERBook
               :@nodes         => @nodes = [], # all nodes in the forest
               :@nodes_by_type => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
               :@stack         => [], # stack for all nodes
-            }.each_pair {|k,v| template.instance_variable_set(k, v) }
+            }.each_pair {|k,v| sandbox.instance_variable_set(k, v) }
 
-            class << template
-              private
+            # Handles the method call from a node
+            # placeholder in the input document.
+            def sandbox.__node_impl__ node_type, *node_args, &node_content
+              node = Node.new(
+                :type => node_type,
+                :defn => @format['nodes'][node_type],
+                :args => node_args,
+                :children => [],
 
-              # Handles the method call from a node
-              # placeholder in the input document.
-              def __node__ node_type, *node_args, &node_content
-                node = Node.new(
-                  :type => node_type,
-                  :defn => @format['nodes'][node_type],
-                  :args => node_args,
-                  :children => [],
+                # omit erbook internals from the stack trace
+                :trace => caller.reject {|t|
+                  [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
+                }
+              )
+              @nodes << node
+              @nodes_by_type[node.type] << node
 
-                  # omit erbook internals from the stack trace
-                  :trace => caller.reject {|t|
-                    [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
-                  }
-                )
-                @nodes << node
-                @nodes_by_type[node.type] << node
-
-                # calculate occurrence number for this node
-                if node.defn['number']
-                  @count ||= Hash.new {|h,k| h[k] = []}
-                  node.number = (@count[node.type] << node).length
-                end
-
-                # assign node family
-                if parent = @stack.last
-                  parent.children << node
-                  node.parent = parent
-                  node.depth = parent.depth
-                  node.depth += 1 if node.defn['depth']
-
-                  # calculate latex-style index number for this node
-                  if node.defn['index']
-                    ancestry = @stack.reverse.find {|n| n.defn['index'] }.index
-                    branches = node.parent.children.select {|n| n.index }
-
-                    node.index = [ancestry, branches.length + 1].join('.')
-                  end
-                else
-                  @roots << node
-                  node.parent = nil
-                  node.depth = 0
-
-                  # calculate latex-style index number for this node
-                  if node.defn['index']
-                    branches = @roots.select {|n| n.index }
-                    node.index = (branches.length + 1).to_s
-                  end
-                end
-
-                # assign node content
-                if block_given?
-                  @stack.push node
-                  node.content = content_from_block(node, &node_content)
-                  @stack.pop
-                end
-
-                self.buffer << node
-
-                nil
+              # calculate occurrence number for this node
+              if node.defn['number']
+                @count ||= Hash.new {|h,k| h[k] = []}
+                node.number = (@count[node.type] << node).length
               end
+
+              # assign node family
+              if parent = @stack.last
+                parent.children << node
+                node.parent = parent
+                node.depth = parent.depth
+                node.depth += 1 if node.defn['depth']
+
+                # calculate latex-style index number for this node
+                if node.defn['index']
+                  ancestry = @stack.reverse.find {|n| n.defn['index'] }.index
+                  branches = node.parent.children.select {|n| n.index }
+
+                  node.index = [ancestry, branches.length + 1].join('.')
+                end
+              else
+                @roots << node
+                node.parent = nil
+                node.depth = 0
+
+                # calculate latex-style index number for this node
+                if node.defn['index']
+                  branches = @roots.select {|n| n.index }
+                  node.index = (branches.length + 1).to_s
+                end
+              end
+
+              # assign node content
+              if block_given?
+                @stack.push node
+                node.content = __block_content__(node, &node_content)
+                @stack.pop
+              end
+
+              @buffer << node
+
+              nil
             end
 
             @node_defs.each_key do |type|
               # XXX: using a string because define_method()
               #      does not accept a block until Ruby 1.9
-              file, line = __FILE__, __LINE__ + 1
-              template.instance_eval %{
-                def #{type} *node_args, &node_content
-                  __node__ #{type.inspect}, *node_args, &node_content
+              file, line = __FILE__, __LINE__; eval %{
+                def sandbox.#{type} *node_args, &node_content
+                  __node_impl__ #{type.inspect}, *node_args, &node_content
                 end
-              }, file, line
+              }, binding, file, line
             end
 
           # evaluate the input & build the document tree
-            template.instance_eval { render(binding) }
+            template.render
             @processed_document = template.buffer
 
           # chain block-level nodes together for local navigation
