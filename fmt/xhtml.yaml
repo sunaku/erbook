@@ -546,7 +546,6 @@ nodes:
       index: false
       number: true
       silent: true
-      inline: true
 
     cite:
       toc: false
