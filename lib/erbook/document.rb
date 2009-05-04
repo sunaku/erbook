@@ -1,3 +1,8 @@
+#--
+# Copyright 2008 Suraj N. Kurapati
+# See the LICENSE file for details.
+#++
+
 require 'yaml'
 require 'erbook/template'
 require 'digest/sha1'

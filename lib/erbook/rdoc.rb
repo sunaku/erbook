@@ -1,4 +1,8 @@
-# Workaround for: `rdoc --fmt xml` does not dump information about methods.
+# Workaround for `rdoc --fmt xml` not dumping information about methods.
+#--
+# Copyright 2008 Suraj N. Kurapati
+# See the LICENSE file for details.
+#++
 
 require 'rubygems'
 gem 'rdoc', '>= 2.4.3', '< 2.5'

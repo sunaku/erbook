@@ -1,3 +1,8 @@
+#--
+# Copyright 2007 Suraj N. Kurapati
+# See the LICENSE file for details.
+#++
+
 require 'rubygems'
 gem 'inochi', '~> 1'
 require 'inochi'
