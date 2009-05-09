@@ -1,4 +1,4 @@
-<% $style = "border-left: thick dotted LightGrey; padding-left: 1em;" %>
+<% $style = "border-left: thick dotted #D3D3D3; padding-left: 1em;" %>
 <% hello "Pretentious", 1, 2, 3 do %>
   <big>I'm</big> the very first node, oh _yes_ I am! *sneer*
 
