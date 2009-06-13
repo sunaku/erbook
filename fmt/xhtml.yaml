@@ -643,8 +643,12 @@ output: |
       <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>
       <meta name="generator" content="<%= ERBook::DISPLAY %>"/>
 
-      % if $title
-        <title><%= $title.to_s.to_inline_xhtml %></title>
+      % if $title || $subtitle
+        <title><%=
+          [$title, $subtitle].compact.map do |t|
+            t.to_s.to_inline_xhtml
+          end.join(' &mdash; ')
+        %></title>
 
       % if $authors
         <meta name="author" content="<%= $authors.keys.join(', ') %>"/>
