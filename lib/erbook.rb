@@ -14,10 +14,11 @@ Inochi.init :ERBook,
   :website => 'http://snk.tuxfamily.org/lib/erbook/',
   :tagline => 'Extensible document processor based on eRuby',
   :require => {
-    'ember'     => '~> 0',   # for eRuby template processing
-    'maruku'    => '~> 0.5', # for Markdown to XHTML conversion
-    'coderay'   => '>= 0.8', # for syntax coloring of source code
-    'rainpress' => '~> 1',   # for minifying CSS
+    'ember'      => '~> 0',    # for eRuby template processing
+    'maruku'     => '~> 0.5',  # for Markdown to XHTML conversion
+    'coderay'    => '>= 0.8',  # for syntax coloring of source code
+    'rainpress'  => '~> 1',    # for minifying CSS
+    'mime-types' => '>= 1.16', # for detecting MIME types
   }
 
 module ERBook

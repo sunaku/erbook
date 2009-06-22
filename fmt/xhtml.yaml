@@ -33,8 +33,12 @@ code: |
 
       # The remaining characters must be letters, digits, hyphens (-),
       # underscores (_), colons (:), or periods (.) or Unicode characters
+      #
+      # However, colons (:) and periods (.) are special characters
+      # in jQuery CSS selector syntax, so we sanitize them as well.
+      #
       buf.unpack('U*').map! do |code|
-        if code > 0xFF or code.chr =~ /[[:alnum:]\-_:\.]/
+        if code > 0xFF or code.chr =~ /[[:alnum:]\-_]/
           code
         else
           32 # ASCII character code for a single space
@@ -63,10 +67,26 @@ code: |
     end
 
     ##
+    # Encodes the contents of the given file in base64 format.
+    #
+    def ERBook.base_64_encode_file path #:nodoc:
+      base_64_encode open(path, 'rb') {|f| f.read }
+    end
+
+    ##
     # Returns a string denoting embedded, base64 encoded data.
     #
-    def ERBook.base_64_embed data, format #:nodoc:
-      "data:#{format.to_s.downcase};base64,#{data.tr("\n", '')}"
+    def ERBook.base_64_embed data, mime #:nodoc:
+      "data:#{mime.to_s.downcase};base64,#{data.tr("\n", '')}"
+    end
+
+    def ERBook.base_64_embed_file path # :nodoc:
+      data = base_64_encode_file(path)
+
+      require 'mime/types'
+      mime = MIME::Types.of(path)
+
+      base_64_embed data, mime
     end
 
     ##
@@ -133,7 +153,7 @@ code: |
         origin = path[/^\w+/]
 
         path = File.join(ICONS_DIR, path) # make the path absolute
-        data = base_64_encode File.open(path, 'rb') {|f| f.read }
+        data = base_64_encode_file(path)
 
         ICON_BY_NAME[name] = Icon.new(origin, path, name, format, data)
       end
@@ -272,7 +292,7 @@ code: |
         end
 
         ##
-        # Returns a navigation menu relative to this node.
+        # Returns a navigation menu for this node.
         #
         def navigation
           self.class.navigation(
@@ -281,6 +301,32 @@ code: |
             (prev_node.here_frag if prev_node),
             (next_node.here_frag if next_node)
           )
+        end
+
+        def parent_tabs_begin #:nodoc:
+          if p = parent and pc = p.toc_children and self == pc.first
+            %{<div class="tabs"><ul>} +
+
+            pc.map do |c|
+              %{<li><a href="##{c.here_frag}">#{c.title.to_s.to_inline_xhtml}</a></li>}
+            end.join +
+
+            %{</ul>}
+          end
+        end
+
+        def parent_tabs_end #:nodoc:
+          if p = parent and self == p.toc_children.last
+            '</div>'
+          end
+        end
+
+        ##
+        # Returns all children of this node which are
+        # configured to appear in the table of contents.
+        #
+        def toc_children
+          children.select {|c| c.defn['toc'] }
         end
 
         HERE_TEXT = ERBook::PHRASES['Focus this segment']
@@ -303,7 +349,7 @@ code: |
           next_link = %{<a title="#{NEXT_TEXT}" href="##{next_frag}">#{NEXT_SIGN}</a>} if next_frag
           list_link = %{<a title="#{LIST_TEXT}" href="##{list_frag}">#{LIST_SIGN}</a>} if list_frag
 
-          %{<a name="#{here_frag}"/><div class="nav" id="#{here_frag}">#{here_link} #{prev_link} #{next_link} #{list_link}</div>}
+          %{<a name="#{here_frag}"/><div class="nav">#{here_link} #{prev_link} #{next_link} #{list_link}</div>}
         end
 
         ##
@@ -344,7 +390,7 @@ code: |
 
             # make it unique
             while @@frags.include? frag
-              frag << '-' << (index || number || salt).to_s
+              frag = "#{frag} #{index || number || salt}".to_uri_fragment
             end
 
             @@frags << frag
@@ -359,7 +405,7 @@ code: |
         # of contents / list of figures that points this node.
         #
         def list_frag #:nodoc:
-          @list_frag ||= "rev:#{here_frag}"
+          @list_frag ||= "__toc__#{here_frag}".to_uri_fragment
         end
     end
   end
@@ -397,7 +443,10 @@ nodes:
       number: false
       silent: true
       inline: true
-      output: <div class="<%= @node.type %>"><%= @node.content_xhtml %></div>
+      output: |
+        <%= @node.parent_tabs_begin %>
+        <div class="<%= @node.type %>" id="<%= @node.here_frag %>"><%= @node.content_xhtml %></div>
+        <%= @node.parent_tabs_end %>
 
     header_inside_above:  *header_insert
     header_inside_below:  *header_insert
@@ -432,7 +481,8 @@ nodes:
       number: true
       silent: false
       output: |
-        <div class="<%= @node.type %>">
+        <%= @node.parent_tabs_begin %>
+        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <h1 class="title">
             <%= @node.type_label %>&nbsp;<%= @node.index_link %>
@@ -441,6 +491,7 @@ nodes:
           </h1>
           <%= @node.content_xhtml_div %>
         </div>
+        <%= @node.parent_tabs_end %>
 
     chapter: *latex
 
@@ -453,13 +504,15 @@ nodes:
       silent: false
       output: |
         <% depth = [6, @node.depth + 1].min %>
-        <div class="<%= @node.type %>">
+        <%= @node.parent_tabs_begin %>
+        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <h<%= depth %> class="title">
             <%= @node.index_and_title_link %>
           </h<%= depth %>>
           <%= @node.content_xhtml_div %>
         </div>
+        <%= @node.parent_tabs_end %>
 
     paragraph:
       toc: true
@@ -469,11 +522,13 @@ nodes:
       number: false
       silent: false
       output: |
-        <div class="<%= @node.type %>">
+        <%= @node.parent_tabs_begin %>
+        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <p class="title"><%= @node.title_link %></p>
           <%= @node.content_xhtml_div %>
         </div>
+        <%= @node.parent_tabs_end %>
 
   # Admonitions
     tip: &admonition
@@ -484,7 +539,8 @@ nodes:
       number: true
       silent: false
       output: |
-        <div class="<%= @node.type %>">
+        <%= @node.parent_tabs_begin %>
+        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <p class="title"><%= @node.number_and_title_link %></p>
           <div class="content">
@@ -492,6 +548,7 @@ nodes:
             <%= @node.content_xhtml %>
           </div>
         </div>
+        <%= @node.parent_tabs_end %>
 
     note: *admonition
     caution: *admonition
@@ -508,11 +565,13 @@ nodes:
       number: true
       silent: false
       output: |
-        <div class="<%= @node.type %>">
+        <%= @node.parent_tabs_begin %>
+        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <p class="title"><%= @node.number_and_title_link %></p>
           <%= @node.content_xhtml_div %>
         </div>
+        <%= @node.parent_tabs_end %>
 
     table: *formal
     example: *formal
@@ -631,7 +690,7 @@ output: |
         label = ERBook::PHRASES[type.capitalize << 's']
         lof_sections << label
 
-        %{#{ERBook::Document::Node.navigation label, "rev:#{label}", nil, nil}<h2 class="title">#{label}</h2> <ol>#{nested}</ol>}
+        %{<div id="#{label}"><h2 class="title">#{label}</h2> <ol>#{nested}</ol></div>}
       end
   %><?xml version="1.0" encoding="utf-8"?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -661,15 +720,32 @@ output: |
         % $feeds.each_pair do |url, fmt|
           <link rel="alternate" type="application/<%= fmt %>+xml" href="<%= url %>"/>
 
-      % require 'rainpress'
-      % @format['styles'].each do |style|
-        % style.each_pair do |media, code|
-          <style type="text/css" media="<%= media %>">
-          /*<![CDATA[*/<%~ Rainpress.compress(code) %>/*]]>*/
-          </style>
-
       <style type="text/css" media="screen">
       /*<![CDATA[*/
+        <%=
+          css = File.read(File.join(JQUERY_DIR, 'jquery-ui-1.7.2.custom.css'))
+
+          # embed images used by jQuery UI as data URIs
+          css.gsub! %r{\bimages/.*?\.png\b} do |path|
+            # XXX: using inspect to put quotes around the value
+            #      because jQuery did not put them in their CSS
+            ERBook.base_64_embed_file(File.join(JQUERY_DIR, path)).inspect
+          end
+
+          css
+        %>
+
+        .ui-widget
+        {
+            /* prevent nested widgets from having larger fonts */
+            font-size: 1em;
+        }
+
+        .ui-tabs .ui-tabs-nav li.ui-tabs-selected a
+        {
+            cursor: pointer;
+        }
+
         /* decorate external hyperlinks with a visual indicator */
         a[href]:not([href^="#"])
         {
@@ -691,199 +767,426 @@ output: |
       /*]]>*/
       </style>
 
+      % require 'rainpress'
+      % @format['styles'].each do |style|
+        % style.each_pair do |media, code|
+          <style type="text/css" media="<%= media %>">
+          /*<![CDATA[*/<%~ Rainpress.compress(code) %>/*]]>*/
+          </style>
+
       <script type="text/javascript">
       //<![CDATA[
         %< File.join(JQUERY_DIR, 'jquery-1.3.2.min.js')
-        %< File.join(JQUERY_DIR, 'jquery.scrollTo-1.4.1-min.js')
-        %< File.join(JQUERY_DIR, 'jquery.localscroll-1.2.7-min.js')
+        %< File.join(JQUERY_DIR, 'jquery-ui-1.7.2.custom.min.js')
 
-        $(document).ready(
-          function(){
-            $.localScroll({
-              // the default 1000 is too slow, and 500 is too fast
-              duration: 700,
+        $(function() {
+          //
+          // respond to changes in window location
+          //
+          var $last_hash = null;
 
-              // allow the CSS ':target' pseudo-selector to work properly
-              hash: true, onAfter: function(){ location = location; }
-            });
+          function on_hash_change() {
+            var curr_hash = window.location.hash;
+
+            if (curr_hash && curr_hash != $last_hash) {
+              $last_hash = curr_hash;
+              reveal_hash(curr_hash);
+            }
+
+            setTimeout(on_hash_change, 300);
           }
-        );
+
+          //
+          // Sets the location bar hash to the given value.
+          //
+          // [prevent_jump]
+          //  If true, prevents the browser from jumping to
+          //  the element corresponding to the given hash.
+          //
+          function set_hash(hash, prevent_jump) {
+            var set_the_hash = function() {
+              //
+              // XXX: bypass on_hash_change() by setting $last_hash
+              //
+              window.location.hash = $last_hash = hash;
+            }
+
+            if (prevent_jump) {
+              var target = $(hash);
+
+              if (target.length) {
+                //
+                // This particular approach to solving the browser
+                // jumping problem comes from the jQuery.LocalScroll
+                // plugin, which is dual licensed under MIT and GPL:
+                //
+                //   Copyright (c) 2007-2009 Ariel Flesler - aflesler(at)gmail(dot)com | http://flesler.blogspot.com
+                //
+                //   Permission is hereby granted, free of charge, to any person obtaining a copy
+                //   of this software and associated documentation files (the "Software"), to deal
+                //   in the Software without restriction, including without limitation the rights
+                //   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                //   copies of the Software, and to permit persons to whom the Software is
+                //   furnished to do so, subject to the following conditions:
+                //
+                //   The above copyright notice and this permission notice shall be included in
+                //   all copies or substantial portions of the Software.
+                //
+                //   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                //   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                //   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                //   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                //   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                //   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+                //   THE SOFTWARE.
+                //
+                // This plugin is documented at:
+                //
+                //   http://flesler.blogspot.com/2007/10/jquerylocalscroll-10.html
+                //
+                // And its source is available at:
+                //
+                //   http://flesler-plugins.googlecode.com/svn/trunk/jquery.localScroll/jquery.localScroll.js
+                //
+                var target_id = target.attr('id');
+
+                //
+                // temporarily place a dummy element at the current
+                // screen position and give it the ID of the target
+                //
+                var dummy = $('<span/>').attr('id', target_id).css({
+                  position: 'absolute',
+                  top:      $(window).scrollTop()
+                });
+
+                target.removeAttr('id').before(dummy);
+
+                //
+                // when we set the hash, the browser will jump to the
+                // dummy, which is where the browser screen currently
+                // is, and therefore the jump will not be visualized!
+                //
+                set_the_hash();
+
+                //
+                // undo the temporary changes
+                //
+                dummy.remove();
+                target.attr('id', target_id);
+
+                return;
+              }
+            }
+
+            set_the_hash();
+          }
+
+          //
+          // Returns the tab corresponding to the
+          // given panel in the given tabs widget.
+          //
+          function tab_by_panel(panel, tabs_widget) {
+            if (!tabs_widget) {
+              tabs_widget = panel.parent('.ui-tabs');
+            }
+
+            return tabs_widget.find(
+              '.ui-tabs-nav > li > a[href=#'+ panel.attr('id') +']'
+            ).parent('li');
+          }
+
+          //
+          // Reveals the element at the given hash by (1) activating all
+          // tabs that contain it, (2) smoothly scrolling to it, and (3)
+          // updating the hash in the browser's location bar accordingly.
+          //
+          function reveal_hash(hash) {
+            var target = $(hash);
+
+            if (target.length) {
+              var target_is_panel = target.is('div') &&
+                target.parent('.ui-tabs').length;
+
+              //
+              // reveal all tabs which contain the target
+              //
+              if (target.is(':hidden')) {
+                var panels = target.parents('.ui-tabs > div:hidden').get().reverse();
+
+                if (target_is_panel) {
+                  panels.push(target);
+                }
+
+                for (var i in panels) {
+                  var panel = $(panels[i]);
+                  var tabs_widget = panel.parent('.ui-tabs');
+                  var selected_index = tabs_widget.tabs('option', 'selected');
+
+                  //
+                  // map the panel to its tab because tabs do not
+                  // have to be in the same order as their panels
+                  //
+                  var tab = tab_by_panel(panel, tabs_widget);
+                  var wanted_index = tab.prevAll('li').length;
+
+                  if (wanted_index != selected_index) {
+                    tabs_widget.tabs('select', wanted_index);
+                  }
+                }
+              }
+
+              function scroll_to_target_and_set_hash() {
+                if (target.is(':hidden')) {
+                  //
+                  // wait before scrolling because the
+                  // tabs.select() calls above may not
+                  // have fully taken effect yet and
+                  // so the target may still be hidden
+                  //
+                  setTimeout(scroll_to_target_and_set_hash, 0);
+                }
+                else {
+                  //
+                  // scroll to the tab bar instead of the target
+                  // because it contains the title for the target
+                  //
+                  var scroll_target = target_is_panel ?
+                    target.parent('.ui-tabs') : target;
+
+                  $('html').animate({
+                    scrollTop: Math.floor(scroll_target.offset().top)
+                  }, 'slow', 'swing', function() {
+                    set_hash(hash, target_is_panel);
+                  });
+                }
+              }
+
+              scroll_to_target_and_set_hash();
+            }
+          }
+
+          //
+          // create jQuery UI tabs
+          //
+          $('.tabs').tabs();
+
+          //
+          // make internal hyperlinks reveal their targets when clicked
+          //
+          $('a[href^=#]').click(function() {
+            var link = $(this);
+            var hash = link.attr('href');
+
+            if (link.parent('li').parent('.ui-tabs-nav').length) {
+              // tab clicks should not cause the screen to scroll
+              set_hash(hash, true);
+            }
+            else {
+              reveal_hash(hash);
+            }
+
+            return false;
+          });
+
+          //
+          // ready for action!
+          //
+          $('#__loading__').append("<%= ERBook::PHRASES['Ready!'] %>").
+          fadeOut('slow', function() {
+            $('#__body__').show();
+            on_hash_change();
+          });
+        });
       //]]>
       </script>
     </head>
     <body>
-    <div id="body">
-      <%
-        # menu of links to link sections
-        nav = [
-          (ERBook::PHRASES['Abstract'] if abstract),
-          ERBook::PHRASES['Contents'],
-          lof_sections,
-          (ERBook::PHRASES['References'] if references)
-        ].flatten.compact
-      %>
-      % if nav.length > 1
-        <div id="nav"><%=
-          nav.map do |section|
-            %{<a id="rev:#{ section }" href="##{ section }">#{ section }</a>}
-          end.join(' &middot; ')
-        %></div>
-
-      <br style="display: none"/>
-      <hr style="display: none"/>
-      <br style="display: none"/>
-
-
-      %= node = @nodes_by_type['header_outside_above'].first and node.output
-
-      <div id="header">
-        %= node = @nodes_by_type['header_inside_above'].first and node.output
-
-        % if header = @nodes_by_type['header'].first
-          <%= header.output %>
-        % else
-          % if $logo
-            <div class="logo"><%= $logo %></div>
-
-          % if $title
-            <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
-
-          % if $subtitle
-            <h2 class="subtitle"><%= $subtitle.to_s.to_inline_xhtml %></h2>
-
-          % if $authors
-            <h3 class="authors"><%=
-              $authors.map do |name, url|
-                if url
-                  %{<a href="#{url}">#{name}</a>}
-                else
-                  name
-                end
-              end.join(', ')
-            %></h3>
-
-          % if $date
-            <h3 class="date"><%= $date %></h3>
-
-        %= node = @nodes_by_type['header_inside_below'].first and node.output
+      <div id="__loading__">
+        <%= ERBook::PHRASES['Loading...'] %> <noscript><%= ERBook::PHRASES['Failed!'] %>
+          <p><%= ERBook::PHRASES['Please enable JavaScript in your Web browser.'] %></p>
+        </noscript>
       </div>
+      <div id="__body__">
+        %= node = @nodes_by_type['header_outside_above'].first and node.output
 
-      %= node = @nodes_by_type['header_outside_below'].first and node.output
+        <div id="__header__">
+          %= node = @nodes_by_type['header_inside_above'].first and node.output
 
+          % if header = @nodes_by_type['header'].first
+            <%= header.output %>
+          % else
+            % if $logo
+              <div class="logo"><%= $logo %></div>
 
-      %= abstract.output if abstract
+            <div class="title_and_subtitle">
+              % if $title
+                <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
 
-      <br style="display: none"/>
-      <hr style="display: none"/>
-      <br style="display: none"/>
+              % if $subtitle
+                <h2 class="subtitle"><%= $subtitle.to_s.to_inline_xhtml %></h2>
+            </div>
 
+            <div class="authors_and_date">
+              % if $authors
+                <h3 class="authors"><%=
+                  $authors.map do |name, url|
+                    if url
+                      %{<a href="#{url}">#{name}</a>}
+                    else
+                      name
+                    end
+                  end.join(', ')
+                %></h3>
 
-      % unless toc.empty?
-        <div id="toc">
-          <%= ERBook::Document::Node.navigation \
-            'Contents', 'rev:Contents', nil, nil %>
-          <h1 class="title"><%= ERBook::PHRASES['Contents'] %></h1>
-          <ul><%= toc %></ul>
+              % if $date
+                <h3 class="date"><%= $date %></h3>
+            </div>
+
+          %= node = @nodes_by_type['header_inside_below'].first and node.output
         </div>
 
-      % unless lof.empty?
-        <div id="lof"><%= lof %></div>
-
-      <br style="display: none"/>
-      <hr style="display: none"/>
-      <br style="display: none"/>
+        %= node = @nodes_by_type['header_outside_below'].first and node.output
 
 
-      <div id="content"><%= @content %></div>
+        %= abstract.output if abstract
 
-      % if references
-        <div id="bib">
-          <%= ERBook::Document::Node.navigation \
-              'References', 'rev:References', nil, nil %>
-          <h1 class="title"><%= ERBook::PHRASES['References'] %></h1>
-          <ol>
-          % references.each do |n|
-            <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
-          </ol>
-        </div>
+        <br style="display: none"/>
+        <hr style="display: none"/>
+        <br style="display: none"/>
 
-      <br style="display: none"/>
-      <hr style="display: none"/>
-      <br style="display: none"/>
+        <div class="tabs">
+          <ul>
+            <li><a href="#__doc__"><%= ERBook::PHRASES['Document'] %></a></li>
 
+            % unless toc.empty?
+              <li><a href="#__toc__"><%= ERBook::PHRASES['Contents'] %></a></li>
 
-      %= node = @nodes_by_type['footer_outside_above'].first and node.output
+            % unless lof.empty?
+              <li><a href="#__lof__"><%= ERBook::PHRASES['Index'] %></a></li>
 
-      <div id="footer">
-        %= node = @nodes_by_type['footer_inside_above'].first and node.output
-        % if footer = @nodes_by_type['footer'].first
-          %= footer.content.to_s.to_xhtml
-        % else
-          <%=
-            ERBook::PHRASES[
-              'Generated by %s on %s.',
-              %{<a href="#{ERBook::WEBSITE}">#{ERBook::DISPLAY}</a>},
-              Time.now
-            ]
-          %>
+            <li><a href="#__nfo__"><%= ERBook::PHRASES['About'] %></a></li>
+          </ul>
 
-        <div id="footer-credits">
-          <%
-            icon_credits = 'The icons shown above are part of %s, which is copyright %s and is distributed under %s.'
-          %>
-          <p>
-            % ICONS.select {|i| i.origin == 'tango' }.each do |icon|
-              %= icon.to_xhtml
+          % unless toc.empty?
+            <div id="__toc__">
+              <h1 class="title"><%= ERBook::PHRASES['Contents'] %></h1>
+              <ul><%= toc %></ul>
+            </div>
 
-            <br/>
+          % unless lof.empty?
+            <div id="__lof__" class="tabs">
+              <ul>
+                % lof_sections.each do |s|
+                  <li><a href="#<%= s %>"><%= s %></a></li>
+              </ul>
 
-            <%=
+              <%= lof %>
+            </div>
+
+          <br style="display: none"/>
+          <hr style="display: none"/>
+          <br style="display: none"/>
+
+          <div id="__doc__" class="tabs">
+            <ul>
+              % @roots.select {|n| n.defn['toc'] }.each do |n|
+                <li><a href="#<%= n.here_frag %>"><%= n.title.to_s.to_inline_xhtml %></a></li>
+
+              % if references
+                <li><a href="#__bib__"><%= ERBook::PHRASES['References'] %></a></li>
+            </ul>
+
+            %= @content
+
+            % if references
+              <div id="__bib__">
+                <h1 class="title"><%= ERBook::PHRASES['References'] %></h1>
+                <ol>
+                % references.each do |n|
+                  <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
+                </ol>
+              </div>
+          </div>
+
+          <br style="display: none"/>
+          <hr style="display: none"/>
+          <br style="display: none"/>
+
+          <div id="__nfo__">
+            <p><%=
               ERBook::PHRASES[
-                icon_credits,
-
-                '<a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a>',
-
-                '&copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a>',
-
-                '<a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>'
+                'This document was generated by %s on %s using the following resources.',
+                %{<a href="#{ERBook::WEBSITE}">#{ERBook::DISPLAY}</a>},
+                %{<b>#{Time.now}</b>}
               ]
-            %>
-          </p>
+            %></p>
 
-          <p>
-            % ICONS.select {|i| i.origin == 'mediawiki' }.each do |icon|
-              %= icon.to_xhtml
+            <table border="1">
+              <thead>
+                <tr>
+                  <th><%= ERBook::PHRASES['Resource'] %></th>
+                  <th><%= ERBook::PHRASES['Origin'] %></th>
+                  <th><%= ERBook::PHRASES['License'] %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    % ICONS.select {|i| i.origin == 'tango' }.each do |icon|
+                      %= icon.to_xhtml
+                  </td>
+                  <td>
+                    <a href="http://tango.freedesktop.org/Tango_Icon_Library">Tango Icon Theme</a>
 
-            <br/>
+                    <p>&copy; 2005 <a href="http://tango.freedesktop.org">Tango Desktop Project</a></p>
+                  </td>
+                  <td>
+                    <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    % ICONS.select {|i| i.origin == 'mediawiki' }.each do |icon|
+                      %= icon.to_xhtml
+                  </td>
+                  <td>
+                    <a href="http://www.mediawiki.org/skins-1.5/monobook/external.png">MediaWiki Monobook Skin</a>
 
-            <%=
-              ERBook::PHRASES[
-                icon_credits,
+                    <p>&copy; 2007 <a href="https://www.ohloh.net/projects/mediawiki/contributors">MediaWiki contributors</a></p>
+                  </td>
+                  <td>
+                    <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License, version 2</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-                '<a href="http://www.mediawiki.org/wiki/MediaWiki">MediaWiki</a>',
+            <p>
+              <a href="http://validator.w3.org/check?uri=referer"><img
+                  src="http://www.w3.org/Icons/valid-xhtml10-blue"
+                  alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
 
-                '&copy; 2007 <a href="https://www.ohloh.net/projects/mediawiki/contributors">MediaWiki contributors</a>',
-
-                '<a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License, version 2</a>'
-              ]
-            %>
-          </p>
-
-          <p style="margin-top: 3em">
-            <a href="http://validator.w3.org/check?uri=referer"><img
-                src="http://www.w3.org/Icons/valid-xhtml10-blue"
-                alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
-
-            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3"><img
-              src="http://jigsaw.w3.org/css-validator/images/vcss-blue"
-              alt="Valid CSS!" height="31" width="88" /></a>
-          </p>
+              <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3"><img
+                src="http://jigsaw.w3.org/css-validator/images/vcss-blue"
+                alt="Valid CSS!" height="31" width="88" /></a>
+            </p>
+          </div>
         </div>
-        %= node = @nodes_by_type['footer_inside_below'].first and node.output
+
+        %= node = @nodes_by_type['footer_outside_above'].first and node.output
+
+        <div id="__footer__">
+          %= node = @nodes_by_type['footer_inside_above'].first and node.output
+
+          % if footer = @nodes_by_type['footer'].first
+            %= footer.content.to_s.to_xhtml
+
+          %= node = @nodes_by_type['footer_inside_below'].first and node.output
+        </div>
+
+        %= node = @nodes_by_type['footer_outside_below'].first and node.output
+
       </div>
-
-      %= node = @nodes_by_type['footer_outside_below'].first and node.output
-    </div>
     </body>
   </html>
 
@@ -966,53 +1269,53 @@ styles:
           font-family       : <%= @format['fonts']['serif'] %>;
       }
 
-      #lof h1,
-      #lof h2,
-      #lof h3,
-      #lof h4,
-      #lof h5,
-      #lof h6
+      #__lof__ h1,
+      #__lof__ h2,
+      #__lof__ h3,
+      #__lof__ h4,
+      #__lof__ h5,
+      #__lof__ h6
       {
           margin-top        : 1.25em;
       }
 
-      #content h1,
-      #content h2,
-      #content h3,
-      #content h4,
-      #content h5,
-      #content h6
+      #__doc__ h1,
+      #__doc__ h2,
+      #__doc__ h3,
+      #__doc__ h4,
+      #__doc__ h5,
+      #__doc__ h6
       {
           margin-top        : 2.5em;
           line-height       : 1.25em;
       }
 
-      #content h1
+      #__doc__ h1
       {
           font-size         : 2.0em;
       }
 
-      #content h2
+      #__doc__ h2
       {
           font-size         : 1.8em;
       }
 
-      #content h3
+      #__doc__ h3
       {
           font-size         : 1.6em;
       }
 
-      #content h4
+      #__doc__ h4
       {
           font-size         : 1.4em;
       }
 
-      #content h5
+      #__doc__ h5
       {
           font-size         : 1.2em;
       }
 
-      #content h6
+      #__doc__ h6
       {
           font-size         : 1.0em;
       }
@@ -1023,6 +1326,7 @@ styles:
           border-collapse   : collapse; /* no spacing between cell borders */
           margin            : auto; /* center horizontally */
           margin-top        : 1em;
+          margin-bottom     : 1em;
       }
 
       th,
@@ -1040,55 +1344,13 @@ styles:
       }
 
     /* document structure */
-      #header
+      #__header__
       {
-          text-align        : center;
       }
 
-      #header > .title
+      #__header__ > .title
       {
           font-size         : 2.25em;
-      }
-
-      #header > .subtitle
-      {
-      }
-
-      #header > .authors
-      {
-          margin-top        : 1.625em;
-          margin-bottom     : -0.25em;
-      }
-
-      #header > .date
-      {
-      }
-
-      .logo,
-      .header_outside_above,
-      #header,
-      .header_outside_below
-      {
-          margin-bottom     : 5em;
-      }
-
-      .footer_outside_above,
-      #footer,
-      .footer_outside_below
-      {
-          margin-top        : 5em;
-      }
-
-      #header .header_inside_above,
-      #footer .footer_inside_above
-      {
-          margin-bottom     : 4em;
-      }
-
-      #header .header_inside_below,
-      #footer .footer_inside_below
-      {
-          margin-top        : 4em;
       }
 
       #Abstract
@@ -1096,43 +1358,40 @@ styles:
           margin-bottom     : 5em;
       }
 
-      #toc li
+      #__toc__ ul > li
       {
           list-style-type   : none;
       }
 
-      #toc li ul
+      #__toc__ li ul
       {
           padding-bottom    : 1em;
           border-left       : thick solid #F5F5F5;
       }
 
-      #toc li ul:hover
+      #__toc__ li ul:hover
       {
           border-color      : #DCDCDC;
       }
 
-      #toc > ul
+      #__toc__ > ul
       {
           padding-left      : 1em;
       }
 
-      #bib
+      #__bib__
       {
-          margin-top        : 5em;
       }
 
-      #footer
+      #__nfo__
       {
-          border-top        : thick dotted #DCDCDC;
+      }
+
+      #__footer__
+      {
           padding-top       : 1em;
           text-align        : center;
-      }
-
-      #footer-credits
-      {
-          margin-top        : 2em;
-          margin-bottom     : 2em;
+          margin            : auto;
       }
 
     /* document nodes */
@@ -1237,11 +1496,21 @@ styles:
           background-color  : #FFFFFF;
       }
 
-      /* the actual content of the <body> element */
-      #body
+      #__body__,
+      .part    > .title,
+      .chapter > .title,
+      .section > .title,
+      .paragraph > .title,
+      #__bib__ > .title,
+      #__toc__ .title
       {
-          margin            : auto;
-          max-width         : 38em;
+          display: none;
+      }
+
+    /* tabs */
+      .tabs
+      {
+          clear: both; /* otherwise .nav becomes obscured by the tabs */
       }
 
     /* source code */
@@ -1294,9 +1563,8 @@ styles:
           color             : #800080;
       }
 
-      #toc a:target,
-      #lof a:target,
-      #nav a:target
+      #__toc__ a:target,
+      #__lof__ a:target
       {
           background          : <%= ICON_BY_NAME['here_frag'].data_css %>;
           background-position : center right;
@@ -1305,11 +1573,43 @@ styles:
       }
 
     /* document structure */
+      #__header__ > .logo
+      {
+          float: left;
+          margin-right: 1em;
+      }
+
+      #__header__ > .logo img
+      {
+          max-height: 4em;
+          max-width: 4em;
+      }
+
+      #__header__ > .title_and_subtitle
+      {
+          float: left;
+          margin-right: 1.5em;
+      }
+
+      #__header__ > .title_and_subtitle > .title
+      {
+          margin-top: 0;
+      }
+
+      #__header__ > .authors_and_date
+      {
+          text-align: right;
+      }
+
+      #__header__ > .authors_and_date > .date
+      {
+          font-weight: lighter;
+      }
+
       /* mini navigation menu beside every block node */
       .nav
       {
           float             : right;
-          margin-top        : -0.25em;
       }
 
       .nav > a > img
@@ -1322,14 +1622,13 @@ styles:
           border-top        : thick solid #FA8072;
       }
 
-      /* global navigation menu at the top of the page */
-      #nav
+- print: |
+    /* tabs */
+      .tabs > ul:first-child
       {
-          margin-bottom     : 4em;
-          text-align        : center;
+          display: none;
       }
 
-- print: |
     /* source code */
       tt
       {
@@ -1393,19 +1692,53 @@ styles:
       }
 
     /* document structure */
-      #nav,
       .nav,
-      #lof
+      #__lof__
       {
           display           : none;
       }
 
-      #toc,
+      #__toc__,
       .part,
       .chapter,
-      #bib
+      #__bib__
       {
           page-break-before : always;
+      }
+
+      #__header__ > .authors
+      {
+          margin-top        : 1.625em;
+          margin-bottom     : -0.25em;
+      }
+
+      .logo,
+      .header_outside_above,
+      #__header__,
+      .header_outside_below
+      {
+          margin-bottom     : 5em;
+      }
+
+      #__nfo__,
+      #__bib__,
+      .footer_outside_above,
+      #__footer__,
+      .footer_outside_below
+      {
+          margin-top        : 5em;
+      }
+
+      #__header__ .header_inside_above,
+      #__footer__ .footer_inside_above
+      {
+          margin-bottom     : 4em;
+      }
+
+      #__header__ .header_inside_below,
+      #__footer__ .footer_inside_below
+      {
+          margin-top        : 4em;
       }
 
     /* document nodes */

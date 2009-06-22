@@ -124,9 +124,19 @@
 
         RDoc::TopLevel.parse @format['code']
         RDoc::TopLevel.parse_file 'lib/erbook/to_xhtml.rb'
+
+        methods_by_owner = Hash.new {|h,k| h[k] = [] }
         RDoc::TopLevel.all_methods.each do |m|
-          paragraph "`#{m.decl}`" do
-            m.comment_html
+          methods_by_owner[m.parent.full_name] << m
+        end
+
+        methods_by_owner.each do |owner, methods|
+          section "`#{owner}`" do
+            methods.each do |m|
+              paragraph "`#{m.name}`" do
+                "`#{m.decl}`\n\n#{m.comment_html}"
+              end
+            end
           end
         end
       %>
@@ -286,7 +296,7 @@
           %|procedure "An example"
             This is how a **procedure** node appears.
 
-      %|section "Bibliographical nodes"
+      %|section "Bibliographic nodes"
         The nodes in this section deal with attribution of ideas---an important weapon against plagiarism.
 
         %|section "reference", "xhtml.nodes.reference"
