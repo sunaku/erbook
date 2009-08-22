@@ -1017,6 +1017,25 @@ output: |
           });
 
           //
+          // checkbox for printer friendly stylesheet
+          //
+          $('#__header__ > .authors_and_date').append(
+            $('<span/>').append(
+              $('<input/>').attr('type', 'checkbox').click(function() {
+                if ($(this).is(':checked')) {
+                  $('style[media=screen]').attr('media', 'neercs');
+                  $('style[media=print]').attr('media', 'screen');
+                }
+                else {
+                  $('style[media=screen]').attr('media', 'print');
+                  $('style[media=neercs]').attr('media', 'screen');
+                }
+                return true;
+              })
+            ).append(" <%= ERBook::PHRASES['Printer friendly'] %>")
+          );
+
+          //
           // ready for action!
           //
           $('#__loading__').append("<%= ERBook::PHRASES['Ready!'] %>").
@@ -1473,6 +1492,7 @@ styles: # these are SASS templates
       .logo
         float: left
         margin-right: 1em
+        margin-top: 0.25em
 
         img
           max-height: 4em
@@ -1482,13 +1502,17 @@ styles: # these are SASS templates
         float: left
         margin-right: 1.5em
 
-        > .title
-          margin-top: 0
+        .title
+          margin-top: 0.25em
 
       .authors_and_date
         text-align: right
 
-        > .date
+        .authors, .date
+          margin-top: 0
+          margin-bottom: 0.25em
+
+        .date
           font-weight: lighter
 
 
