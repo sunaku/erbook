@@ -17,6 +17,6 @@ quote:      tango-icon-theme-0.8.90/48x48/apps/internet-group-chat.png
 
 # navigation menu on every heading
 nav_here:   tango-icon-theme-0.8.90/32x32/status/software-update-available.png
-nav_prev:   tango-icon-theme-0.8.90/32x32/actions/go-up.png
-nav_next:   tango-icon-theme-0.8.90/32x32/actions/go-down.png
+nav_prev:   tango-icon-theme-0.8.90/32x32/actions/go-previous.png
+nav_next:   tango-icon-theme-0.8.90/32x32/actions/go-next.png
 nav_list:   tango-icon-theme-0.8.90/32x32/places/start-here.png

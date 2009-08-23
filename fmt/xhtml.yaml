@@ -289,8 +289,8 @@ code: |
         LIST_TEXT = ERBook::PHRASES['Return to listing']
 
         HERE_SIGN = ICON_BY_NAME['nav_here'].to_xhtml(:alt => '&lowast;')
-        PREV_SIGN = ICON_BY_NAME['nav_prev'].to_xhtml(:alt => '&uarr;')
-        NEXT_SIGN = ICON_BY_NAME['nav_next'].to_xhtml(:alt => '&darr;')
+        PREV_SIGN = ICON_BY_NAME['nav_prev'].to_xhtml(:alt => '&larr;')
+        NEXT_SIGN = ICON_BY_NAME['nav_next'].to_xhtml(:alt => '&rarr;')
         LIST_SIGN = ICON_BY_NAME['nav_list'].to_xhtml(:alt => '&equiv;')
 
         ##

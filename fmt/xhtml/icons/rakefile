@@ -12,8 +12,6 @@ desc 'generate PNGs for tango icons from SVG sources'
 task :default
 
 INDEX.values.grep(/tango-icon-theme/).each do |dst|
-  sh 'git', 'add', dst
-
   if dst =~ /(\d+)x\1/
     size = $1
     src = $` + 'scalable' + $'.ext('.svg')
@@ -24,10 +22,10 @@ INDEX.values.grep(/tango-icon-theme/).each do |dst|
 
       # ensure sources are in repository so everything
       # works the next time this rake task is run
-      sh 'git', 'add', src
+      sh 'git', 'add', src, dst
     end
-    CLOBBER.include dst
 
+    CLOBBER.include dst
     task :default => dst
   end
 end
