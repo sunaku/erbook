@@ -1,6 +1,6 @@
 %#--
-%# Copyright 2007 Suraj N. Kurapati
-%# See the LICENSE file for details.
+%# Copyright protects this work.
+%# See LICENSE file for details.
 %#++
 
 % eruby_url = "http://en.wikipedia.org/wiki/ERuby"
@@ -81,15 +81,14 @@
 
   %|section "Credits" |n|
     %= $logo = n.xref_link("![#{$project} logo](#{$program}.png)".to_inline_xhtml)
+
     %< "README"
 
     <%= $project %> is made possible by
     <%= xref "History", "contributions" %>
     from users like you:
 
-    * Jens Vierbuchen
-    * Maunika Gosike
-    * [Zhang Chiyuan](http://lifegoo.pluskid.org)
+    %< "../CREDITS"
 
   %|section "Reviews"
     Tom Cloyd in [ruby-talk](http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/327499):

@@ -5,8 +5,8 @@
 # formatting system via Maruku, syntax coloring via CodeRay,
 # and smart source code sizing (block versus inline display).
 #--
-# Copyright 2006 Suraj N. Kurapati
-# See the LICENSE file for details.
+# Copyright protects this work.
+# See LICENSE file for details.
 #++
 
 require 'cgi'
