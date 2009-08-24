@@ -907,10 +907,12 @@ output: |
               var target_is_panel = target.is('div') &&
                 target.parent('.ui-tabs').length;
 
+              var target_initially_hidden = target.is(':hidden');
+
               //
               // reveal all tabs which contain the target
               //
-              if (target.is(':hidden')) {
+              if (target_initially_hidden) {
                 var panels = target.parents('.ui-tabs > div:hidden').get().reverse();
 
                 if (target_is_panel) {
@@ -953,10 +955,24 @@ output: |
                   var scroll_target = target_is_panel ?
                     target.parent('.ui-tabs') : target;
 
+                  var screen_before_scroll = $(window).scrollTop();
+
                   $('html').animate({
                     scrollTop: Math.floor(scroll_target.offset().top)
                   }, 'slow', 'swing', function() {
                     set_hash(hash, target_is_panel);
+
+                    if (
+                      !target_initially_hidden &&
+                      $(window).scrollTop() == screen_before_scroll
+                    ) {
+                      //
+                      // nothing changed on the screen.
+                      // the target was already visible.
+                      // highlight it to notify the user.
+                      //
+                      target.effect('highlight', 'slow');
+                    }
                   });
                 }
               }
