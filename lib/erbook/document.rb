@@ -41,7 +41,7 @@ module ERBook
     #
     def initialize format_name, input_text, input_file, options = {}
       # process format specification
-      @format_file = format_name.to_s
+        @format_file = format_name.to_s
 
         File.file? @format_file or
           @format_file = File.join(ERBook::FORMATS_DIR, @format_file + '.yaml')
@@ -62,160 +62,163 @@ module ERBook
         @node_defs = @format['nodes']
 
       # process input document
-        begin
-          # create sandbox for input evaluation
-            template = Template.new(input_file, input_text, options[:unindent])
-            sandbox = template.sandbox
+      begin
+        # create sandbox for input evaluation
+          template = Template.new(input_file, input_text, options[:unindent])
+          sandbox = template.sandbox
 
-            @template_vars = {
-              :@format        => @format,
-              :@roots         => @roots = [], # root nodes of all trees
-              :@nodes         => @nodes = [], # all nodes in the forest
-              :@nodes_by_type => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
-              :@stack         => [], # stack for all nodes
-            }.each_pair {|k,v| sandbox.instance_variable_set(k, v) }
+          @template_vars = {
+            :@format        => @format,
+            :@roots         => @roots = [], # root nodes of all trees
+            :@nodes         => @nodes = [], # all nodes in the forest
+            :@nodes_by_type => @nodes_by_type = Hash.new {|h,k| h[k] = [] },
+            :@stack         => [], # stack for all nodes
+          }.each_pair {|k,v| sandbox.instance_variable_set(k, v) }
 
-            # Handles the method call from a node
-            # placeholder in the input document.
-            def sandbox.__node_impl__ node_type, *node_args, &node_content
-              node = Node.new(
-                :type => node_type,
-                :defn => @format['nodes'][node_type],
-                :args => node_args,
-                :children => [],
+          ##
+          # Handles the method call from a node
+          # placeholder in the input document.
+          #
+          def sandbox.__node_impl__ node_type, *node_args, &node_content
+            node = Node.new(
+              :type => node_type,
+              :defn => @format['nodes'][node_type],
+              :args => node_args,
+              :children => [],
 
-                # omit erbook internals from the stack trace
-                :trace => caller.reject {|t|
-                  [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
-                }
-              )
-              @nodes << node
-              @nodes_by_type[node.type] << node
+              # omit erbook internals from the stack trace
+              :trace => caller.reject {|t|
+                [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
+              }
+            )
+            @nodes << node
+            @nodes_by_type[node.type] << node
 
-              # calculate occurrence number for this node
-              if node.defn['number']
-                @count ||= Hash.new {|h,k| h[k] = []}
-                node.number = (@count[node.type] << node).length
+            # calculate occurrence number for this node
+            if node.defn['number']
+              @count ||= Hash.new {|h,k| h[k] = []}
+              node.number = (@count[node.type] << node).length
+            end
+
+            # assign node family
+            if parent = @stack.last
+              parent.children << node
+              node.parent = parent
+              node.depth = parent.depth
+              node.depth += 1 if node.defn['depth']
+
+              # calculate latex-style index number for this node
+              if node.defn['index']
+                ancestry = @stack.reverse.find {|n| n.defn['index'] }.index
+                branches = node.parent.children.select {|n| n.index }
+
+                node.index = [ancestry, branches.length + 1].join('.')
               end
+            else
+              @roots << node
+              node.parent = nil
+              node.depth = 0
 
-              # assign node family
-              if parent = @stack.last
-                parent.children << node
-                node.parent = parent
-                node.depth = parent.depth
-                node.depth += 1 if node.defn['depth']
+              # calculate latex-style index number for this node
+              if node.defn['index']
+                branches = @roots.select {|n| n.index }
+                node.index = (branches.length + 1).to_s
+              end
+            end
 
-                # calculate latex-style index number for this node
-                if node.defn['index']
-                  ancestry = @stack.reverse.find {|n| n.defn['index'] }.index
-                  branches = node.parent.children.select {|n| n.index }
+            # assign node content
+            if block_given?
+              @stack.push node
+              node.content = __block_content__(node, &node_content)
+              @stack.pop
+            end
 
-                  node.index = [ancestry, branches.length + 1].join('.')
-                end
+            @buffer << node
+
+            nil
+          end
+
+          @node_defs.each_key do |type|
+            # XXX: using a string because define_method()
+            #      does not accept a block until Ruby 1.9
+            file, line = __FILE__, __LINE__; eval %{
+              def sandbox.#{type} *node_args, &node_content
+                __node_impl__ #{type.inspect}, *node_args, &node_content
+              end
+            }, binding, file, line
+          end
+
+        # evaluate the input & build the document tree
+          template.render
+          @processed_document = template.buffer
+
+        # chain block-level nodes together for local navigation
+          block_nodes = @nodes.reject do |n|
+            n.defn['bypass'] || n.defn['inline']
+          end
+
+          require 'enumerator'
+          block_nodes.each_cons(2) do |a, b|
+            a.next_node = b
+            b.prev_node = a
+          end
+
+        # calculate output for all nodes
+          actual_output_by_node = {}
+
+          visitor = lambda do |n|
+            #
+            # allow child nodes to calculate their actual
+            # output and to set their identifier as Node#output
+            #
+            # we do this nodes first because this node's
+            # content contains the child nodes' output
+            #
+            n.children.each {|c| visitor.call c }
+
+            # calculate the output for this node
+            actual_output = Template.new(
+              "#{@format_file}:nodes:#{n.type}:output",
+              n.defn['output'].to_s.chomp
+            ).render_with(@template_vars.merge(:@node => n))
+
+            # reveal child nodes' actual output in this node's actual output
+            n.children.each do |c|
+              if c.defn['inline'] && !c.defn['bypass']
+                actual_output[c.output] = actual_output_by_node[c]
+
               else
-                @roots << node
-                node.parent = nil
-                node.depth = 0
-
-                # calculate latex-style index number for this node
-                if node.defn['index']
-                  branches = @roots.select {|n| n.index }
-                  node.index = (branches.length + 1).to_s
+                # pull block-level node out of paragraph tag added by Maruku
+                actual_output.sub! %r/(<p>\s*)?#{Regexp.quote c.output}/ do
+                  actual_output_by_node[c] + $1.to_s
                 end
               end
-
-              # assign node content
-              if block_given?
-                @stack.push node
-                node.content = __block_content__(node, &node_content)
-                @stack.pop
-              end
-
-              @buffer << node
-
-              nil
             end
 
-            @node_defs.each_key do |type|
-              # XXX: using a string because define_method()
-              #      does not accept a block until Ruby 1.9
-              file, line = __FILE__, __LINE__; eval %{
-                def sandbox.#{type} *node_args, &node_content
-                  __node_impl__ #{type.inspect}, *node_args, &node_content
-                end
-              }, binding, file, line
-            end
+            actual_output_by_node[n] = actual_output
 
-          # evaluate the input & build the document tree
-            template.render
-            @processed_document = template.buffer
+            #
+            # allow the parent node to calculate its actual
+            # output without interference from the output of
+            # this node (Node#to_s is aliased to Node#output)
+            #
+            # this assumes that having this node's string
+            # representation be a consecutive sequence of digits
+            # will not interfere with the text-to-whatever
+            # transformation defined by the format specification
+            #
+            n.output = Digest::SHA1.digest(n.object_id.to_s).unpack('I*').join
+          end
 
-          # chain block-level nodes together for local navigation
-            block_nodes = @nodes.reject {|n| n.defn['bypass'] ||
-                                             n.defn['inline'] }
+          @roots.each {|n| visitor.call n }
 
-            require 'enumerator'
-            block_nodes.each_cons(2) do |a, b|
-              a.next_node = b
-              b.prev_node = a
-            end
+          # replace the temporary identifier with each node's actual output
+          @nodes.each {|n| n.output = actual_output_by_node[n] }
 
-          # calculate output for all nodes
-            actual_output_by_node = {}
-
-            visitor = lambda do |n|
-              #
-              # allow child nodes to calculate their actual
-              # output and to set their identifier as Node#output
-              #
-              # we do this nodes first because this node's
-              # content contains the child nodes' output
-              #
-              n.children.each {|c| visitor.call c }
-
-              # calculate the output for this node
-              actual_output = Template.new(
-                "#{@format_file}:nodes:#{n.type}:output",
-                n.defn['output'].to_s.chomp
-              ).render_with(@template_vars.merge(:@node => n))
-
-              # reveal child nodes' actual output in this node's actual output
-              n.children.each do |c|
-                if c.defn['inline'] && !c.defn['bypass']
-                  actual_output[c.output] = actual_output_by_node[c]
-
-                else
-                  # pull block-level node out of paragraph tag added by Maruku
-                  actual_output.sub! %r/(<p>\s*)?#{Regexp.quote c.output}/ do
-                    actual_output_by_node[c] + $1.to_s
-                  end
-                end
-              end
-
-              actual_output_by_node[n] = actual_output
-
-              #
-              # allow the parent node to calculate its actual
-              # output without interference from the output of
-              # this node (Node#to_s is aliased to Node#output)
-              #
-              # this assumes that having this node's string
-              # representation be a consecutive sequence of digits
-              # will not interfere with the text-to-whatever
-              # transformation defined by the format specification
-              #
-              n.output = Digest::SHA1.digest(n.object_id.to_s).unpack('I*').join
-            end
-
-            @roots.each {|n| visitor.call n }
-
-            # replace the temporary identifier with each node's actual output
-            @nodes.each {|n| n.output = actual_output_by_node[n] }
-
-        rescue Exception
-          puts input_text # so the user can debug line numbers in stack trace
-          error "Could not process input document #{input_file.inspect}"
-        end
+      rescue Exception
+        puts input_text # so the user can debug line numbers in stack trace
+        error "Could not process input document #{input_file.inspect}"
+      end
     end
 
     ##
@@ -232,7 +235,9 @@ module ERBook
       undef id if respond_to? :id
       undef type if respond_to? :type
 
+      ##
       # Returns the output of this node.
+      #
       def to_s
         defn['silent'] ? '' : output
       end

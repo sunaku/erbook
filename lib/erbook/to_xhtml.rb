@@ -23,18 +23,22 @@ require 'coderay'
 require 'maruku'
 
 class String
+  ##
   # The content of these XHTML tags will be preserved while
   # they are being processed by Textile.  By doing this, we
   # avoid unwanted Textile transformations, such as quotation
   # marks becoming curly (&#8192;), in source code.
+  #
   PROTECTED_TAGS = {
     :pre  => :block,    # tag => is it a block or inline element?
     :code => :inline,
     :tt   => :inline
   }
 
+  ##
   # The content of these XHTML tags will be preserved
   # *verbatim* throughout the text-to-XHTML conversion process.
+  #
   VERBATIM_TAGS = {
     :noformat => :block # tag => is it a block or inline element?
   }

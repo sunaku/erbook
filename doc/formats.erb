@@ -4,25 +4,30 @@
 %#++
 
 %|part "Formats"
+
   This part describes the default formats provided along with <%= $project %>. The <%= xref "SpecFile", "format specification files" %> for these formats can be found in the <tt>fmt/</tt> directory of the <%= $project %> installation directory (see <%= xref "Manifest" %>).
 
   These formats are meant to serve as working examples. If you require more functionality from one of these formats, simply make a copy of the corresponding format specification file and edit the copy to suit your needs. If you would like to contribute or discuss your enhancements to these default formats, you can <%= xref "License", "contact the author" %>.
 
+
   %|chapter "XHTML (web page)", "xhtml"
+
     This format generates a _monolithic_ XHTML document that allows users to easily search for a particular topic using nothing more than their web browser's built-in text search mechanism. This facilitates offline reading, where an Internet search engine is not available.
 
     When viewing an XHTML document in a graphical web browser, you will notice navigation menus to the left of chapters, sections, figures, admonitions, and so on.  These menus contain hyperlinks that make it easy to navigate the XHTML document, especially for users of text-only web browsers.
 
-    Furthermore, the XHTML document comes equipped with a stylesheet that makes it suitable for printing. In particular, users of web browsers that support CSS3 selectors will notice that all hyperlinks have been expanded to include their target URL next to them.  Try the "print preview" function of your web browser to see how the XHTML document would appear when printed.
+    Furthermore, the XHTML document comes equipped with a stylesheet suitable for printing. In particular, users of web browsers that support CSS3 selectors will notice that all hyperlinks have been expanded to include their target URL next to them.  Try the "print preview" function of your web browser to see how the XHTML document would appear when printed.
+
 
     %|section "Text to XHTML conversion"
+
       The <tt>lib/<%= $program %>/to_xhtml.rb</tt> file inside <%= $project %>'s installation directory (see <%= xref "Manifest" %>) defines the following methods:
 
       * `String#to_xhtml` - Transforms this string into XHTML while ensuring that the result contains one or more block-level elements at the root.
 
-      * `String.to_inline_xhtml` - Transforms this string into an *inline* XHTML string (one that does not contain any block-level XHTML elements at the root).
+      * `String#to_inline_xhtml` - Transforms this string into an *inline* XHTML string (one that does not contain any block-level XHTML elements at the root).
 
-      The default implementation of the `String#to_xhtml` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>to_xhtml.rb</tt> file and adjust the source code of the default `String#to_xhtml` and `String.to_inline_xhtml` methods accordingly.
+      The default implementation of the `String#to_xhtml` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>to_xhtml.rb</tt> file and adjust the source code of the default `String#to_xhtml` and `String#to_inline_xhtml` methods accordingly.
 
       For example, if you replace the entire <tt>to_xhtml.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
 
@@ -44,7 +49,9 @@
 
       In addition to supporting Markdown syntax, the default implementation has some additional features which are described in the following subsections.
 
+
       %|section "Syntax coloring for source code"
+
         Syntax coloring is _automatically added_ to source code found inside the **&lt;code&gt;** and **&lt;/code&gt;** HTML tags.  The syntax coloring library, [CodeRay](http://coderay.rubychan.de), currently supports the following programming languages:
         * Ruby
         * C
@@ -53,7 +60,9 @@
         * RHTML (Rails)
         * Nitro-XHTML
 
+
         %|section "Specifying the programming language"
+
           Because different programming languages have different syntax coloring schemes, you can specify the language of your source code using the `lang` attribute to ensure that only the appropriate coloring scheme is used. Note that unless the `lang` attribute is specified, _Ruby_ is assumed to be the programming language of all source code by default.
 
           <% sampleCode = %q{
@@ -91,17 +100,23 @@
 
           <code lang="html"><%= verbatim sampleCode %></code>
 
+
       %|section "Smart sizing of source code"
+
         Source code is _automatically sized_ to be displayed as either a line or paragraph of text, depending on whether it contains line breaks.
 
         For example, here is a single line <code>life = true or false</code> of code. And here is a paragraph <code>life =
           true or
         false</code> of code.
 
+
       %|section "Protecting verbatim text"
+
         Sometimes you just need to protect some text from being mangled by the text-to-XHTML conversion process . In such cases, you can wrap the text you want to proctect within **&lt;noformat&gt;** and **&lt;/noformat&gt;** tags.
 
+
     %|section "Parameters"
+
       The XHTML format accepts the following document parameters.  To disable the default value for a particular parameter, simply set that parameter to `nil`.  For example, to disable the `$authors` parameter, you would write `$authors = nil` in your input document.
 
       | Parameter   | Type     | Default value                   | Description                                                                                                                                                                                                 |
@@ -113,7 +128,9 @@
       | `$logo`     | `String` | `nil`                           | Arbitrary content that goes above the document title in the default header.                                                                                                                                 |
       | `$feeds`    | `Hash`   | `nil`                           | A mapping of feed URL to feed format. Here is an example: <code>$feeds = { "my_rss_feed.xml" => "rss", "my_atom_feed.xml" => "atom" }</code>                                                                |
 
+
     %|section "Methods"
+
       The XHTML format provides the following methods. In the method declarations shown below,
       * a pound sign (#) indicates that the method is an *instance method*, meaning that it can only be invoked on instances of a class, not on the classes themselves.
       * a double colon sign (::) indicates that the method is a *class method*, meaning that it can only be invoked on a class.
@@ -141,7 +158,9 @@
         end
       %>
 
+
     %|chapter "Nodes", "xhtml.nodes"
+
       Unless otherwise noted, all nodes defined by the XHTML format accept two arguments, in this order:
       1.  a required *title* for the node
       2.  an optional *unique identifier* for the node
@@ -155,19 +174,29 @@
       | toc       | Boolean | Include this node in the **Table of Contents** (TOC)? |
       | lof       | Boolean | Include this node in the **List of Figures** (LOF)?   |
 
+
       %|section "Structural nodes"
+
         The nodes described in this section form the overall structure of the output document.
 
+
         %|section "header", "xhtml.nodes.header"
+
           This node overrides the logo, title, list of authors, and date when the document was written, all of which are shown at the top of the document.
 
+
         %|section "footer", "xhtml.nodes.footer"
+
           This node overrides (1) the date when this document was generated and (2) the hyperlink to the <%= $project %> website, shown at the bottom of the document. The hyperlink is there as a way of saying thanks for <%= $project %>, the _wonderful_ little utility you have grown so fond of! ;-)
 
+
         %|section "abstract", "xhtml.nodes.abstract"
+
           A summary of the entire document.  This is what most readers will _skim_ through, if you are lucky.  Alas, nobody reads entire documents these days! :-(
 
+
         %|section "xref", "xhtml.nodes.xref"
+
           A cross-reference; a hyperlink that takes you to any node in the document.
 
           The first argument of this node is either the unique identifier or the user-defined title of the node you wish to cross-reference. If no nodes in the document have the given identifier or user-defined title, then an error will be raised.
@@ -186,131 +215,207 @@
 
           appears in the output document like this: <%= xref "SpecFile", "custom link text" %>.
 
+
       %|section "Organizational nodes"
+
         The nodes described in this section are meant to help organize the document's content logically.  Based on how deeply these nodes are nested in the document, their heading will be larger (shallow depth) or smaller (deep depth).
 
+
         %|section "node", "xhtml.nodes.node"
+
           A placeholder that simply passes its content to the output.
 
           This node has no real use in the writing of a document.  It mainly helps programmers define "virtual" nodes that simply wrap some user-provided content.  Programmers can then manipluate the content of those virtual nodes when processing the document.
 
+
           %|node "An example"
+
             This is how a **node** node appears.
 
+
         %|section "part", "xhtml.nodes.part"
+
           A collection of chapters.
 
+
           %|part "An example"
+
             This is how a **part** node appears.
 
+
         %|section "chapter", "xhtml.nodes.chapter"
+
           A collection of sections.
 
+
           %|chapter "An example"
+
             This is how a **chapter** node appears.
 
+
         %|section "section", "xhtml.nodes.section"
+
           A collection of paragraphs about a particular topic.
 
+
           %|section "An example"
+
             This is how a **section** node appears.
 
+
         %|section "paragraph", "xhtml.nodes.paragraph"
+
           A collection of sentences about a particular idea.
 
+
           %|paragraph "An example"
+
             This is how a **paragraph** node appears.  Notice that there is no LaTeX-style index number in the heading of this **paragraph** node.
 
+
       %|section "Admonition nodes"
+
         An admonition is basically a box that is indented more deeply than the text surrounding it.  It is typically used to convey extraneous or pertinent information about the application of ideas discussed in the surrounding text.
 
         I like to follow the KDE guidelines<%= cite "KDE.admonitions" %> when determining which admonition to use in my documents.
 
+
         %|reference "KDE.admonitions"
+
           L. Watts, "Admonitions: Tips, hints, and Warnings", in _The KDE DocBook Authors guide_, Chapter 13, \[Online document], 22 September 2004 (Revision 1.00.00), \[cited 8 December 2007], Available at <%= hyperlink "http://l10n.kde.org/docs/markup/tips-hints-etc.html" %>
 
+
         %|section "warning", "xhtml.nodes.warning"
+
           Use a **warning** node when "data loss could occur if you follow the procedure being described." <%= cite "KDE.admonitions" %>
 
+
           %|warning "An example"
+
             This is how a **warning** node appears.
 
+
         %|section "caution", "xhtml.nodes.caution"
+
           bq. A note of caution. Use this for example when the reader may lose easily recovered or replaceable information (e.g. user settings), or when they could cause data loss if they don't correctly follow the procedure being outlined. <%= cite "KDE.admonitions" %>
 
+
           %|caution "An example"
+
             This is how a **caution** node appears.
 
+
         %|section "important", "xhtml.nodes.important"
+
           Use an **important** node when:
 
           bq. When there is no danger of data loss, but you wish to make clear to the reader a consequence that isn't immediately obvious (e.g. when changing the font for one instance of a program also changes the default setting, and this isn't clear from the GUI.) <%= cite "KDE.admonitions" %>
 
+
           %|important "An example"
+
             This is how a **important** node appears.
 
+
         %|section "note", "xhtml.nodes.note"
+
           Use a **note** node to convey:
 
           bq. Information the user should be aware of, but is peripheral to the actual task being described. <%= cite "KDE.admonitions" %>
 
+
           %|note "An example"
+
             This is how a **note** node appears.
 
+
         %|section "tip", "xhtml.nodes.tip"
+
           Use a **tip** node when:
 
           bq. When you're giving a hint to make things easier or more productive for the reader. <%= cite "KDE.admonitions" %>
 
+
           %|tip "An example"
+
             This is how a **tip** node appears.
 
+
       %|section "Auxilary materials"
+
         %|section "figure", "xhtml.nodes.figure"
           A diagram, sketch, image, or illustration; something that visually depicts an idea or thought.
 
+
           %|figure "An example"
+
             This is how a **figure** node appears.
 
+
         %|section "table", "xhtml.nodes.table"
+
           Information (typically measurement data) represented in tabular form for easy reading, comparison, and analysis.
 
+
           %|table "An example"
+
             This is how a **table** node appears.
 
+
         %|section "example", "xhtml.nodes.example"
+
           A sample application of an idea or thought.
 
+
           %|example "An example"
+
             This is how a **example** node appears.
 
+
         %|section "equation", "xhtml.nodes.equation"
+
           A mathematical equation or formula.
 
+
           %|equation "An example"
+
             This is how a **equation** node appears.
 
+
         %|section "procedure", "xhtml.nodes.procedure"
+
           An outline; a series of steps outlining some kind of process.
 
+
           %|procedure "An example"
+
             This is how a **procedure** node appears.
 
+
       %|section "Bibliographic nodes"
+
         The nodes in this section deal with attribution of ideas---an important weapon against plagiarism.
 
+
         %|section "reference", "xhtml.nodes.reference"
+
           This node stores bibliography information about an information source that is relevant to your document.
 
           If you wish to cite a certain source in several places in your document, start by creating a **reference** node first and then use a **cite** node (see <%= xref "xhtml.nodes.cite" %>) to perform the citation.
 
+
           %|paragraph "An example"
+
             See <%= xref "xhtml.nodes.reference.example" %> for an example of how a **reference** node appears.
 
+
           %|reference "xhtml.nodes.reference.example"
+
             This is how a **reference** node appears.
 
+
         %|section "cite", "xhtml.nodes.cite"
+
           A citation to a **reference** node (see <%= xref "xhtml.nodes.reference" %>) in the document's bibliography.
 
           The first argument of this node is the unique identifier of the reference node you wish to cite. You can specify additional arguments to give more detail about the citation.
@@ -329,17 +434,23 @@
 
   <% patches_are_welcome = "This format is not yet implemented.  Patches are welcome! :-)" %>
 
+
   %|chapter "Plain text", "text"
+
     <%= patches_are_welcome %>
 
     <%= hyperlink "http://en.wikipedia.org/wiki/Plain_text" %>
 
+
   %|chapter "LaTeX (PDF)", "latex"
+
     <%= patches_are_welcome %>
 
     <%= hyperlink "http://www.latex-project.org" %>
 
+
   %|chapter "UNIX manual page", "man"
+
     <%= patches_are_welcome %>
 
     <%= hyperlink "http://en.wikipedia.org/wiki/Man_page" %>

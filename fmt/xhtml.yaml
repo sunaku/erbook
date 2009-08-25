@@ -228,6 +228,10 @@ code: |
 
       # utility methods
 
+        def type_frag #:nodoc:
+          "__#{type}__"
+        end
+
         def type_label #:nodoc:
           ERBook::PHRASES[type.to_s.capitalize]
         end
@@ -465,8 +469,9 @@ nodes:
       index: false
       number: false
       silent: true
+      bypass: true
       output: |
-        <div id="<%= @node.type_label %>">
+        <div id="<%= @node.type_frag %>">
           <%= @node.navigation %>
           <h1 class="title"><%= @node.type_label %></h1>
           <%= @node.content_xhtml_div %>
@@ -680,7 +685,7 @@ output: |
         end
       end
 
-      lof_sections = []
+      lof_sections_frag_and_label = []
 
       lof = lof_enums.sort.map do |type, nodes|
         nested = nodes.map do |n|
@@ -688,9 +693,10 @@ output: |
         end
 
         label = ERBook::PHRASES[type.capitalize << 's']
-        lof_sections << label
+        frag = nodes.first.type_frag
+        lof_sections_frag_and_label << [frag, label]
 
-        %{<div id="#{label}"><h2 class="title">#{label}</h2> <ol>#{nested}</ol></div>}
+        %{<div id="#{frag}"><h2 class="title">#{label}</h2> <ol>#{nested}</ol></div>}
       end
   %><?xml version="1.0" encoding="utf-8"?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -1048,16 +1054,25 @@ output: |
       </script>
     </head>
     <body>
+      <%
+        text_only_browser_divider = %{
+          <div style="display: none"><br/><hr/><br/></div>
+        }.strip
+      %>
+
       <div id="__loading__">
         <%= ERBook::PHRASES['Loading...'] %> <noscript><%= ERBook::PHRASES['Failed!'] %>
           <p><%= ERBook::PHRASES['Please enable JavaScript in your Web browser.'] %></p>
+
+          %= text_only_browser_divider
         </noscript>
       </div>
+
       <div id="__body__">
-        %= node = @nodes_by_type['header_outside_above'].first and node.output
+        %= node.output if node = @nodes_by_type['header_outside_above'].first
 
         <div id="__header__">
-          %= node = @nodes_by_type['header_inside_above'].first and node.output
+          %= node.output if node = @nodes_by_type['header_inside_above'].first
 
           % if header = @nodes_by_type['header'].first
             <%= header.output %>
@@ -1089,75 +1104,58 @@ output: |
                 <h3 class="date"><%= $date %></h3>
             </div>
 
-          %= node = @nodes_by_type['header_inside_below'].first and node.output
+          %= node.output if node = @nodes_by_type['header_inside_below'].first
         </div>
 
-        %= node = @nodes_by_type['header_outside_below'].first and node.output
-
-
-        %= abstract.output if abstract
-
-        <br style="display: none"/>
-        <hr style="display: none"/>
-        <br style="display: none"/>
+        %= node.output if node = @nodes_by_type['header_outside_below'].first
 
         <div class="tabs">
           <ul>
+            % if abstract
+              <li><a href="#__abstract__"><%= ERBook::PHRASES['Abstract'] %></a></li>
+
             <li><a href="#__doc__"><%= ERBook::PHRASES['Document'] %></a></li>
 
             % unless toc.empty?
               <li><a href="#__toc__"><%= ERBook::PHRASES['Contents'] %></a></li>
 
-            % unless lof.empty?
-              <li><a href="#__lof__"><%= ERBook::PHRASES['Index'] %></a></li>
+            % if references
+              <li><a href="#__bib__"><%= ERBook::PHRASES['References'] %></a></li>
 
             <li><a href="#__nfo__"><%= ERBook::PHRASES['About'] %></a></li>
           </ul>
+
+          %= abstract.output if abstract
 
           % unless toc.empty?
             <div id="__toc__">
               <h1 class="title"><%= ERBook::PHRASES['Contents'] %></h1>
               <ul><%= toc %></ul>
+
+              % unless lof.empty?
+                <div id="__lof__"><%= lof %></div>
             </div>
-
-          % unless lof.empty?
-            <div id="__lof__" class="tabs">
-              <ul>
-                % lof_sections.each do |s|
-                  <li><a href="#<%= s %>"><%= s %></a></li>
-              </ul>
-
-              <%= lof %>
-            </div>
-
-          <br style="display: none"/>
-          <hr style="display: none"/>
-          <br style="display: none"/>
 
           <div id="__doc__" class="tabs">
+            <h1 style="display: none"><%= ERBook::PHRASES['Document'] %></h1>
             <ul>
               % @roots.select {|n| n.defn['toc'] }.each do |n|
                 <li><a href="#<%= n.here_frag %>"><%= n.title.to_s.to_inline_xhtml %></a></li>
-
-              % if references
-                <li><a href="#__bib__"><%= ERBook::PHRASES['References'] %></a></li>
             </ul>
 
             %= @content
-
-            % if references
-              <div id="__bib__">
-                <h1 class="title"><%= ERBook::PHRASES['References'] %></h1>
-                <ol>
-                % references.each do |n|
-                  <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
-                </ol>
-              </div>
           </div>
 
-          <br style="display: none"/>
-          <hr style="display: none"/>
-          <br style="display: none"/>
+          % if references
+            <div id="__bib__">
+              <h1 class="title"><%= ERBook::PHRASES['References'] %></h1>
+              <ol>
+              % references.each do |n|
+                <li id="<%= n.here_frag %>"><%= n.content_xhtml %></li>
+              </ol>
+            </div>
+
+          %= text_only_browser_divider
 
           <div id="__nfo__">
             <p><%=
@@ -1191,6 +1189,7 @@ output: |
                     <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License Agreement</a>
                   </td>
                 </tr>
+
                 <tr>
                   <td>
                     % ICONS.select {|i| i.origin == 'mediawiki' }.each do |icon|
@@ -1208,7 +1207,7 @@ output: |
               </tbody>
             </table>
 
-            <p>
+            <p class="validations">
               <a href="http://validator.w3.org/check?uri=referer"><img
                   src="http://www.w3.org/Icons/valid-xhtml10-blue"
                   alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
@@ -1220,18 +1219,19 @@ output: |
           </div>
         </div>
 
-        %= node = @nodes_by_type['footer_outside_above'].first and node.output
+
+        %= node.output if node = @nodes_by_type['footer_outside_above'].first
 
         <div id="__footer__">
-          %= node = @nodes_by_type['footer_inside_above'].first and node.output
+          %= node.output if node = @nodes_by_type['footer_inside_above'].first
 
           % if footer = @nodes_by_type['footer'].first
             %= footer.content.to_s.to_xhtml
 
-          %= node = @nodes_by_type['footer_inside_below'].first and node.output
+          %= node.output if node = @nodes_by_type['footer_inside_below'].first
         </div>
 
-        %= node = @nodes_by_type['footer_outside_below'].first and node.output
+        %= node.output if node = @nodes_by_type['footer_outside_below'].first
 
       </div>
     </body>
@@ -1345,7 +1345,7 @@ styles: # these are SASS templates
       font-size: 2.25em
 
 
-    #Abstract
+    #__abstract__
       margin-bottom: 5em
 
 
@@ -1422,7 +1422,7 @@ styles: # these are SASS templates
       background-color: #FFFFFF
 
 
-    #__body__, .part > .title, .chapter > .title, .section > .title, .paragraph > .title, #__bib__ > .title, #__toc__ .title
+    #__body__, #__abstract__ > .title, #__toc__ > .title, .part > .title, .chapter > .title, .section > .title, .paragraph > .title, #__bib__ > .title
       display: none
 
 
@@ -1526,11 +1526,11 @@ styles: # these are SASS templates
           border-top: thick solid #FA8072
 
 
+    #__nfo__ > table td:first-child, #__nfo__ > .validations
+      text-align: center
+
+
 - print: |
-    .tabs > ul:first-child
-      display: none
-
-
     tt
       font-weight: normal
 
@@ -1579,7 +1579,7 @@ styles: # these are SASS templates
         font-size: smaller
 
 
-    .nav, #__lof__
+    .tabs > ul, .nav, #__lof__, #__nfo__ > .validations
       display: none
 
 
@@ -1587,16 +1587,20 @@ styles: # these are SASS templates
       page-break-before: always
 
 
+    #__header__, #__footer__
+      text-align: center
+
+
     #__header__ > .authors
       margin-top: 1.625em
       margin-bottom: -0.25em
 
 
-    .logo, .header_outside_above, #__header__, .header_outside_below
+    .header_outside_above, #__header__, .header_outside_below, .logo
       margin-bottom: 5em
 
 
-    #__nfo__, #__bib__, .footer_outside_above, #__footer__, .footer_outside_below
+    .footer_outside_above, #__footer__, .footer_outside_below, #__bib__, #__nfo__
       margin-top: 5em
 
 
