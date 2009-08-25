@@ -551,6 +551,7 @@ nodes:
       index: false
       number: true
       silent: true
+      bypass: true
 
     cite:
       toc: false
