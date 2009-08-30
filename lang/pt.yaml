@@ -1,4 +1,5 @@
 # pt (Portuguese)
+%d results: resultados de %d
 About: Sobre
 Abstract: Sumário
 Caution: Cuidado
@@ -13,6 +14,7 @@ Examples: Exemplos
 Failed!: Falhado!
 Figure: Figura
 Figures: Figuras
+Help: Ajuda
 Here: Aqui
 Important: Importante
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Índice
 License: Licença
 Loading...: Carregamento…
 Next: Em seguida
+Not found: Não encontrado
 Note: Nota
 Notes: Notas
 Origin: Origem
@@ -33,6 +36,8 @@ Ready!: Pronto!
 Reference: Referência
 References: Referências
 Resource: Recurso
+Search: Busca
+Searching...: Procurarar…
 Section: Seção
 Table: Tabela
 Tables: Tabelas

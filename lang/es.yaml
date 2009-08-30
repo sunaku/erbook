@@ -1,4 +1,5 @@
 # es (Spanish)
+%d results: resultados de %d
 About: Sobre
 Abstract: Extracto
 Caution: Precaución
@@ -13,6 +14,7 @@ Examples: Ejemplos
 Failed!: ¡Fallado!
 Figure: Figura
 Figures: Figuras
+Help: Ayuda
 Here: Aquí
 Important: Importante
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Índice
 License: Licencia
 Loading...: Cargamento…
 Next: Después
+Not found: No encontrado
 Note: Nota
 Notes: Notas
 Origin: Origen
@@ -33,6 +36,8 @@ Ready!: ¡Listo!
 Reference: Referencia
 References: Referencias
 Resource: Recurso
+Search: Búsqueda
+Searching...: Búsqueda…
 Section: Sección
 Table: Tabla
 Tables: Tablas

@@ -1,4 +1,5 @@
 # zh (Chinese-simp)
+%d results: %d结果
 About: 关于
 Abstract: 摘要
 Caution: 小心
@@ -13,6 +14,7 @@ Examples: 例子
 Failed!: 不合格!
 Figure: 图
 Figures: 图
+Help: 帮助
 Here: 这里
 Important: 重要
 Importants: Importants
@@ -20,6 +22,7 @@ Index: 索引
 License: 执照
 Loading...: 装货…
 Next: 其次
+Not found: 没找到
 Note: 笔记
 Notes: 笔记
 Origin: 起源
@@ -33,6 +36,8 @@ Ready!: 准备好!
 Reference: 参考
 References: 参考
 Resource: 资源
+Search: 查寻
+Searching...: 搜寻…
 Section: 部分
 Table: 表
 Tables: 表

@@ -1,4 +1,5 @@
 # fr (French)
+%d results: résultats de %d
 About: Au sujet de
 Abstract: Abstrait
 Caution: Attention
@@ -13,6 +14,7 @@ Examples: Exemples
 Failed!: Échoué !
 Figure: Figure
 Figures: Figures
+Help: Aide
 Here: Ici
 Important: Important
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Index
 License: Permis
 Loading...: Chargement…
 Next: Après
+Not found: Non trouvé
 Note: Note
 Notes: Notes
 Origin: Origine
@@ -33,6 +36,8 @@ Ready!: Prêt !
 Reference: Référence
 References: Références
 Resource: Ressource
+Search: Recherche
+Searching...: Recherche…
 Section: Section
 Table: Tableau
 Tables: Tableaux

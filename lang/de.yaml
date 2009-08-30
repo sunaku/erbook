@@ -1,4 +1,5 @@
 # de (German)
+%d results: %d Resultate
 About: Über
 Abstract: Auszug
 Caution: Vorsicht
@@ -13,6 +14,7 @@ Examples: Beispiele
 Failed!: Ausfallen!
 Figure: Abbildung
 Figures: Abbildungen
+Help: Hilfe
 Here: Hier
 Important: Wichtig
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Index
 License: Lizenz
 Loading...: Laden…
 Next: Zunächst
+Not found: Nicht gefunden
 Note: Anmerkung
 Notes: Anmerkungen
 Origin: Ursprung
@@ -33,6 +36,8 @@ Ready!: Bereit!
 Reference: Hinweis
 References: Hinweise
 Resource: Hilfsmittel
+Search: Suche
+Searching...: Suchen…
 Section: Abschnitt
 Table: Tabelle
 Tables: Tabellen

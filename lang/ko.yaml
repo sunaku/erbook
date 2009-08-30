@@ -1,4 +1,5 @@
 # ko (Korean)
+%d results: %d는 유래한다
 About: 에 관하여
 Abstract: 요약
 Caution: 주의
@@ -13,6 +14,7 @@ Examples: 보기
 Failed!: 실패한!
 Figure: 숫자
 Figures: 숫자
+Help: 도움
 Here: 여기에서
 Important: 중요한
 Importants: Importants
@@ -20,6 +22,7 @@ Index: 색인
 License: 면허
 Loading...: 선적…
 Next: 다음으로
+Not found: 찾아내지 않는
 Note: 주
 Notes: 주
 Origin: 근원
@@ -33,6 +36,8 @@ Ready!: 준비되어 있는!
 Reference: 참고
 References: 참고
 Resource: 자원
+Search: 수색
+Searching...: 찾기…
 Section: 단면도
 Table: 테이블
 Tables: 테이블

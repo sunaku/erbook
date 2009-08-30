@@ -1,4 +1,5 @@
 # ru (Russian)
+%d results: результаты %d
 About: О
 Abstract: Конспект
 Caution: Предосторежение
@@ -13,6 +14,7 @@ Examples: Примеры
 Failed!: Неудачно!
 Figure: Диаграмма
 Figures: Диаграммы
+Help: Помощь
 Here: Здесь
 Important: Важно
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Индекс
 License: Лицензия
 Loading...: Нагрузка…
 Next: Затем
+Not found: Не найдено
 Note: Примечание
 Notes: Примечания
 Origin: Начало
@@ -33,6 +36,8 @@ Ready!: Готово!
 Reference: Справка
 References: Справки
 Resource: Ресурс
+Search: Поиск
+Searching...: Искать…
 Section: Раздел
 Table: Таблица
 Tables: Таблицы

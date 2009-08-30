@@ -1,4 +1,5 @@
 # ja (Japanese)
+%d results: %dは生じる
 About: について
 Abstract: 概要
 Caution: 注意
@@ -13,6 +14,7 @@ Examples: 例
 Failed!: 失敗する!
 Figure: 図
 Figures: 図
+Help: 助け
 Here: ここに
 Important: 重要
 Importants: Importants
@@ -20,6 +22,7 @@ Index: 索引
 License: 免許証
 Loading...: ローディング…
 Next: 次に
+Not found: 見つけられない
 Note: ノート
 Notes: ノート
 Origin: 起源
@@ -33,6 +36,8 @@ Ready!: 準備ができた!
 Reference: 参照
 References: 参照
 Resource: 資源
+Search: 調査
+Searching...: 捜索…
 Section: セクション
 Table: テーブル
 Tables: テーブル

@@ -1,4 +1,5 @@
 # it (Italian)
+%d results: risultati di %d
 About: Circa
 Abstract: Estratto
 Caution: Attenzione
@@ -13,6 +14,7 @@ Examples: Esempi
 Failed!: Venuto a mancare!
 Figure: Figura
 Figures: Figure
+Help: Aiuto
 Here: Qui
 Important: Importante
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Indice
 License: Autorizzazione
 Loading...: Caricamento…
 Next: Dopo
+Not found: Non trovato
 Note: Nota
 Notes: Note
 Origin: Origine
@@ -33,6 +36,8 @@ Ready!: Pronto!
 Reference: Riferimento
 References: Riferimenti
 Resource: Risorsa
+Search: Ricerca
+Searching...: Ricerca…
 Section: Sezione
 Table: Tabella
 Tables: Tabelle

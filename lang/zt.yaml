@@ -1,4 +1,5 @@
 # zt (Chinese-trad)
+%d results: %d結果
 About: 關於
 Abstract: 摘要
 Caution: 小心
@@ -13,6 +14,7 @@ Examples: 例子
 Failed!: 不合格!
 Figure: 图
 Figures: 图
+Help: 幫助
 Here: 這裡
 Important: 重要
 Importants: Importants
@@ -20,6 +22,7 @@ Index: 索引
 License: 執照
 Loading...: 裝貨…
 Next: 其次
+Not found: 沒找到
 Note: 筆記
 Notes: 筆記
 Origin: 起源
@@ -33,6 +36,8 @@ Ready!: 準備好!
 Reference: 參考
 References: 參考
 Resource: 資源
+Search: 查尋
+Searching...: 搜尋…
 Section: 部分
 Table: 表
 Tables: 表

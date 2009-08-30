@@ -1,4 +1,5 @@
 # nl (Dutch)
+%d results: %d resultaten
 About: Ongeveer
 Abstract: Samenvatting
 Caution: Voorzichtigheid
@@ -13,6 +14,7 @@ Examples: Voorbeelden
 Failed!: Ontbroken!
 Figure: Cijfer
 Figures: Cijfers
+Help: Hulp
 Here: Hier
 Important: Belangrijk
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Index
 License: Vergunning
 Loading...: Het laden…
 Next: Daarna
+Not found: Vinden niet
 Note: Nota
 Notes: Nota's
 Origin: Oorsprong
@@ -33,6 +36,8 @@ Ready!: Klaar!
 Reference: Verwijzing
 References: Verwijzingen
 Resource: Middel
+Search: Zoek
+Searching...: Het zoeken…
 Section: Sectie
 Table: Lijst
 Tables: Lijsten

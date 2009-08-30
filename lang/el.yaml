@@ -1,4 +1,5 @@
 # el (Greek)
+%d results: %d αποτελέσματα
 About: Περίπου
 Abstract: Περίληψη
 Caution: Προσοχή
@@ -13,6 +14,7 @@ Examples: Παραδείγματα
 Failed!: Αποτυχημένος!
 Figure: Αριθμός
 Figures: Αριθμοί
+Help: Βοήθεια
 Here: Εδώ
 Important: Σημαντικός
 Importants: Importants
@@ -20,6 +22,7 @@ Index: Δείκτης
 License: Άδεια
 Loading...: Φόρτωση…
 Next: Έπειτα
+Not found: Να μην βρεί
 Note: Σημείωση
 Notes: Σημειώσεις
 Origin: Προέλευση
@@ -33,6 +36,8 @@ Ready!: Έτοιμος!
 Reference: Αναφορά
 References: Αναφορές
 Resource: Πόρος
+Search: Αναζήτηση
+Searching...: Έρευνα…
 Section: Τμήμα
 Table: Πίνακας
 Tables: Πίνακες
