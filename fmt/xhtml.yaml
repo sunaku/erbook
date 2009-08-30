@@ -769,9 +769,21 @@ output: |
 
       % require 'rainpress'
       % @format['styles'].each do |style|
-        % style.each_pair do |media, code|
+        % style.each_pair do |media, sass|
           <style type="text/css" media="<%= media %>">
-          /*<![CDATA[*/<%~ Rainpress.compress(code) %>/*]]>*/
+          /*<![CDATA[*/<%=
+
+            # expand eRuby directives in SASS templates
+            sass = ::Ember::Template.new(sass).render(binding)
+
+            # compile SASS into CSS
+            require 'sass'
+            css = ::Sass::Engine.new(sass).render
+
+            # minify the CSS
+            css = Rainpress.compress(css)
+
+          %>/*]]>*/
           </style>
 
       <script type="text/javascript">
@@ -1212,554 +1224,366 @@ fonts:
   sans-serif: Calibri, Verdana, sans-serif
   monospace:  Monaco, Consolas, "Lucida Console", monospace
 
-styles:
+styles: # these are SASS templates
 - all: |
-    /* general */
-      body
-      {
-          color             : #000000;
-          background-color  : #FFFFFF;
-          line-height       : 1.5em;
-          font-family       : <%= @format['fonts']['sans-serif'] %>;
-      }
+    body
+      color: #000000
+      background-color: #FFFFFF
+      line-height: 1.5em
+      font-family: <%= @format['fonts']['sans-serif'] %>
 
-    /* emphasis */
-      blockquote
-      {
-          color             : #333;
-          font-style        : italic;
-      }
 
-      em,
-      strong,
-      dt
-      {
-          font-family       : <%= @format['fonts']['serif'] %>;
-      }
+    blockquote
+      color: #333
+      font-style: italic
 
-      hr
-      {
-          height            : 0;
-          border            : 0;
-          border-top        : thin dashed #000000;
-      }
 
-    /* source code */
-      tt,
-      code,
-      pre
-      {
-          font-family       : <%= @format['fonts']['monospace'] %>;
-          font-size         : 100%; /* appears like "size: small" otherwise */
-      }
+    em, strong, dt
+      font-family: <%= @format['fonts']['serif'] %>
 
-      /* output of the syntax coloring library */
-      code.para
-      {
-          white-space       : pre;
-      }
 
-    /* hyperlinks */
-      a > img
-      {
-          border            : none;
-      }
+    hr
+      height: 0
+      border: 0
+      border-top: thin dashed #000000
 
-    /* lists */
-      dt
-      {
-          margin-top        : 1.5em;
-          font-weight       : bolder;
-      }
 
-    /* headings */
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
+    tt, code, pre
+      font-family: <%= @format['fonts']['monospace'] %>
+      // appears like "size: small" otherwise
+      font-size: 100%
+
+
+    // output of the syntax coloring library
+    code.para
+      white-space: pre
+
+
+    a > img
+      border: none
+
+
+    dt
+      margin-top: 1.5em
+      font-weight: bolder
+
+
+    h1, h2, h3, h4, h5, h6, .title
+      font-weight: lighter
+      font-family: <%= @format['fonts']['serif'] %>
+
+
+    #__lof__
+      h1, h2, h3, h4, h5, h6
+        margin-top: 1.25em
+
+
+    #__doc__
+      h1, h2, h3, h4, h5, h6
+        margin-top: 2.5em
+        line-height: 1.25em
+
+      h1
+        font-size: 2.0em
+
+      h2
+        font-size: 1.8em
+
+      h3
+        font-size: 1.6em
+
+      h4
+        font-size: 1.4em
+
+      h5
+        font-size: 1.2em
+
+      h6
+        font-size: 1.0em
+
+
+    table
+      border: none
+      // no spacing between cell borders
+      border-collapse: collapse
+      margin: auto
+      margin-top: 1em
+      margin-bottom: 1em
+
+
+    th, td
+      padding: 1em
+      border: 1px solid #bbb
+      vertical-align: top
+      background-color: #FFFFFF
+
+
+    th
+      background-color: #F5F5F5
+
+
+    #__header__ > .title
+      font-size: 2.25em
+
+
+    #Abstract
+      margin-bottom: 5em
+
+
+    #__toc__
+      ul > li
+        list-style-type: none
+
+      li ul
+        padding-bottom: 1em
+        border-left: thick solid #F5F5F5
+
+        &:hover
+          border-color: #DCDCDC
+
+      > ul
+        padding-left: 1em
+
+
+    #__footer__
+      padding-top: 1em
+      text-align: center
+      margin: auto
+
+
+    .part > .title, .chapter > .title
+      padding-bottom: 0.5em
+
+
+    .part > .title > big, .chapter > .title > big
+      display: block
+      margin-top: 0.25em
+
+
+    .paragraph > .title, .tip > .title, .note > .title, .caution > .title, .warning > .title, .important > .title, .figure > .title, .table > .title, .example > .title, .equation > .title, .procedure > .title
+      font-size: large
+      margin-top: 2em
+
+
+    .tip, .note, .caution, .warning, .important, .figure, .table, .example, .equation, .procedure
+      margin: 3em
+
+
+    .tip .nav, .note .nav, .caution .nav, .warning .nav, .important .nav, .figure .nav, .table .nav, .example .nav, .equation .nav, .procedure .nav
+      margin-right: -3em
+
+
+    .tip > .content, .note > .content, .caution > .content, .warning > .content, .important > .content, .figure > .content, .table > .content, .example > .content, .equation > .content, .procedure > .content
+      // height of icon
+      min-height: 48px
+
+
+    .tip > .content > .icon, .note > .content > .icon, .caution > .content > .icon, .warning > .content > .icon, .important > .content > .icon
+      float: left
+      margin:
+        top: 0
+        right: 1em
+        bottom: 1em
+        left: 0
+
+
+    .figure >
       .title
-      {
-          font-weight       : lighter;
-          font-family       : <%= @format['fonts']['serif'] %>;
-      }
+        text-align: center
 
-      #__lof__ h1,
-      #__lof__ h2,
-      #__lof__ h3,
-      #__lof__ h4,
-      #__lof__ h5,
-      #__lof__ h6
-      {
-          margin-top        : 1.25em;
-      }
+      .content img
+        display: block
+        margin: auto
 
-      #__doc__ h1,
-      #__doc__ h2,
-      #__doc__ h3,
-      #__doc__ h4,
-      #__doc__ h5,
-      #__doc__ h6
-      {
-          margin-top        : 2.5em;
-          line-height       : 1.25em;
-      }
-
-      #__doc__ h1
-      {
-          font-size         : 2.0em;
-      }
-
-      #__doc__ h2
-      {
-          font-size         : 1.8em;
-      }
-
-      #__doc__ h3
-      {
-          font-size         : 1.6em;
-      }
-
-      #__doc__ h4
-      {
-          font-size         : 1.4em;
-      }
-
-      #__doc__ h5
-      {
-          font-size         : 1.2em;
-      }
-
-      #__doc__ h6
-      {
-          font-size         : 1.0em;
-      }
-
-    /* tables */
-      table
-      {
-          border-collapse   : collapse; /* no spacing between cell borders */
-          margin            : auto; /* center horizontally */
-          margin-top        : 1em;
-          margin-bottom     : 1em;
-      }
-
-      th,
-      td
-      {
-          padding           : 1em;
-          border            : 1px solid #bbb;
-          vertical-align    : top;
-          background-color  : #FFFFFF;
-      }
-
-      th
-      {
-          background-color  : #F5F5F5;
-      }
-
-    /* document structure */
-      #__header__
-      {
-      }
-
-      #__header__ > .title
-      {
-          font-size         : 2.25em;
-      }
-
-      #Abstract
-      {
-          margin-bottom     : 5em;
-      }
-
-      #__toc__ ul > li
-      {
-          list-style-type   : none;
-      }
-
-      #__toc__ li ul
-      {
-          padding-bottom    : 1em;
-          border-left       : thick solid #F5F5F5;
-      }
-
-      #__toc__ li ul:hover
-      {
-          border-color      : #DCDCDC;
-      }
-
-      #__toc__ > ul
-      {
-          padding-left      : 1em;
-      }
-
-      #__bib__
-      {
-      }
-
-      #__nfo__
-      {
-      }
-
-      #__footer__
-      {
-          padding-top       : 1em;
-          text-align        : center;
-          margin            : auto;
-      }
-
-    /* document nodes */
-      .part    > .title,
-      .chapter > .title
-      {
-          padding-bottom    : 0.5em;
-      }
-
-      .part    > .title > big,
-      .chapter > .title > big
-      {
-          display           : block;
-          margin-top        : 0.25em;
-      }
-
-      .paragraph > .title,
-      .tip       > .title,
-      .note      > .title,
-      .caution   > .title,
-      .warning   > .title,
-      .important > .title,
-      .figure    > .title,
-      .table     > .title,
-      .example   > .title,
-      .equation  > .title,
-      .procedure > .title
-      {
-          font-size         : large;
-          margin-top        : 2em;
-      }
-
-      .tip      ,
-      .note     ,
-      .caution  ,
-      .warning  ,
-      .important,
-      .figure   ,
-      .table    ,
-      .example  ,
-      .equation ,
-      .procedure
-      {
-          margin            : 3em;
-      }
-
-      .tip       .nav,
-      .note      .nav,
-      .caution   .nav,
-      .warning   .nav,
-      .important .nav,
-      .figure    .nav,
-      .table     .nav,
-      .example   .nav,
-      .equation  .nav,
-      .procedure .nav
-      {
-          margin-right      : -3em;
-      }
-
-      .tip       > .content,
-      .note      > .content,
-      .caution   > .content,
-      .warning   > .content,
-      .important > .content,
-      .figure    > .content,
-      .table     > .content,
-      .example   > .content,
-      .equation  > .content,
-      .procedure > .content
-      {
-          min-height        : 48px; /* 48px is height of icon */
-      }
-
-      .tip       > .content > .icon,
-      .note      > .content > .icon,
-      .caution   > .content > .icon,
-      .warning   > .content > .icon,
-      .important > .content > .icon
-      {
-          float             : left;
-          margin            : 0 1em 1em 0; /* top right bottom left */
-      }
-
-      .figure > .title
-      {
-          text-align        : center;
-      }
-
-      .figure > .content img
-      {
-          display           : block;
-          margin            : auto;
-      }
 
 - screen: |
-    /* general */
-      body
-      {
-          margin            : 0;
-          padding           : 0.5em;
-          background-color  : #FFFFFF;
-      }
+    body
+      margin: 0
+      padding: 0.5em
+      background-color: #FFFFFF
 
-      #__body__,
-      .part    > .title,
-      .chapter > .title,
-      .section > .title,
-      .paragraph > .title,
-      #__bib__ > .title,
-      #__toc__ .title
-      {
-          display: none;
-      }
 
-    /* tabs */
-      .tabs
-      {
-          clear: both; /* otherwise .nav becomes obscured by the tabs */
-      }
+    #__body__, .part > .title, .chapter > .title, .section > .title, .paragraph > .title, #__bib__ > .title, #__toc__ .title
+      display: none
 
-    /* source code */
-      tt
-      {
-          background-color  : #F0F8FF;
-      }
 
-      pre,
-      code.para
-      {
-          cursor            : text;
-          line-height       : normal;
-          border            : 1px solid #b1d827;
-          background-color  : #F5FFDF;
-          padding           : 1em;
+    .tabs
+      // otherwise .nav becomes obscured by the tabs
+      clear: both
 
-          /* fit container to content; no overflow! */
-          display           : inline-block;
-          margin            : 0;
-          min-width         : 92.5%;
-      }
 
-      /* output of the syntax coloring library */
-      code.para,
-      pre.para
-      {
-          background-color  : #FFFFE8;
-          border-color      : #EEDD88;
-      }
+    tt
+      background-color: #F0F8FF
 
-    /* hyperlinks */
-      a
-      {
-          text-decoration   : none;
-      }
 
-      a:hover
-      {
-          text-decoration   : underline;
-      }
+    pre
+      cursor: text
+      line-height: normal
+      border: 1px solid #b1d827
+      background-color: #F5FFDF
+      padding: 1em
 
-      a:link
-      {
-          color             : #0038E1; /* maximum saturation of RoyalBlue */
-      }
+      // fit container to content; no overflow!
+      display: inline-block
+      margin: 0
+      min-width: 92.5%
 
-      a:visited
-      {
-          color             : #800080;
-      }
 
-      #__toc__ a:target,
-      #__lof__ a:target
-      {
-          background          : <%= ICON_BY_NAME['here_frag'].data_css %>;
-          background-position : center right;
-          background-repeat   : no-repeat;
-          padding-right       : 20px;
-      }
+    // output of the syntax coloring library
+    code.para
+      cursor: text
+      line-height: normal
+      border: 1px solid #b1d827
+      background-color: #F5FFDF
+      padding: 1em
+      display: inline-block
+      margin: 0
+      min-width: 92.5%
+      background-color: #FFFFE8
+      border-color: #EEDD88
 
-    /* document structure */
-      #__header__ > .logo
-      {
-          float: left;
-          margin-right: 1em;
-      }
 
-      #__header__ > .logo img
-      {
-          max-height: 4em;
-          max-width: 4em;
-      }
+    pre.para
+      background-color: #FFFFE8
+      border-color: #EEDD88
 
-      #__header__ > .title_and_subtitle
-      {
-          float: left;
-          margin-right: 1.5em;
-      }
 
-      #__header__ > .title_and_subtitle > .title
-      {
-          margin-top: 0;
-      }
+    a
+      text-decoration: none
 
-      #__header__ > .authors_and_date
-      {
-          text-align: right;
-      }
+      &:hover
+        text-decoration: underline
 
-      #__header__ > .authors_and_date > .date
-      {
-          font-weight: lighter;
-      }
+      &:link
+        // maximum saturation of RoyalBlue
+        color: #0038E1
 
-      /* mini navigation menu beside every block node */
-      .nav
-      {
-          float             : right;
-      }
+      &:visited
+        color: #800080
 
-      .nav > a > img
-      {
-          border-top        : thick solid #FFFFFF;
-      }
 
-      .nav > a > img:hover
-      {
-          border-top        : thick solid #FA8072;
-      }
+    #__toc__ a:target, #__lof__ a:target
+      background: <%= ICON_BY_NAME['here_frag'].data_css %>
+      background-position: center right
+      background-repeat: no-repeat
+      padding-right: 20px
+
+
+    #__header__ >
+      .logo
+        float: left
+        margin-right: 1em
+
+        img
+          max-height: 4em
+          max-width: 4em
+
+      .title_and_subtitle
+        float: left
+        margin-right: 1.5em
+
+        > .title
+          margin-top: 0
+
+      .authors_and_date
+        text-align: right
+
+        > .date
+          font-weight: lighter
+
+
+    .nav
+      float: right
+
+      > a > img
+        border-top: thick solid #FFFFFF
+
+        &:hover
+          border-top: thick solid #FA8072
+
 
 - print: |
-    /* tabs */
-      .tabs > ul:first-child
-      {
-          display: none;
-      }
+    .tabs > ul:first-child
+      display: none
 
-    /* source code */
-      tt
-      {
-          font-weight       : normal;
-      }
 
-      pre
-      {
-          border            : none;
-      }
+    tt
+      font-weight: normal
 
-    /* headings */
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6
-      {
-          font-weight       : normal;
-          clear             : both;
-      }
 
-    /* hyperlinks */
-      /* blend all hyperlinks with normal text */
-      a:link,
-      a:visited
-      {
-          color             : #000000;
-          text-decoration   : none;
-      }
+    pre
+      border: none
 
-      /* emphasize external and cross-reference hyperlinks */
-      a[href]:not([href^="#"]):link,
-      a[href]:not([href^="#"]):visited,
-      a.xref[title]:link,
-      a.xref[title]:visited
-      {
-          color             : #0000FF;
-          text-decoration   : underline;
-          font-weight       : bolder;
-      }
 
-      /* show URL of destination for external hyperlinks */
-      a[href]:not([href^="#"]):after
-      {
-          content           : " " attr(href);
-          font-family       : <%= @format['fonts']['monospace'] %>;
-      }
+    h1, h2, h3, h4, h5, h6
+      font-weight: normal
+      clear: both
 
-      /* show name of destination for cross-references */
-      a.xref[title]:after
-      {
-          content           : " " attr(title);
-      }
 
-      a:after
-      {
-          font-weight       : normal;
-          font-size         : smaller;
-      }
+    =emphasize_hyperlinks
+      color: #0000FF
+      text-decoration: underline
+      font-weight: bolder
 
-    /* document structure */
-      .nav,
-      #__lof__
-      {
-          display           : none;
-      }
+    a
+      // blend all hyperlinks with normal text
+      &:link, &:visited
+        color: #000000
+        text-decoration: none
 
-      #__toc__,
-      .part,
-      .chapter,
-      #__bib__
-      {
-          page-break-before : always;
-      }
+      // emphasize external hyperlinks
+      &[href]:not([href^="#"])
+        &:link, &:visited
+          +emphasize_hyperlinks
 
-      #__header__ > .authors
-      {
-          margin-top        : 1.625em;
-          margin-bottom     : -0.25em;
-      }
+      // emphasize cross-reference hyperlinks
+      &.xref[title]
+        &:link, &:visited
+          +emphasize_hyperlinks
 
-      .logo,
-      .header_outside_above,
-      #__header__,
-      .header_outside_below
-      {
-          margin-bottom     : 5em;
-      }
+      // show URL of destination for external hyperlinks
+      &[href]:not([href^="#"]):after
+        content: " " attr(href)
+        font-family: <%= @format['fonts']['monospace'] %>
 
-      #__nfo__,
-      #__bib__,
-      .footer_outside_above,
-      #__footer__,
-      .footer_outside_below
-      {
-          margin-top        : 5em;
-      }
+      // show name of destination for cross-references
+      &.xref[title]:after
+        content: " " attr(title)
 
-      #__header__ .header_inside_above,
-      #__footer__ .footer_inside_above
-      {
-          margin-bottom     : 4em;
-      }
+      &:after
+        font-weight: normal
+        font-size: smaller
 
-      #__header__ .header_inside_below,
-      #__footer__ .footer_inside_below
-      {
-          margin-top        : 4em;
-      }
 
-    /* document nodes */
-      .part    > .title > big,
-      .chapter > .title > big
-      {
-          padding-bottom    : 0.5em;
-      }
+    .nav, #__lof__
+      display: none
+
+
+    #__toc__, .part, .chapter, #__bib__
+      page-break-before: always
+
+
+    #__header__ > .authors
+      margin-top: 1.625em
+      margin-bottom: -0.25em
+
+
+    .logo, .header_outside_above, #__header__, .header_outside_below
+      margin-bottom: 5em
+
+
+    #__nfo__, #__bib__, .footer_outside_above, #__footer__, .footer_outside_below
+      margin-top: 5em
+
+
+    #__header__ .header_inside_above, #__footer__ .footer_inside_above
+      margin-bottom: 4em
+
+
+    #__header__ .header_inside_below, #__footer__ .footer_inside_below
+      margin-top: 4em
+
+
+    .part > .title > big, .chapter > .title > big
+      padding-bottom: 0.5em
+
