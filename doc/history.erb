@@ -9,6 +9,41 @@
   %|history
 
 
+    %|section "Version 7.1.0 (2009-08-30)"
+
+      This release improves the appearance and usability of <%= xref "xhtml" %> documents through [jQuery UI](http://jqueryui.com), and fixes some bugs.
+
+
+      %|paragraph "New features"
+
+        * [jQuery UI tabs](http://jqueryui.com/demos/tabs/) now organize the content of <%= xref "xhtml" %> documents in a breadth-first manner for easier skimming and browsing.  Note that the print stylesheet still continues to organize content in the traditional depth-first manner.
+
+        * Add checkbox for toggling printer friendly stylesheet.  This makes it more obvious to readers that a specially-designed print stylesheet exists for their convenience.
+
+        * Show both `$title` and `$subtitle` in XHTML document's title.
+
+
+      %|paragraph "Bug fixes"
+
+        * Reference nodes were included in next/prev navigation chain.
+
+        * "Logistics" section was under project description and was therefore put into the release announcement.  Ack!
+
+
+      %|paragraph "Housekeeping"
+
+        * Convert CSS into SASS.
+
+        * Use simpler Copyright reminder at the top of every file:
+
+              Copyright protects this work.
+              See LICENSE file for details.
+
+        * Remove localScroll and scrollTo jQuery plugins; we do our own logic (based on their source code) for smoothly scrolling to elements.
+
+        * Rename XHTML resource directories into subdirs.
+
+
     %|section "Version 7.0.0 (2009-05-03)"
 
       This release improves the appearance, usability, and validity of <%= xref "xhtml" %> output, upgrades to a new eRuby templating system, adds new processing options to node definitions, and fixes some bugs.
