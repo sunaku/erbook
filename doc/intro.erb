@@ -14,9 +14,17 @@
 
   %|project
 
-    <%= $project %> is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>) which allow scripting and dynamic content generation.
+    <%= $project %> is an extensible document processor that emits <%= xref "HelloWorld", "any document you can imagine" %> from [eRuby templates](<%= eruby_url %>), which allow scripting and dynamic content generation.
 
-    A working <%= xref "xhtml", "XHTML (web page)" %> format is provided, while <%= xref "latex", "LaTeX (PDF)" %>, <%= xref "man", "UNIX manual page" %>, and <%= xref "text", "plain text" %> formats are planned... <%= xref "License", "patches are welcome" %>!
+    A working <%= xref "xhtml", "XHTML (web page)" %> format is provided at present, while <%= xref "latex", "LaTeX (PDF)" %>, <%= xref "man", "UNIX manual page" %>, and <%= xref "text", "plain text" %> formats are planned for future releases... <%= xref "License", "patches are welcome" %>!
+
+  * <%= xref "History", "What's new?" %> --- history of project releases.
+  * [Source code](<%= repo_url %>) --- obtain via <%= repo_scm %> or browse online.
+  * [API reference](<%= api_url %>) --- documentation for source code.
+  * [Project home](<%= $website %>) --- the <%= $project %> project home page.
+
+  To get help or provide feedback, simply
+  <%= xref "License", "contact the author(s)" %>.
 
 
   %|section "Features"
@@ -24,7 +32,7 @@
     <%= $project %> is exciting because:
     * Its documents are scriptable [eRuby templates](<%= eruby_url %>).
     * It lets you <%= xref "HelloWorld", "define your own document formats" %>.
-    * Its core contains less than 400 lines of code.
+    * It consists of a mere <%= `sloccount .`[/^Total.+=\s*(\d+)$/, 1] %> lines of code.
 
     These features distinguish <%= $project %> from the competition, who offer neither scriptable documents nor definable document formats:
     * [DocBook](http://www.docbook.org)
@@ -33,59 +41,6 @@
     * [AsciiDoc](http://www.methods.co.nz/asciidoc/)
     * [txt2tags](http://txt2tags.sourceforge.net)
     * [Grutatxt](http://www.triptico.com/software/grutatxt.html)
-
-
-  %|section "Logistics"
-
-    * <%= xref "History", "What's new?" %> --- history of project releases.
-    * [Source code](<%= repo_url %>) --- obtain via <%= repo_scm %> or browse online.
-    * [API reference](<%= api_url %>) --- documentation for source code.
-    * [Project home](<%= $website %>) --- the <%= $project %> project home page.
-
-    To get help or provide feedback, simply
-    <%= xref "License", "contact the authors" %>.
-
-
-    %|paragraph "Version numbers"
-
-      <%= $project %> releases are numbered in *major.minor.patch*
-      form according to the [RubyGems rational versioning
-      policy](http://www.rubygems.org/read/chapter/7), which
-      can be summarized thus:
-
-      <table markdown="1">
-        <thead>
-          <tr>
-            <td rowspan="2">What increased in the version number?</td>
-            <td colspan="3">The increase indicates that the release:</td>
-          </tr>
-          <tr>
-            <th>Is backward compatible?</th>
-            <th>Has new features?</th>
-            <th>Has bug fixes?</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>major</th>
-            <td style="background-color: #FFE4E1;">No</td>
-            <td>Yes</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <th>minor</th>
-            <td>Yes</td>
-            <td>Yes</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <th>patch</th>
-            <td>Yes</td>
-            <td style="background-color: #FFE4E1;">No</td>
-            <td>Yes</td>
-          </tr>
-        </tbody>
-      </table>
 
 
   %|section "License"

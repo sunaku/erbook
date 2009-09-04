@@ -33,7 +33,7 @@
     Otherwise, you can <%= xref "License", "contact the author" %> for help.
 
 
-  %|section "Manifest"
+  %|section "Package contents"
 
     You will see the following items inside <%= $project %>'s installation directory, whose path you can determine by running this command:
 
@@ -67,3 +67,46 @@
       * <tt>api/</tt> --- API reference documentation.
 
     * <tt>LICENSE</tt> --- project license and copyright notice.
+
+
+  %|section "Version numbers"
+
+    <%= $project %> releases are numbered in *major.minor.patch*
+    form according to the [RubyGems rational versioning
+    policy](http://www.rubygems.org/read/chapter/7), which
+    can be summarized as follows:
+
+    <table markdown="1">
+      <thead>
+        <tr>
+          <td rowspan="2">What increased in the version number?</td>
+          <td colspan="3">The increase indicates that the release:</td>
+        </tr>
+        <tr>
+          <th>Is backward compatible?</th>
+          <th>Has new features?</th>
+          <th>Has bug fixes?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>major</th>
+          <td style="background-color: #FFE4E1;">No</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <th>minor</th>
+          <td>Yes</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <th>patch</th>
+          <td>Yes</td>
+          <td style="background-color: #FFE4E1;">No</td>
+          <td>Yes</td>
+        </tr>
+      </tbody>
+    </table>
+
