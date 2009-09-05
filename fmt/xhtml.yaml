@@ -469,7 +469,7 @@ nodes:
       index: false
       number: false
       silent: true
-      bypass: true
+      bypass: false
       output: |
         <div id="<%= @node.type_frag %>">
           <%= @node.navigation %>
