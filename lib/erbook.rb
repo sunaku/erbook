@@ -12,7 +12,7 @@ Inochi.init :ERBook,
   :version => '7.1.0',
   :release => '2009-08-30',
   :website => 'http://snk.tuxfamily.org/lib/erbook/',
-  :tagline => 'Extensible document processor based on eRuby',
+  :tagline => 'Write books, manuals, and documents in eRuby',
   :require => {
     'ember'      => '~> 0',     # for eRuby template processing
     'maruku'     => '~> 0.5',   # for Markdown to XHTML conversion
