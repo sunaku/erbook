@@ -646,6 +646,8 @@ output: |
     $subtitle = '$subtitle' unless defined? $subtitle
     $authors  = {'$authors' => nil} unless defined? $authors
     $date     = Time.now.strftime("%d %B %Y") unless defined? $date
+    $logo     = nil unless defined? $logo
+    $feeds    = nil unless defined? $feeds
 
     abstract = @nodes_by_type['abstract'].first
 
