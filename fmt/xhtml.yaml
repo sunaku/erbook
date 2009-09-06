@@ -831,6 +831,10 @@ output: |
           //  the element corresponding to the given hash.
           //
           function set_hash(hash, prevent_jump) {
+            if ($last_hash == hash) {
+              return;
+            }
+
             var set_the_hash = function() {
               //
               // XXX: bypass on_hash_change() by setting $last_hash
