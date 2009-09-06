@@ -972,47 +972,35 @@ output: |
                 }
               }
 
-              function scroll_to_target_and_set_hash() {
-                if (target.is(':hidden')) {
-                  //
-                  // wait before scrolling because the
-                  // tabs.select() calls above may not
-                  // have fully taken effect yet and
-                  // so the target may still be hidden
-                  //
-                  setTimeout(scroll_to_target_and_set_hash, 0);
+              //
+              // scroll to the tab bar instead of the target
+              // because it contains the title for the target
+              //
+              var scroll_target = target_is_panel ?
+                target.parent('.ui-tabs') : target;
+
+              var screen_before_scroll = $(window).scrollTop();
+
+              $('html, body').animate(
+                { scrollTop: Math.floor(scroll_target.offset().top) },
+                'slow', 'swing', function() {
+                  var screen_after_scroll = $(window).scrollTop();
+
+                  set_hash(hash, target_is_panel);
+
+                  if (
+                    !target_initially_hidden &&
+                    screen_after_scroll == screen_before_scroll
+                  ) {
+                    //
+                    // nothing changed on the screen.
+                    // the target was already visible.
+                    // highlight it to notify the user.
+                    //
+                    target.effect('highlight', 'slow');
+                  }
                 }
-                else {
-                  //
-                  // scroll to the tab bar instead of the target
-                  // because it contains the title for the target
-                  //
-                  var scroll_target = target_is_panel ?
-                    target.parent('.ui-tabs') : target;
-
-                  var screen_before_scroll = $(window).scrollTop();
-
-                  $('html, body').animate({
-                    scrollTop: Math.floor(scroll_target.offset().top)
-                  }, 'slow', 'swing', function() {
-                    set_hash(hash, target_is_panel);
-
-                    if (
-                      !target_initially_hidden &&
-                      $(window).scrollTop() == screen_before_scroll
-                    ) {
-                      //
-                      // nothing changed on the screen.
-                      // the target was already visible.
-                      // highlight it to notify the user.
-                      //
-                      target.effect('highlight', 'slow');
-                    }
-                  });
-                }
-              }
-
-              scroll_to_target_and_set_hash();
+              );
             }
           }
 
