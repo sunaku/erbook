@@ -881,9 +881,11 @@ output: |
                 // temporarily place a dummy element at the current
                 // screen position and give it the ID of the target
                 //
+                var original_screen_position = $(window).scrollTop();
+
                 var dummy = $('<span/>').attr('id', target_id).css({
                   position: 'absolute',
-                  top:      $(window).scrollTop()
+                  top:      original_screen_position
                 });
 
                 target.removeAttr('id').before(dummy);
@@ -900,6 +902,12 @@ output: |
                 //
                 dummy.remove();
                 target.attr('id', target_id);
+
+                //
+                // the above approach does not work for Opera and IE.
+                // they ignore the dummy and jump to the actual target
+                //
+                $(window).scrollTop(original_screen_position);
 
                 return;
               }
