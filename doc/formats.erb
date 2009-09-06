@@ -432,26 +432,26 @@
 
           appears in the output document like this: <%= cite "xhtml.nodes.reference.example", "chapter 10", "page 53", "..." %>
 
-  <% patches_are_welcome = "This format is not yet implemented.  Patches are welcome! :-)" %>
+  % patches_are_welcome = "This format is not yet implemented.  Patches are welcome! :-)"
 
 
   %|chapter "Plain text", "text"
 
-    <%= patches_are_welcome %>
+    %= patches_are_welcome
 
-    <%= hyperlink "http://en.wikipedia.org/wiki/Plain_text" %>
+    %= hyperlink "http://en.wikipedia.org/wiki/Plain_text"
 
 
   %|chapter "LaTeX (PDF)", "latex"
 
-    <%= patches_are_welcome %>
+    %= patches_are_welcome
 
-    <%= hyperlink "http://www.latex-project.org" %>
+    %= hyperlink "http://www.latex-project.org"
 
 
   %|chapter "UNIX manual page", "man"
 
-    <%= patches_are_welcome %>
+    %= patches_are_welcome
 
-    <%= hyperlink "http://en.wikipedia.org/wiki/Man_page" %>
+    %= hyperlink "http://en.wikipedia.org/wiki/Man_page"
 

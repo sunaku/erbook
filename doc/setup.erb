@@ -46,7 +46,7 @@
     * <tt>fmt/</tt> --- contains the predefined set of <%= xref "SpecFile", "format specification files" %>. If you ever need to install your custom format specification file globally, then put it inside this directory.
 
       %|ERBook::FORMAT_FILES.each do |file|
-        <%='  '%>* <tt><%= File.basename(file) %></tt> --- <%= YAML.load_file(file)['desc'] %>
+        %= '  * <tt>%s</tt> --- %s' % [File.basename(file), YAML.load_file(file)['desc']]
 
     * <tt>lib/</tt>
 
