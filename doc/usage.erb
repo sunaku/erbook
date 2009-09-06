@@ -24,11 +24,13 @@
       In the above example, *YOUR\_PATH\_HERE* is the path of the file in which the output should be saved.
 
 
-      %|important "Save XHTML output as <tt>.xhtml</tt>"
+      %|important "Serve XHTML as HTML for Microsoft web browsers"
 
-        When you use the XHTML format, ensure that the file extension of your saved output document is either <tt>.xhtml</tt> or <tt>.xml</tt>. Alternatively, ensure that your saved output document is served to web browsers under the <tt>application/xhtml+xml</tt> mime type.
+        If you do not care whether people can read your XHTML documents using Microsoft web browsers, please disregard this message.  Otherwise, please heed the following instructions.
 
-        Otherwise, most web browsers _will not display_ the icons and graphics embedded in the saved XHTML output document because they will treat it as HTML instead of as XML.  See [this QuirksMode.org bug report](http://www.quirksmode.org/bugreports/archives/2005/02/custom_dtds_int_1.html) for details.
+        When you use the XHTML format, ensure that either (1) your saved output document is served to web browsers under the <tt>text/html</tt> mime type, or (2) the file extension of your saved output document is either <tt>.html</tt> or <tt>.htm</tt>.
+
+        Otherwise, Microsoft web browsers _will not display_ your XHTML document and will instead prompt the reader to save your XHTML document as a file on their computer.  See [this detailed explanation](http://www.howtocreate.co.uk/wrongWithIE/?chapter=XHTML) for details.
 
 
   %|section "Unindenting nodes hierarchically"

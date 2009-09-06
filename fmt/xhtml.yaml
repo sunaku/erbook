@@ -119,28 +119,11 @@ code: |
         end
 
         ##
-        # Returns a XML entity reference (to this icon's
-        # embedded image data) ready for insertion into XML.
-        #
-        def entity_xml
-          "&#{entity_name};"
-        end
-
-        ##
-        # Returns the name of the XML entity whose
-        # value contains embedded image data.
-        #
-        def entity_name
-          "icon_#{name}"
-        end
-
-        ##
-        # Returns an <img/> tag that renders the image
-        # data embedded as an ENTITY in the html DOCTYPE.
+        # Returns an <img/> tag that renders an embedded data URI.
         #
         def to_xhtml atts = {}
           atts[:alt] ||= name
-          atts[:src] = entity_xml
+          atts[:src] = data_uri
           atts[:class] = :icon
           "<img#{atts.to_xml_atts}/>"
         end
@@ -702,13 +685,10 @@ output: |
       end
   %><?xml version="1.0" encoding="utf-8"?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" [
-    %|ICONS.each |icon|
-      <!ENTITY <%= icon.entity_name %> "<%= icon.data_uri %>">
-  ]>
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-      <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 
       <meta name="generator" content="<%=
         [ERBook::DISPLAY, ERBook::WEBSITE].join(' &mdash; ')
