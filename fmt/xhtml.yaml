@@ -992,7 +992,7 @@ output: |
 
                   var screen_before_scroll = $(window).scrollTop();
 
-                  $('html').animate({
+                  $('html, body').animate({
                     scrollTop: Math.floor(scroll_target.offset().top)
                   }, 'slow', 'swing', function() {
                     set_hash(hash, target_is_panel);
