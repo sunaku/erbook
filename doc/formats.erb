@@ -31,21 +31,21 @@
 
       For example, if you replace the entire <tt>to_xhtml.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
 
-      <code>
-      class String
-        # Transforms this string into XHTML while ensuring that the
-        # result contains one or more block-level elements at the root.
-        def to_xhtml
-          '<p style="border: thin solid red">' + self + '</p>'
-        end
+          class String
+            # Transforms this string into XHTML while ensuring that the
+            # result contains one or more block-level elements at the root.
+            def to_xhtml
+              '<p style="border: thin solid red">' + self + '</p>'
+            end
 
-        # Transforms this string into an *inline* XHTML string (one that
-        # does not contain any block-level XHTML elements at the root).
-        def to_inline_xhtml
-          self
-        end
-      end
-      </code>
+            # Transforms this string into an *inline* XHTML string (one that
+            # does not contain any block-level XHTML elements at the root).
+            def to_inline_xhtml
+              self
+            end
+          end
+
+      {:lang=ruby}
 
       In addition to supporting Markdown syntax, the default implementation has some additional features which are described in the following subsections.
 
