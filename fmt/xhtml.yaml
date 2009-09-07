@@ -1351,10 +1351,6 @@ styles: # these are SASS templates
 
       li ul
         padding-bottom: 1em
-        border-left: thick solid #F5F5F5
-
-        &:hover
-          border-color: #DCDCDC
 
       > ul
         padding-left: 1em
@@ -1510,6 +1506,16 @@ styles: # these are SASS templates
 
         .date
           font-weight: lighter
+
+
+    // visually indicate the current location in
+    // the hierarchy as the cursor hovers about
+    #__toc__
+      li ul
+        border-left: thick solid #F5F5F5
+
+        &:hover
+          border-color: #DCDCDC
 
 
     .nav
