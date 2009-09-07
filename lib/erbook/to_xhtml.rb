@@ -69,6 +69,11 @@ class String
       while html.gsub! %r{(<pre>)<code>(.*?)</code>(</pre>)}m, '\1\2\3'
       end
 
+      # allow "code spans" annotated with Maruku's IAL (Inline
+      # Attribute List) Markdown extension to be syntax colored
+      while html.gsub! %r{<pre[^>]+>(<code[^>]+>.*?</code>)</pre>}m, '\1'
+      end
+
       # allow user to type <pre> blocks on single lines
       # without affecting the display of their content
       html.gsub! %r{(<pre>)[ \t]*\r?\n|\r?\n[ \t]*(</pre>)}, '\1\2'
