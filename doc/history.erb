@@ -9,6 +9,37 @@
   %|history
 
 
+    %|section "Version 7.1.1 (2009-09-06)"
+
+      This release improves support for Microsoft, Opera, and Webkit web browsers in the XHTML format, revises the code and documentation, and fixes some bugs.
+
+
+      %|paragraph "Bug fixes"
+
+        * Restore support for Microsoft web browsers by removing the optimization of storing image data URIs in XML entities.  See <%= xref "Serve XHTML as HTML for Microsoft web browsers" %> for the consequences of this change.
+
+        * The screen did not scroll during `reveal_hash()` in Webkit browsers.
+
+        * The prevent_jump option of `set_hash()` did not work for Opera and Microsoft browsers.
+
+        * Use text descriptions instead of graphical symbols in the ALT fields of navigation menu images.
+
+        * The Abstract was not in the prev/next navigation chain.
+
+
+      %|paragraph "Housekeeping"
+
+        * Open source is for fun, so [be nice](http://loiclemeur.com/english/2009/03/never-criticize-your-competitors.html): speak of "related works" instead of "competitors".
+
+        * Fix warning about `$logo` and `$feeds` being used when not defined.
+
+        * Include project website URL in "generator" HTML meta field.
+
+        * Emit project license above JavaScript code in XHTML output.
+
+        * Lots of other clean up in the documentation and the XHTML format.
+
+
     %|section "Version 7.1.0 (2009-08-30)"
 
       This release improves the appearance and usability of <%= xref "xhtml" %> documents through [jQuery UI](http://jqueryui.com), and fixes some bugs.
