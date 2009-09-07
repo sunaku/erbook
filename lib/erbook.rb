@@ -18,6 +18,7 @@ Inochi.init :ERBook,
     'maruku'     => '~> 0.5',   # for Markdown to XHTML conversion
     'coderay'    => '>= 0.8',   # for syntax coloring of source code
     'rainpress'  => '~> 1',     # for minifying CSS
+    'jsmin'      => '~> 1',     # for minifying JavaScript
     'haml'       => '>= 2.2.2', # for generating HTML and CSS
     'mime-types' => '>= 1.16',  # for detecting MIME types
   }

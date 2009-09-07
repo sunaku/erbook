@@ -777,268 +777,18 @@ output: |
           %>/*]]>*/
           </style>
 
+      % require 'jsmin'
       <script type="text/javascript">
       //<![CDATA[
         %< File.join(JQUERY_DIR, 'jquery-1.3.2.min.js')
         %< File.join(JQUERY_DIR, 'jquery-ui-1.7.2.custom.min.js')
+        <%=
+          # expand eRuby directives in JavaScript template
+          js = ::Ember::Template.new(@format['javascript']).render(binding)
 
-        $(function() {
-          /*
-          %< File.join(ERBook::INSTALL, 'LICENSE')
-          */
-
-          //
-          // respond to changes in window location
-          //
-          var $last_hash = null;
-
-          function on_hash_change() {
-            var curr_hash = window.location.hash;
-
-            if (curr_hash && curr_hash != $last_hash) {
-              $last_hash = curr_hash;
-              reveal_hash(curr_hash);
-            }
-
-            setTimeout(on_hash_change, 300);
-          }
-
-          //
-          // Sets the location bar hash to the given value.
-          //
-          // [prevent_jump]
-          //  If true, prevents the browser from jumping to
-          //  the element corresponding to the given hash.
-          //
-          function set_hash(hash, prevent_jump) {
-            if ($last_hash == hash) {
-              return;
-            }
-
-            var set_the_hash = function() {
-              //
-              // XXX: bypass on_hash_change() by setting $last_hash
-              //
-              window.location.hash = $last_hash = hash;
-            }
-
-            if (prevent_jump) {
-              var target = $(hash);
-
-              if (target.length) {
-                //
-                // This particular approach to solving the browser
-                // jumping problem comes from the jQuery.LocalScroll
-                // plugin, which is dual licensed under MIT and GPL:
-                //
-                //   Copyright (c) 2007-2009 Ariel Flesler - aflesler(at)gmail(dot)com | http://flesler.blogspot.com
-                //
-                //   Permission is hereby granted, free of charge, to any person obtaining a copy
-                //   of this software and associated documentation files (the "Software"), to deal
-                //   in the Software without restriction, including without limitation the rights
-                //   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-                //   copies of the Software, and to permit persons to whom the Software is
-                //   furnished to do so, subject to the following conditions:
-                //
-                //   The above copyright notice and this permission notice shall be included in
-                //   all copies or substantial portions of the Software.
-                //
-                //   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-                //   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-                //   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-                //   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-                //   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-                //   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-                //   THE SOFTWARE.
-                //
-                // This plugin is documented at:
-                //
-                //   http://flesler.blogspot.com/2007/10/jquerylocalscroll-10.html
-                //
-                // And its source is available at:
-                //
-                //   http://flesler-plugins.googlecode.com/svn/trunk/jquery.localScroll/jquery.localScroll.js
-                //
-                var target_id = target.attr('id');
-
-                //
-                // temporarily place a dummy element at the current
-                // screen position and give it the ID of the target
-                //
-                var original_screen_position = $(window).scrollTop();
-
-                var dummy = $('<span/>').attr('id', target_id).css({
-                  position: 'absolute',
-                  top:      original_screen_position
-                });
-
-                target.removeAttr('id').before(dummy);
-
-                //
-                // when we set the hash, the browser will jump to the
-                // dummy, which is where the browser screen currently
-                // is, and therefore the jump will not be visualized!
-                //
-                set_the_hash();
-
-                //
-                // undo the temporary changes
-                //
-                dummy.remove();
-                target.attr('id', target_id);
-
-                //
-                // the above approach does not work for Opera and IE.
-                // they ignore the dummy and jump to the actual target
-                //
-                $(window).scrollTop(original_screen_position);
-
-                return;
-              }
-            }
-
-            set_the_hash();
-          }
-
-          //
-          // Returns the tab corresponding to the
-          // given panel in the given tabs widget.
-          //
-          function tab_by_panel(panel, tabs_widget) {
-            if (!tabs_widget) {
-              tabs_widget = panel.parent('.ui-tabs');
-            }
-
-            return tabs_widget.find(
-              '.ui-tabs-nav > li > a[href=#'+ panel.attr('id') +']'
-            ).parent('li');
-          }
-
-          //
-          // Reveals the element at the given hash by (1) activating all
-          // tabs that contain it, (2) smoothly scrolling to it, and (3)
-          // updating the hash in the browser's location bar accordingly.
-          //
-          function reveal_hash(hash) {
-            var target = $(hash);
-
-            if (target.length) {
-              var target_is_panel = target.is('div') &&
-                target.parent('.ui-tabs').length;
-
-              var target_initially_hidden = target.is(':hidden');
-
-              //
-              // reveal all tabs which contain the target
-              //
-              if (target_initially_hidden) {
-                var panels = target.parents('.ui-tabs > div:hidden').get().reverse();
-
-                if (target_is_panel) {
-                  panels.push(target);
-                }
-
-                for (var i in panels) {
-                  var panel = $(panels[i]);
-                  var tabs_widget = panel.parent('.ui-tabs');
-                  var selected_index = tabs_widget.tabs('option', 'selected');
-
-                  //
-                  // map the panel to its tab because tabs do not
-                  // have to be in the same order as their panels
-                  //
-                  var tab = tab_by_panel(panel, tabs_widget);
-                  var wanted_index = tab.prevAll('li').length;
-
-                  if (wanted_index != selected_index) {
-                    tabs_widget.tabs('select', wanted_index);
-                  }
-                }
-              }
-
-              //
-              // scroll to the tab bar instead of the target
-              // because it contains the title for the target
-              //
-              var scroll_target = target_is_panel ?
-                target.parent('.ui-tabs') : target;
-
-              var screen_before_scroll = $(window).scrollTop();
-
-              $('html, body').animate(
-                { scrollTop: Math.floor(scroll_target.offset().top) },
-                'slow', 'swing', function() {
-                  var screen_after_scroll = $(window).scrollTop();
-
-                  set_hash(hash, target_is_panel);
-
-                  if (
-                    !target_initially_hidden &&
-                    screen_after_scroll == screen_before_scroll
-                  ) {
-                    //
-                    // nothing changed on the screen.
-                    // the target was already visible.
-                    // highlight it to notify the user.
-                    //
-                    target.effect('highlight', 'slow');
-                  }
-                }
-              );
-            }
-          }
-
-          //
-          // create jQuery UI tabs
-          //
-          $('.tabs').tabs();
-
-          //
-          // make internal hyperlinks reveal their targets when clicked
-          //
-          $('a[href^=#]').click(function() {
-            var link = $(this);
-            var hash = link.attr('href');
-
-            if (link.parent('li').parent('.ui-tabs-nav').length) {
-              // tab clicks should not cause the screen to scroll
-              set_hash(hash, true);
-            }
-            else {
-              reveal_hash(hash);
-            }
-
-            return false;
-          });
-
-          //
-          // checkbox for printer friendly stylesheet
-          //
-          $('#__header__ > .authors_and_date').append(
-            $('<span/>').append(
-              $('<input/>').attr('type', 'checkbox').click(function() {
-                if ($(this).is(':checked')) {
-                  $('style[media=screen]').attr('media', 'neercs');
-                  $('style[media=print]').attr('media', 'screen');
-                }
-                else {
-                  $('style[media=screen]').attr('media', 'print');
-                  $('style[media=neercs]').attr('media', 'screen');
-                }
-                return true;
-              })
-            ).append(" <%= ERBook::PHRASES['Printer friendly'] %>")
-          );
-
-          //
-          // ready for action!
-          //
-          $('#__loading__').append("<%= ERBook::PHRASES['Ready!'] %>").
-          fadeOut('slow', function() {
-            $('#__body__').show();
-            on_hash_change();
-          });
-        });
+          # minify the JavaScript
+          JSMin.minify(js)
+        %>
       //]]>
       </script>
     </head>
@@ -1225,6 +975,265 @@ output: |
       </div>
     </body>
   </html>
+
+javascript: |
+  $(function() {
+    /*
+    %< File.join(ERBook::INSTALL, 'LICENSE')
+    */
+
+    //
+    // respond to changes in window location
+    //
+    var $last_hash = null;
+
+    function on_hash_change() {
+      var curr_hash = window.location.hash;
+
+      if (curr_hash && curr_hash != $last_hash) {
+        $last_hash = curr_hash;
+        reveal_hash(curr_hash);
+      }
+
+      setTimeout(on_hash_change, 300);
+    }
+
+    //
+    // Sets the location bar hash to the given value.
+    //
+    // [prevent_jump]
+    //  If true, prevents the browser from jumping to
+    //  the element corresponding to the given hash.
+    //
+    function set_hash(hash, prevent_jump) {
+      if ($last_hash == hash) {
+        return;
+      }
+
+      var set_the_hash = function() {
+        //
+        // XXX: bypass on_hash_change() by setting $last_hash
+        //
+        window.location.hash = $last_hash = hash;
+      }
+
+      if (prevent_jump) {
+        var target = $(hash);
+
+        if (target.length) {
+          //
+          // This particular approach to solving the browser
+          // jumping problem comes from the jQuery.LocalScroll
+          // plugin, which is dual licensed under MIT and GPL:
+          //
+          //   Copyright (c) 2007-2009 Ariel Flesler - aflesler(at)gmail(dot)com | http://flesler.blogspot.com
+          //
+          //   Permission is hereby granted, free of charge, to any person obtaining a copy
+          //   of this software and associated documentation files (the "Software"), to deal
+          //   in the Software without restriction, including without limitation the rights
+          //   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+          //   copies of the Software, and to permit persons to whom the Software is
+          //   furnished to do so, subject to the following conditions:
+          //
+          //   The above copyright notice and this permission notice shall be included in
+          //   all copies or substantial portions of the Software.
+          //
+          //   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+          //   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+          //   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+          //   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+          //   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+          //   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+          //   THE SOFTWARE.
+          //
+          // This plugin is documented at:
+          //
+          //   http://flesler.blogspot.com/2007/10/jquerylocalscroll-10.html
+          //
+          // And its source is available at:
+          //
+          //   http://flesler-plugins.googlecode.com/svn/trunk/jquery.localScroll/jquery.localScroll.js
+          //
+          var target_id = target.attr('id');
+
+          //
+          // temporarily place a dummy element at the current
+          // screen position and give it the ID of the target
+          //
+          var original_screen_position = $(window).scrollTop();
+
+          var dummy = $('<span/>').attr('id', target_id).css({
+            position: 'absolute',
+            top:      original_screen_position
+          });
+
+          target.removeAttr('id').before(dummy);
+
+          //
+          // when we set the hash, the browser will jump to the
+          // dummy, which is where the browser screen currently
+          // is, and therefore the jump will not be visualized!
+          //
+          set_the_hash();
+
+          //
+          // undo the temporary changes
+          //
+          dummy.remove();
+          target.attr('id', target_id);
+
+          //
+          // the above approach does not work for Opera and IE.
+          // they ignore the dummy and jump to the actual target
+          //
+          $(window).scrollTop(original_screen_position);
+
+          return;
+        }
+      }
+
+      set_the_hash();
+    }
+
+    //
+    // Returns the tab corresponding to the
+    // given panel in the given tabs widget.
+    //
+    function tab_by_panel(panel, tabs_widget) {
+      if (!tabs_widget) {
+        tabs_widget = panel.parent('.ui-tabs');
+      }
+
+      return tabs_widget.find(
+        '.ui-tabs-nav > li > a[href=#'+ panel.attr('id') +']'
+      ).parent('li');
+    }
+
+    //
+    // Reveals the element at the given hash by (1) activating all
+    // tabs that contain it, (2) smoothly scrolling to it, and (3)
+    // updating the hash in the browser's location bar accordingly.
+    //
+    function reveal_hash(hash) {
+      var target = $(hash);
+
+      if (target.length) {
+        var target_is_panel = target.is('div') &&
+          target.parent('.ui-tabs').length;
+
+        var target_initially_hidden = target.is(':hidden');
+
+        //
+        // reveal all tabs which contain the target
+        //
+        if (target_initially_hidden) {
+          var panels = target.parents('.ui-tabs > div:hidden').get().reverse();
+
+          if (target_is_panel) {
+            panels.push(target);
+          }
+
+          for (var i in panels) {
+            var panel = $(panels[i]);
+            var tabs_widget = panel.parent('.ui-tabs');
+            var selected_index = tabs_widget.tabs('option', 'selected');
+
+            //
+            // map the panel to its tab because tabs do not
+            // have to be in the same order as their panels
+            //
+            var tab = tab_by_panel(panel, tabs_widget);
+            var wanted_index = tab.prevAll('li').length;
+
+            if (wanted_index != selected_index) {
+              tabs_widget.tabs('select', wanted_index);
+            }
+          }
+        }
+
+        //
+        // scroll to the tab bar instead of the target
+        // because it contains the title for the target
+        //
+        var scroll_target = target_is_panel ?
+          target.parent('.ui-tabs') : target;
+
+        var screen_before_scroll = $(window).scrollTop();
+
+        $('html, body').animate(
+          { scrollTop: Math.floor(scroll_target.offset().top) },
+          'slow', 'swing', function() {
+            var screen_after_scroll = $(window).scrollTop();
+
+            set_hash(hash, target_is_panel);
+
+            if (
+              !target_initially_hidden &&
+              screen_after_scroll == screen_before_scroll
+            ) {
+              //
+              // nothing changed on the screen.
+              // the target was already visible.
+              // highlight it to notify the user.
+              //
+              target.effect('highlight', 'slow');
+            }
+          }
+        );
+      }
+    }
+
+    //
+    // create jQuery UI tabs
+    //
+    $('.tabs').tabs();
+
+    //
+    // make internal hyperlinks reveal their targets when clicked
+    //
+    $('a[href^=#]').click(function() {
+      var link = $(this);
+      var hash = link.attr('href');
+
+      if (link.parent('li').parent('.ui-tabs-nav').length) {
+        // tab clicks should not cause the screen to scroll
+        set_hash(hash, true);
+      }
+      else {
+        reveal_hash(hash);
+      }
+
+      return false;
+    });
+
+    //
+    // checkbox for printer friendly stylesheet
+    //
+    $('#__header__ > .authors_and_date').append(
+      $('<span/>').append(
+        $('<input/>').attr('type', 'checkbox').click(function() {
+          if ($(this).is(':checked')) {
+            $('style[media=screen]').attr('media', 'neercs');
+            $('style[media=print]').attr('media', 'screen');
+          }
+          else {
+            $('style[media=screen]').attr('media', 'print');
+            $('style[media=neercs]').attr('media', 'screen');
+          }
+          return true;
+        })
+      ).append(" <%= ERBook::PHRASES['Printer friendly'] %>")
+    );
+
+    //
+    // ready for action!
+    //
+    $('#__loading__').append("<%= ERBook::PHRASES['Ready!'] %>").
+    fadeOut('slow', function() {
+      $('#__body__').show();
+      on_hash_change();
+    });
+  });
 
 # definition of font families for use in the CSS styles
 fonts:
