@@ -1258,8 +1258,8 @@ styles: # these are SASS templates
 
     tt, code, pre
       font-family: <%= @format['fonts']['monospace'] %>
-      // appears like "size: small" otherwise
-      font-size: 100%
+      font-size: 1em
+      line-height: 1em
 
 
     // output of the syntax coloring library
