@@ -1533,6 +1533,14 @@ styles: # these are SASS templates
 
 
 - print: |
+    body
+      font-family: <%= @format['fonts']['serif'] %>
+
+
+    em, strong, dt
+      font-family: <%= @format['fonts']['sans-serif'] %>
+
+
     tt
       font-weight: normal
 
