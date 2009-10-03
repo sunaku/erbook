@@ -253,6 +253,13 @@ code: |
         end
 
         ##
+        # Returns the content of this node as inline XHTML.
+        #
+        def content_inline_xhtml
+          content.join.to_inline_xhtml
+        end
+
+        ##
         # Returns the content of this node as XHTML inside a <div/>.
         #
         def content_xhtml_div #:nodoc:
@@ -534,8 +541,33 @@ nodes:
         </div>
         <%= @node.parent_tabs_end %>
 
-  # cross-reference
+  # tables
 
+    table: &table
+      index: false
+      number: false
+      inline: true
+      silent: false
+      params: [xml_atts]
+      output: |
+        <table border="1"<%=
+          (@node.xml_atts || {}).to_xml_atts
+        %>><%= @node.content_xhtml %></table>
+
+    thead: &table_child
+      <<: *table
+      output: |
+        <<%= @node.type %><%=
+          (@node.xml_atts || {}).to_xml_atts
+        %>><%= @node.content_inline_xhtml %></<%= @node.type %>>
+
+    tbody:  *table_child
+    tfoot:  *table_child
+    th:     *table_child
+    tr:     *table_child
+    td:     *table_child
+
+  # cross-references
     xref:
       index:  false
       number: false
