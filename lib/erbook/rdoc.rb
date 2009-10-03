@@ -148,8 +148,12 @@ module RDoc
   end
 
   class DummyMarkup #:nodoc:
-    require 'rdoc/generators/html_generator'
-    include Generators::MarkUp
-    include DummyMixin
+    require 'rdoc/generator/markup'
+    include Generator::Markup
+
+    def formatter
+      require 'rdoc/markup/to_html'
+      Markup::ToHtml.new
+    end
   end
 end
