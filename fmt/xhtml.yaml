@@ -218,6 +218,14 @@ code: |
         @id ||= args[1]
       end
 
+      def index?
+        defn['index']
+      end
+
+      def index_toc?
+        Array(defn['index']).include? 'tree'
+      end
+
       # utility methods
 
         def type_frag #:nodoc:
@@ -257,34 +265,34 @@ code: |
         end
 
         ##
-        # Returns a hyperlink to this node
-        # containing its LaTeX-style index number.
+        # Returns a hyperlink to this node containing its section number.
         #
-        def index_link
-          index
+        def section_number_link
+          section_number
         end
 
         ##
-        # Returns a hyperlink to this node containing its occurrence number.
+        # Returns a hyperlink to this node containing its ordinal number.
         #
-        def number_link
-          [type_label, number].compact.join(' ')
+        def ordinal_number_link
+          [type_label, ordinal_number].compact.join(' ')
         end
 
         ##
         # Returns a hyperlink to this node containing
         # its ocurrence number and its title.
         #
-        def number_and_title_link #:nodoc:
-          "#{number_link}.&nbsp;&nbsp;#{title_link}"
+        def ordinal_number_and_title_link #:nodoc:
+          "#{ordinal_number_link}.&nbsp;&nbsp;#{title_link}"
         end
 
         ##
-        # Returns a hyperlink to this node containing
-        # its LaTeX-style index number and its title.
+        # Returns a hyperlink to this
+        # node containing its section
+        # number and its title.
         #
-        def index_and_title_link #:nodoc:
-          "#{index_link}&nbsp;&nbsp;#{title_link}"
+        def section_number_and_title_link #:nodoc:
+          "#{section_number_link}&nbsp;&nbsp;#{title_link}"
         end
 
         ##
@@ -293,7 +301,7 @@ code: |
         def navigation
           self.class.navigation(
             here_frag,
-            (list_frag if defn['toc'] || defn['lof']),
+            (list_frag if index?),
             (prev_node.here_frag if prev_node),
             (next_node.here_frag if next_node)
           )
@@ -322,7 +330,7 @@ code: |
         # configured to appear in the table of contents.
         #
         def toc_children
-          children.select {|c| c.defn['toc'] }
+          children.select {|c| c.index_toc? }
         end
 
         HERE_TEXT = ERBook::PHRASES['Focus this segment']
@@ -358,7 +366,8 @@ code: |
         #   this node will be used as the label instead.
         #
         def xref_link label = nil
-          prefix = [type_label, index || number].compact.join(' ')
+          prefix = [type_label, section_number || ordinal_number].
+                   compact.join(' ')
 
           caption =
             if type == 'reference'
@@ -386,7 +395,8 @@ code: |
 
             # make it unique
             while @@frags.include? frag
-              frag = "#{frag} #{index || number || salt}".to_uri_fragment
+              frag = [frag, section_number || ordinal_number || salt].
+                     join(' ').to_uri_fragment
             end
 
             @@frags << frag
@@ -408,37 +418,23 @@ code: |
 
 
 nodes:
-  # object model
-    node:
-      toc: false
-      lof: false
-      depth: false
-      index: false
+  # theory
+
+    node: &wrapper
+      index:  false
       number: false
-      silent: false
       inline: true
-      bypass: true
+      silent: false
       output: <%= @node.content_xhtml %>
 
-  # Structure
+  # structure
+
     header: &header
-      toc: false
-      lof: false
-      depth: false
-      index: false
-      number: false
+      <<: *wrapper
       silent: true
-      inline: true
-      output: <%= @node.content_xhtml %>
 
     header_outside_above: &header_insert
-      toc: false
-      lof: false
-      depth: false
-      index: false
-      number: false
-      silent: true
-      inline: true
+      <<: *header
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>"><%= @node.content_xhtml %></div>
@@ -455,33 +451,26 @@ nodes:
     footer_outside_below: *header_insert
 
     abstract:
-      toc: false
-      lof: false
-      depth: false
-      index: false
-      number: false
-      silent: true
-      bypass: false
+      <<: *wrapper
       output: |
         <div id="<%= @node.type_frag %>">
           <h1 class="title"><%= @node.type_label %></h1>
           <%= @node.content_xhtml_div %>
         </div>
 
-  # Organization
+  # organization
+
     part: &latex
-      toc: true
-      lof: false
-      depth: true
-      index: true
-      number: true
+      index:  tree
+      number: section
+      inline: false
       silent: false
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <h1 class="title">
-            <%= @node.type_label %>&nbsp;<%= @node.index_link %>
+            <%= @node.type_label %>&nbsp;<%= @node.section_number_link %>
             <br/>
             <big><%= @node.title_link %></big>
           </h1>
@@ -492,31 +481,22 @@ nodes:
     chapter: *latex
 
     section:
-      toc: true
-      lof: false
-      depth: true
-      index: true
-      number: true
-      silent: false
+      <<: *latex
       output: |
         <% depth = [6, @node.depth + 1].min %>
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <h<%= depth %> class="title">
-            <%= @node.index_and_title_link %>
+            <%= @node.section_number_and_title_link %>
           </h<%= depth %>>
           <%= @node.content_xhtml_div %>
         </div>
         <%= @node.parent_tabs_end %>
 
     paragraph:
-      toc: true
-      lof: false
-      depth: false
-      index: false
+      <<: *latex
       number: false
-      silent: false
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
@@ -526,19 +506,18 @@ nodes:
         </div>
         <%= @node.parent_tabs_end %>
 
-  # Admonitions
+  # admonitions
+
     tip: &admonition
-      toc: false
-      lof: true
-      depth: true
-      index: false
-      number: true
+      index:  list
+      number: ordinal
+      inline: false
       silent: false
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
-          <p class="title"><%= @node.number_and_title_link %></p>
+          <p class="title"><%= @node.ordinal_number_and_title_link %></p>
           <div class="content">
             <%= ICON_BY_NAME[@node.type].to_xhtml %>
             <%= @node.content_xhtml %>
@@ -553,18 +532,14 @@ nodes:
 
   # Auxilary materials (formal blocks)
   # see http://www.sagehill.net/docbookxsl/FormalTitles.html
+
     figure: &formal
-      toc: false
-      lof: true
-      depth: true
-      index: false
-      number: true
-      silent: false
+      <<: *admonition
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
-          <p class="title"><%= @node.number_and_title_link %></p>
+          <p class="title"><%= @node.ordinal_number_and_title_link %></p>
           <%= @node.content_xhtml_div %>
         </div>
         <%= @node.parent_tabs_end %>
@@ -574,15 +549,13 @@ nodes:
     equation: *formal
     procedure: *formal
 
-  # cross-references
+  # cross-reference
+
     xref:
-      toc: false
-      lof: false
-      depth: true
-      index: false
+      index:  false
       number: false
-      silent: false
       inline: true
+      silent: false
       output: |
         <%=
           query, label = @node.args
@@ -598,31 +571,28 @@ nodes:
           end
         %>
 
-  # Bibliography
-    reference:
-      toc: false
-      lof: false
-      depth: false
-      index: false
-      number: true
+  # bibliography
+
+    reference: &reference
+      index:  false
+      number: ordinal
+      inline: false
       silent: true
-      bypass: true
 
     cite:
-      toc: false
-      lof: false
-      depth: false
-      index: false
+      index:  false
       number: false
-      silent: false
       inline: true
+      silent: false
       output: |
         <%=
-          target = @nodes_by_type['reference'].find {|n| n.title == @node.title }
+          target = @nodes_by_type['reference'].find do |n|
+            n.title == @node.title
+          end
 
           if target
             '<sup>[%s]</sup>' % [
-              target.xref_link(target.number),
+              target.xref_link(target.ordinal_number),
               *@node.args[1..-1]
             ].join(', ')
           else
@@ -652,9 +622,9 @@ output: |
         nested = n.children.inject('') {|s,c| s << toc_builder[c] }
         nested = nil if nested.empty?
 
-        if n.defn['toc']
+        if n.index_toc?
           entry = '%s<a id="%s" href="#%s">%s</a>' % [
-            (n.index.to_s + '&nbsp;&nbsp;' if n.index),
+            (n.section_number.to_s + '&nbsp;&nbsp;' if n.section_number),
             n.list_frag,
             n.here_frag,
             n.title.to_s.to_inline_xhtml
@@ -672,7 +642,7 @@ output: |
       lof_enums = {} # type => nodes
 
       @format['nodes'].each_pair do |name, info|
-        if info['lof']
+        if info['index'] == 'list'
           nodes = @nodes_by_type[name]
           lof_enums[name] = nodes unless nodes.empty?
         end
@@ -878,7 +848,7 @@ output: |
           <div id="__doc__" class="tabs">
             <h1 style="display: none"><%= ERBook::PHRASES['Document'] %></h1>
             <ul>
-              % @roots.select {|n| n.defn['toc'] }.each do |n|
+              % @roots.select {|n| n.index_toc? }.each do |n|
                 <li><a href="#<%= n.here_frag %>"><%= n.title.to_s.to_inline_xhtml %></a></li>
             </ul>
 

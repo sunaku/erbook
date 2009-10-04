@@ -87,40 +87,44 @@ module ERBook
               :defn     => @format['nodes'][node_type],
               :args     => node_args,
               :trace    => caller,
+              :parent   => @stack.last,
               :children => []
             )
             @nodes << node
             @nodes_by_type[node.type] << node
 
-            # calculate occurrence number for this node
-            if node.defn['number']
+            # calculate ordinal number for this node
+            if node.ordinal_number?
               @count_by_type ||= Hash.new {|h,k| h[k] = 0 }
-              node.number = (@count_by_type[node.type] += 1)
+              node.ordinal_number = (@count_by_type[node.type] += 1)
             end
 
             # assign node family
-            if parent = @stack.last
+            if parent = node.parent
               parent.children << node
               node.parent = parent
               node.depth = parent.depth
-              node.depth += 1 if node.defn['depth']
+              node.depth += 1 if node.anchor?
 
-              # calculate latex-style index number for this node
-              if node.defn['index']
-                ancestry = @stack.reverse.find {|n| n.defn['index'] }.index
-                branches = node.parent.children.select {|n| n.index }
+              # calculate section number for this node
+              if node.section_number?
+                ancestor = @stack.reverse.find {|n| n.section_number }
+                branches = parent.children.select {|n| n.section_number }
 
-                node.index = [ancestry, branches.length + 1].join('.')
+                node.section_number = [
+                  ancestor.section_number,
+                  branches.length + 1
+                ].join('.')
               end
             else
               @roots << node
               node.parent = nil
               node.depth = 0
 
-              # calculate latex-style index number for this node
-              if node.defn['index']
-                branches = @roots.select {|n| n.index }
-                node.index = (branches.length + 1).to_s
+              # calculate section number for this node
+              if node.section_number?
+                branches = @roots.select {|n| n.section_number }
+                node.section_number = (branches.length + 1).to_s
               end
             end
 
@@ -153,9 +157,7 @@ module ERBook
           @processed_document = template.buffer
 
         # chain block-level nodes together for local navigation
-          block_nodes = @nodes.reject do |n|
-            n.defn['bypass'] || n.defn['inline']
-          end
+          block_nodes = @nodes.select {|n| n.anchor? }
 
           require 'enumerator'
           block_nodes.each_cons(2) do |a, b|
@@ -184,11 +186,15 @@ module ERBook
 
             # reveal child nodes' actual output in this node's actual output
             n.children.each do |c|
-              if c.defn['inline'] && !c.defn['bypass']
+              if c.silent?
+                # this child's output is not meant to be revealed at this time
+                next
+
+              elsif c.inline?
                 actual_output[c.output] = actual_output_by_node[c]
 
               else
-                # pull block-level node out of paragraph tag added by Maruku
+                # pull block-level child out of paragraph tag added by Maruku
                 actual_output.sub! %r/(<p>\s*)?#{Regexp.quote c.output}/ do
                   actual_output_by_node[c] + $1.to_s
                 end
@@ -239,7 +245,31 @@ module ERBook
       # Returns the output of this node.
       #
       def to_s
-        defn['silent'] ? '' : output
+        if silent?
+          ''
+        else
+          output
+        end
+      end
+
+      def section_number?
+        Array(defn['number']).include? 'section'
+      end
+
+      def ordinal_number?
+        Array(defn['number']).include? 'ordinal'
+      end
+
+      def anchor?
+        not inline? and not silent?
+      end
+
+      def inline?
+        defn['inline']
+      end
+
+      def silent?
+        defn['silent']
       end
     end
 

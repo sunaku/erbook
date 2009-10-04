@@ -33,8 +33,7 @@ code: |
 
 nodes:
   hello:
-    index: true
-    number: true
+    number: [section, ordinal]
     silent: false
     output: |
 
@@ -46,11 +45,11 @@ nodes:
         <dt>args</dt>
         <dd><code><%= @node.args.inspect %></code></dd>
 
-        <dt>index</dt>
-        <dd><code><%= @node.index.inspect %></code></dd>
+        <dt>section_number</dt>
+        <dd><code><%= @node.section_number.inspect %></code></dd>
 
-        <dt>number</dt>
-        <dd><code><%= @node.number.inspect %></code></dd>
+        <dt>ordinal_number</dt>
+        <dd><code><%= @node.ordinal_number.inspect %></code></dd>
 
         <dt>trace</dt>
         <dd><pre><%= @node.trace.join("\n") %></pre></dd>
