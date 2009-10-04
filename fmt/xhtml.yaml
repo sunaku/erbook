@@ -201,6 +201,18 @@ code: |
         atts[:src] = ERBook.base_64_embed_image_data(data, format)
         "<img#{atts.to_xml_atts}/>"
       end
+
+      ##
+      # Allows float nodes to be instantiated implicitly by name.
+      #
+      def method_missing name, *args, &block
+        if name.to_s =~ /!$/
+          args[2] = $` # the type of this float node
+          float(*args, &block)
+        else
+          super
+        end
+      end
     end
 
     class Document::Node
@@ -210,6 +222,10 @@ code: |
 
       def index_toc?
         Array(defn['index']).include? 'tree'
+      end
+
+      def index_lof?
+        Array(defn['index']).include? 'list'
       end
 
       # utility methods
@@ -493,9 +509,10 @@ nodes:
         </div>
         <%= @node.parent_tabs_end %>
 
-  # admonitions
+  # arbitrary floats
+  # see also http://www.sagehill.net/docbookxsl/FormalTitles.html
 
-    tip: &admonition
+    float:
       index:  list
       number: ordinal
       inline: false
@@ -506,36 +523,16 @@ nodes:
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <p class="title"><%= @node.ordinal_number_and_title_link %></p>
-          <div class="content">
-            <%= ICON_BY_NAME[@node.type].to_xhtml %>
-            <%= @node.content_xhtml %>
-          </div>
+          <% if ICON_BY_NAME.key? @node.type %>
+            <div class="content">
+              <%= ICON_BY_NAME[@node.type].to_xhtml %>
+              <%= @node.content_xhtml %>
+            </div>
+          <% else %>
+            <%= @node.content_xhtml_div %>
+          <% end %>
         </div>
         <%= @node.parent_tabs_end %>
-
-    note: *admonition
-    caution: *admonition
-    warning: *admonition
-    important: *admonition
-
-  # Auxilary materials (formal blocks)
-  # see http://www.sagehill.net/docbookxsl/FormalTitles.html
-
-    figure: &formal
-      <<: *admonition
-      output: |
-        <%= @node.parent_tabs_begin %>
-        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
-          <%= @node.navigation %>
-          <p class="title"><%= @node.ordinal_number_and_title_link %></p>
-          <%= @node.content_xhtml_div %>
-        </div>
-        <%= @node.parent_tabs_end %>
-
-    table: *formal
-    example: *formal
-    equation: *formal
-    procedure: *formal
 
   # cross-reference
 
@@ -627,17 +624,19 @@ output: |
       toc = @roots.inject('') {|s,n| s << toc_builder[n] }
 
     # compute list of figures
-      lof_enums = {} # type => nodes
-
-      @format['nodes'].each_pair do |name, info|
-        if info['index'] == 'list'
-          nodes = @nodes_by_type[name]
-          lof_enums[name] = nodes unless nodes.empty?
+      lof_nodes_by_type = Hash.new {|h,k| h[k] = [] }
+      @nodes.each do |node|
+        if node.index_lof?
+          lof_nodes_by_type[node.type] << node
         end
       end
 
-      lof_sections_frag_and_label = []
+      lof_enums = {} # type => nodes
+      lof_nodes_by_type.each do |type, nodes|
+        lof_enums[type] = nodes unless nodes.empty?
+      end
 
+      lof_sections_frag_and_label = []
       lof = lof_enums.sort.map do |type, nodes|
         nested = nodes.map do |n|
           %{<li><a id="#{n.list_frag}" href="##{n.here_frag}">#{n.title.to_s.to_inline_xhtml}</a></li>}

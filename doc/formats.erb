@@ -272,6 +272,36 @@
             This is how a **paragraph** node appears.  Notice that there is no LaTeX-style index number in the heading of this **paragraph** node.
 
 
+      %|section "Float nodes"
+
+        A **float** (also known as an "aside" or "sidebar") is an imaginary box that is set off from the main flow of content.  It typically contains auxiliary materials---such as figures, tables, equations, <%= xref "Admonition nodes", "admonitions" %>, an so on---to which the main body of text can refer.
+
+
+        %|float "An example", "xhtml.nodes.float"
+
+          This is how a **float** node appears.
+
+
+        %|section "Arbitrary floats"
+
+          Arbitrary **float** nodes can be instantiated anywhere in the document simply by adding an exclamation mark to the name of the arbitrary node.
+
+
+          %|example! "An example", "xhtml.nodes.float!"
+
+            To create an arbitrary float named "foobar", we would write:
+
+                <%% foobar! "Foo, bar, and friends" do %>
+                  **You there!**  Behold this highly *foobar* node!
+                <%% end %>
+
+            and the result would be this:
+
+                <% foobar! "Foo, bar, and friends" do %>
+                  **You there!**  Behold this highly *foobar* node!
+                <% end %>
+
+
       %|section "Admonition nodes"
 
         An admonition is basically a box that is indented more deeply than the text surrounding it.  It is typically used to convey extraneous or pertinent information about the application of ideas discussed in the surrounding text.
@@ -284,111 +314,60 @@
           L. Watts, "Admonitions: Tips, hints, and Warnings", in _The KDE DocBook Authors guide_, Chapter 13, \[Online document], 22 September 2004 (Revision 1.00.00), \[cited 8 December 2007], Available at <%= hyperlink "http://l10n.kde.org/docs/markup/tips-hints-etc.html" %>
 
 
-        %|section "warning", "xhtml.nodes.warning"
+        %|section "warning!", "xhtml.nodes.warning"
 
-          Use a **warning** node when "data loss could occur if you follow the procedure being described." <%= cite "KDE.admonitions" %>
-
-
-          %|warning "An example"
-
-            This is how a **warning** node appears.
+          Use a **warning!** node when "data loss could occur if you follow the procedure being described." <%= cite "KDE.admonitions" %>
 
 
-        %|section "caution", "xhtml.nodes.caution"
+          %|warning! "An example"
+
+            This is how a **warning!** node appears.
+
+
+        %|section "caution!", "xhtml.nodes.caution"
 
           > A note of caution. Use this for example when the reader may lose easily recovered or replaceable information (e.g. user settings), or when they could cause data loss if they don't correctly follow the procedure being outlined. <%= cite "KDE.admonitions" %>
 
 
-          %|caution "An example"
+          %|caution! "An example"
 
-            This is how a **caution** node appears.
+            This is how a **caution!** node appears.
 
 
-        %|section "important", "xhtml.nodes.important"
+        %|section "important!", "xhtml.nodes.important"
 
-          Use an **important** node when:
+          Use an **important!** node when:
 
           > When there is no danger of data loss, but you wish to make clear to the reader a consequence that isn't immediately obvious (e.g. when changing the font for one instance of a program also changes the default setting, and this isn't clear from the GUI.) <%= cite "KDE.admonitions" %>
 
 
-          %|important "An example"
+          %|important! "An example"
 
-            This is how a **important** node appears.
+            This is how a **important!** node appears.
 
 
-        %|section "note", "xhtml.nodes.note"
+        %|section "note!", "xhtml.nodes.note"
 
-          Use a **note** node to convey:
+          Use a **note!** node to convey:
 
           > Information the user should be aware of, but is peripheral to the actual task being described. <%= cite "KDE.admonitions" %>
 
 
-          %|note "An example"
+          %|note! "An example"
 
-            This is how a **note** node appears.
+            This is how a **note!** node appears.
 
 
-        %|section "tip", "xhtml.nodes.tip"
+        %|section "tip!", "xhtml.nodes.tip"
 
-          Use a **tip** node when:
+          Use a **tip!** node when:
 
           > When you're giving a hint to make things easier or more productive for the reader. <%= cite "KDE.admonitions" %>
 
 
-          %|tip "An example"
+          %|tip! "An example"
 
-            This is how a **tip** node appears.
-
-
-      %|section "Auxilary materials"
-
-        %|section "figure", "xhtml.nodes.figure"
-          A diagram, sketch, image, or illustration; something that visually depicts an idea or thought.
-
-
-          %|figure "An example"
-
-            This is how a **figure** node appears.
-
-
-        %|section "table", "xhtml.nodes.table"
-
-          Information (typically measurement data) represented in tabular form for easy reading, comparison, and analysis.
-
-
-          %|table "An example"
-
-            This is how a **table** node appears.
-
-
-        %|section "example", "xhtml.nodes.example"
-
-          A sample application of an idea or thought.
-
-
-          %|example "An example"
-
-            This is how a **example** node appears.
-
-
-        %|section "equation", "xhtml.nodes.equation"
-
-          A mathematical equation or formula.
-
-
-          %|equation "An example"
-
-            This is how a **equation** node appears.
-
-
-        %|section "procedure", "xhtml.nodes.procedure"
-
-          An outline; a series of steps outlining some kind of process.
-
-
-          %|procedure "An example"
-
-            This is how a **procedure** node appears.
+            This is how a **tip!** node appears.
 
 
       %|section "Bibliographic nodes"
