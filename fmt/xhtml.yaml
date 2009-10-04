@@ -455,7 +455,6 @@ nodes:
       bypass: false
       output: |
         <div id="<%= @node.type_frag %>">
-          <%= @node.navigation %>
           <h1 class="title"><%= @node.type_label %></h1>
           <%= @node.content_xhtml_div %>
         </div>
