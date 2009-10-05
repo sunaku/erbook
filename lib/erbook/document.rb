@@ -90,6 +90,12 @@ module ERBook
               :parent   => @stack.last,
               :children => []
             )
+
+            Array(node.defn['params']).each do |param|
+              break if node_args.empty?
+              node.__send__ "#{param}=", node_args.shift
+            end
+
             @nodes << node
             @nodes_by_type[node.type] << node
 

@@ -204,20 +204,6 @@ code: |
     end
 
     class Document::Node
-      ##
-      # Returns the user-defined title for this node's content.
-      #
-      def title
-        @title ||= args[0]
-      end
-
-      ##
-      # Returns the user-defined indentifer for this node.
-      #
-      def id
-        @id ||= args[1]
-      end
-
       def index?
         defn['index']
       end
@@ -465,6 +451,7 @@ nodes:
       number: section
       inline: false
       silent: false
+      params: [title, id]
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
@@ -513,6 +500,7 @@ nodes:
       number: ordinal
       inline: false
       silent: false
+      params: [title, id, type]
       output: |
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
@@ -556,18 +544,17 @@ nodes:
       number: false
       inline: true
       silent: false
+      params: [query, label]
       output: |
         <%=
-          query, label = @node.args
-
           scope  = @nodes.select {|n| n.content }
-          target = scope.find {|n| n.id == query } || # id has 1st priority
-                   scope.find {|n| n.title == query }
+          target = scope.find {|n| n.id == @node.query } || # id has priority
+                   scope.find {|n| n.title == @node.query }
 
           if target
-            target.xref_link label
+            target.xref_link @node.label
           else
-            raise ArgumentError, "invalid cross-reference to #{@node.title.inspect}", @node.trace
+            raise ArgumentError, "invalid cross-reference to #{@node.query.inspect}", @node.trace
           end
         %>
 
@@ -578,25 +565,26 @@ nodes:
       number: ordinal
       inline: false
       silent: true
+      params: [title, id]
 
     cite:
       index:  false
       number: false
       inline: true
       silent: false
+      params: [target]
       output: |
         <%=
           target = @nodes_by_type['reference'].find do |n|
-            n.title == @node.title
+            n.title == @node.target
           end
 
           if target
             '<sup>[%s]</sup>' % [
-              target.xref_link(target.ordinal_number),
-              *@node.args[1..-1]
-            ].join(', ')
+              target.xref_link(target.ordinal_number), *@node.args
+            ].compact.join(', ')
           else
-            raise ArgumentError, "invalid citation for #{@node.title.inspect}", @node.trace
+            raise ArgumentError, "invalid citation for #{@node.target.inspect}", @node.trace
           end
         %>
 

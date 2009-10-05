@@ -116,12 +116,13 @@
 
       A node definition is a mapping from a name (the "node type") to the following set of parameters:
 
-      | Parameter | Type                        | Description                                                                                                                           |
-      | --------- | ----                        | -----------                                                                                                                           |
-      | number    | `String` or `Array` thereof | When "ordinal", assign an order-of-occurrence number to this node.  When "section", assign a LaTeX-style section number to this node. |
-      | inline    | Boolean                     | Is node's output an in-line string of text that can be embedded anywhere in the document?                                             |
-      | silent    | Boolean                     | Suppress the output of this node at the location it is instantiated?                                                                  |
-      | output    | `String`                    | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.                                              |
+      | Parameter | Type                        | Description                                                                                                                                                                                                                      |
+      | --------- | ----                        | -----------                                                                                                                                                                                                                      |
+      | params    | `String` or `Array` thereof | List of parameters that are expected to be specified during an instantiation of node.  Any additional arguments passed during instantiation are stored in the `argv` attribute of the resulting `ERBook::Document::Node` object. |
+      | number    | `String` or `Array` thereof | When "ordinal", assign an order-of-occurrence number to this node.  When "section", assign a LaTeX-style section number to this node.                                                                                            |
+      | inline    | Boolean                     | Is node's output an in-line string of text that can be embedded anywhere in the document?                                                                                                                                        |
+      | silent    | Boolean                     | Suppress the output of this node at the location it is instantiated?                                                                                                                                                             |
+      | output    | `String`                    | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.                                                                                                                                         |
 
       You may define additional parameters in a node definition if you want.
 
