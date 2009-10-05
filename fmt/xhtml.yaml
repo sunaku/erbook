@@ -674,7 +674,7 @@ output: |
       lof = lof_enums.sort.map do |type, nodes|
         nested = nodes.map do |n|
           %{<li><a id="#{n.list_frag}" href="##{n.here_frag}">#{n.title.to_s.to_inline_xhtml}</a></li>}
-        end
+        end.join
 
         label = ERBook::PHRASES[type.capitalize << 's']
         frag = nodes.first.type_frag
