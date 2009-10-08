@@ -1211,13 +1211,42 @@ javascript: |
     $('#__header__ > .authors_and_date').append(
       $('<span/>').append(
         $('<input/>').attr('type', 'checkbox').click(function() {
-          if ($(this).is(':checked')) {
-            $('style[media=screen]').attr('media', 'neercs');
-            $('style[media=print]').attr('media', 'screen');
+          var checkbox = $(this);
+
+          function change_media(src, dst) {
+            var styles = $('style[media='+ src +']');
+            if (styles.length) {
+              //
+              // try changing the media in-place
+              //
+              var before = checkbox.offset();
+              styles.attr('media', dst);
+              var after = checkbox.offset();
+
+              if (after.top == before.top && after.left == before.left) {
+                //
+                // try reinserting the <style> into document.
+                // this works in Webkit browsers, which ignore
+                // the in-place changing approach tried above.
+                //
+                styles.each(function() {
+                  var style = $(this);
+                  var parent = style.parent();
+
+                  style.remove();
+                  parent.append(style);
+                });
+              }
+            }
+          }
+
+          if (checkbox.is(':checked')) {
+            change_media('screen', 'neercs');
+            change_media('print', 'screen');
           }
           else {
-            $('style[media=screen]').attr('media', 'print');
-            $('style[media=neercs]').attr('media', 'screen');
+            change_media('screen', 'print');
+            change_media('neercs', 'screen');
           }
           return true;
         })
