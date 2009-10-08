@@ -45,6 +45,15 @@ code: |
         end
       end.pack('U*').strip.gsub(/[[:space:]-]+/, '-')
     end
+
+    ##
+    # Evaluates this string as an Ember
+    # template (created with the given
+    # options) inside the given binding.
+    #
+    def thru_ember binding, options = {}
+      ::Ember::Template.new(self, options).render(binding)
+    end
   end
 
   class Hash
@@ -764,7 +773,7 @@ output: |
           /*<![CDATA[*/<%=
 
             # expand eRuby directives in SASS templates
-            sass = ::Ember::Template.new(sass).render(binding)
+            sass = sass.to_s.thru_ember(binding)
 
             # compile SASS into CSS
             require 'sass'
@@ -783,7 +792,7 @@ output: |
         %< File.join(JQUERY_DIR, 'jquery-ui-1.7.2.custom.min.js')
         <%=
           # expand eRuby directives in JavaScript template
-          js = ::Ember::Template.new(@format['javascript']).render(binding)
+          js = @format['javascript'].to_s.thru_ember(binding)
 
           # minify the JavaScript
           JSMin.minify(js)
