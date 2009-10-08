@@ -98,8 +98,8 @@ module ERBook
 
             # calculate occurrence number for this node
             if node.defn['number']
-              @count ||= Hash.new {|h,k| h[k] = []}
-              node.number = (@count[node.type] << node).length
+              @count_by_type ||= Hash.new {|h,k| h[k] = 0 }
+              node.number = (@count_by_type[node.type] += 1)
             end
 
             # assign node family

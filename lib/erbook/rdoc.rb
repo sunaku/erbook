@@ -142,7 +142,8 @@ module RDoc
   class DummyOptions #:nodoc:
     include DummyMixin
 
-    def quiet # supress '...c..m...' output on STDERR
+    # supress '...c..m...' output on STDERR
+    def quiet
       true
     end
   end

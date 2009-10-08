@@ -1279,13 +1279,13 @@ styles: # these are SASS templates
       font-family: <%= @format['fonts']['sans-serif'] %>
 
 
+    em, strong, dt
+      font-family: <%= @format['fonts']['serif'] %>
+
+
     blockquote
       color: #333
       font-style: italic
-
-
-    em, strong, dt
-      font-family: <%= @format['fonts']['serif'] %>
 
 
     hr
@@ -1511,13 +1511,6 @@ styles: # these are SASS templates
         color: #800080
 
 
-    #__toc__ a:target, #__lof__ a:target
-      background: <%= ICON_BY_NAME['here_frag'].data_css %>
-      background-position: center right
-      background-repeat: no-repeat
-      padding-right: 20px
-
-
     #__header__ >
       .logo
         float: left
@@ -1554,6 +1547,13 @@ styles: # these are SASS templates
 
         &:hover
           border-color: #DCDCDC
+
+
+    #__toc__ a:target, #__lof__ a:target
+      background: <%= ICON_BY_NAME['here_frag'].data_css %>
+      background-position: center right
+      background-repeat: no-repeat
+      padding-right: 20px
 
 
     .nav
