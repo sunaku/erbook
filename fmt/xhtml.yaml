@@ -1222,7 +1222,7 @@ javascript: |
           var checkbox = $(this);
 
           function change_media(src, dst) {
-            var styles = $('style[media='+ src +']');
+            var styles = $('style[media="'+ src +'"]');
             if (styles.length) {
               //
               // try changing the media in-place
@@ -1249,12 +1249,12 @@ javascript: |
           }
 
           if (checkbox.is(':checked')) {
-            change_media('screen', 'neercs');
-            change_media('print', 'screen');
+            change_media('screen', 'none');
+            change_media('print', 'screen,print');
           }
           else {
-            change_media('screen', 'print');
-            change_media('neercs', 'screen');
+            change_media('screen,print', 'print');
+            change_media('none', 'screen');
           }
           return true;
         })
