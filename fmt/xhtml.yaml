@@ -1155,8 +1155,15 @@ javascript: |
         // scroll to the tab bar instead of the target
         // because it contains the title for the target
         //
-        var scroll_target = target_is_panel ?
-          target.parent('.ui-tabs') : target;
+        var scroll_target = target;
+
+        if (target_is_panel) {
+          var tabs_nav = target.parent('.ui-tabs').find('> .ui-tabs-nav');
+
+          if (!tabs_nav.is(':hidden')) {
+            scroll_target = tabs_nav;
+          }
+        }
 
         var screen_before_scroll = $(window).scrollTop();
 
