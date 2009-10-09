@@ -87,11 +87,7 @@ module ERBook
               :defn => @format['nodes'][node_type],
               :args => node_args,
               :children => [],
-
-              # omit erbook internals from the stack trace
-              :trace => caller.reject {|t|
-                [$0, ERBook::INSTALL].any? {|f| t.index(f) == 0 }
-              }
+              :trace => caller
             )
             @nodes << node
             @nodes_by_type[node.type] << node
