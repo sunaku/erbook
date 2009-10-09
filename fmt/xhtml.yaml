@@ -1217,7 +1217,7 @@ javascript: |
     // checkbox for printer friendly stylesheet
     //
     $('#__header__ > .authors_and_date').append(
-      $('<span/>').append(
+      $('<span/>').addClass('printer_friendly_toggle').append(
         $('<input/>').attr('type', 'checkbox').click(function() {
           var checkbox = $(this);
 
@@ -1384,6 +1384,16 @@ styles: # these are SASS templates
 
     #__header__ > .title
       font-size: 2.25em
+
+
+    @media print
+      #__header__ .printer_friendly_toggle
+        display: none
+
+
+    @media screen
+      #__header__ .printer_friendly_toggle
+        display: inline
 
 
     #__abstract__
