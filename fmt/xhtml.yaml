@@ -1645,7 +1645,7 @@ styles: # these are SASS templates
         font-size: smaller
 
 
-    .tabs > ul, .nav, #__lof__, #__nfo__ > .validations
+    .tabs > ul, .nav, #__lof__, #__nfo__
       display: none
 
 
