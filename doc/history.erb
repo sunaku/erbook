@@ -9,6 +9,43 @@
   %|history
 
 
+    %|section "Version 7.2.0 (2009-10-07)"
+
+      This release improves support for Ruby 1.9 and Webkit-based web browsers, reduces gem dependencies, and fixes some bugs.
+
+
+      %|paragraph "New features"
+
+        * Add `String#thru_ember` method for direct template rendering.
+
+
+      %|paragraph "Bug fixes"
+
+        XHTML
+
+        * Fix "printer friendly" toggle checkbox for Webkit browsers.
+        * Disable interactive TOC tree location coloring in print style.
+        * Use normal line height for preformatted text in print style.
+        * Use serif for normal and sans-serif for emphasis in print style.
+
+        Ruby 1.9
+
+        * `Array#to_s` is same as `Array#inspect` in Ruby 1.9.
+        * RDoc 2.4.3 no longer provides `RDoc::Generators::MarkUp`.
+
+        Markdown
+
+        * Allow "code spans" annotated with Maruku's IAL (Inline Attribute List) Markdown extension to be syntax colored.
+
+
+      %|paragraph "Housekeeping"
+
+        * Remove CSS and JavaScript minification in favor of manual gzip compression and fewer gem dependencies.
+        * Fix forgotten Textile 'bq.' to Markdown '>' conversion.
+        * Omit navigation menu from Abstract; it is standalone.
+        * Mark all code spans with `{:lang=ruby}` instead of HTML `<code/>` tags
+
+
     %|section "Version 7.1.1 (2009-09-06)"
 
       This release improves support for Microsoft, Opera, and Webkit web browsers in the XHTML format, revises the code and documentation, and fixes some bugs.
