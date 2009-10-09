@@ -1256,6 +1256,7 @@ javascript: |
             change_media('screen,print', 'print');
             change_media('none', 'screen');
           }
+
           return true;
         })
       ).append(" <%= ERBook::PHRASES['Printer friendly'] %>")
@@ -1657,7 +1658,7 @@ styles: # these are SASS templates
       text-align: center
 
 
-    #__header__ > .authors
+    #__header__ > .authors_and_date > .authors
       margin-top: 1.625em
       margin-bottom: -0.25em
 

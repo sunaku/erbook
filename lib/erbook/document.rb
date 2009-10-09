@@ -83,11 +83,11 @@ module ERBook
           #
           def sandbox.__node_impl__ node_type, *node_args, &node_content
             node = Node.new(
-              :type => node_type,
-              :defn => @format['nodes'][node_type],
-              :args => node_args,
-              :children => [],
-              :trace => caller
+              :type     => node_type,
+              :defn     => @format['nodes'][node_type],
+              :args     => node_args,
+              :trace    => caller,
+              :children => []
             )
             @nodes << node
             @nodes_by_type[node.type] << node
