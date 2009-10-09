@@ -37,6 +37,7 @@ nodes:
     number: true
     silent: false
     output: |
+
       <h3><%= @node.type %> #<%= @node.index %>: <%= @node.name.inspect %></h3>
 
       My name is <%= @node.name.inspect %> and these are my properties:
