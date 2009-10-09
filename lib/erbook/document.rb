@@ -75,6 +75,8 @@ module ERBook
             :@stack         => [], # stack for all nodes
           }.each_pair {|k,v| sandbox.instance_variable_set(k, v) }
 
+          #:stopdoc:
+
           ##
           # Handles the method call from a node
           # placeholder in the input document.
@@ -137,6 +139,8 @@ module ERBook
 
             nil
           end
+
+          #:startdoc:
 
           @node_defs.each_key do |type|
             # XXX: using a string because define_method()
