@@ -217,15 +217,15 @@ code: |
 
     class Document::Node
       def index?
-        defn['index']
+        definition['index']
       end
 
       def index_toc?
-        Array(defn['index']).include? 'tree'
+        Array(definition['index']).include? 'tree'
       end
 
       def index_lof?
-        Array(defn['index']).include? 'list'
+        Array(definition['index']).include? 'list'
       end
 
       # utility methods
@@ -583,7 +583,7 @@ nodes:
           if target
             target.xref_link @node.label
           else
-            raise ArgumentError, "invalid cross-reference to #{@node.query.inspect}", @node.trace
+            raise ArgumentError, "invalid cross-reference to #{@node.query.inspect}", @node.backtrace
           end
         %>
 
@@ -610,10 +610,10 @@ nodes:
 
           if target
             '<sup>[%s]</sup>' % [
-              target.xref_link(target.ordinal_number), *@node.args
+              target.xref_link(target.ordinal_number), *@node.arguments
             ].compact.join(', ')
           else
-            raise ArgumentError, "invalid citation for #{@node.target.inspect}", @node.trace
+            raise ArgumentError, "invalid citation for #{@node.target.inspect}", @node.backtrace
           end
         %>
 

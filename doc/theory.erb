@@ -79,18 +79,18 @@
       | Property       | Type                                | Description                                                                                                                                                |
       | --------       | ----                                | -----------                                                                                                                                                |
       | type           | `String`                            | Name of the type of this node.                                                                                                                             |
-      | args           | `Array`                             | Arguments passed to this node.                                                                                                                             |
-      | content        | `String`                            | The block of text passed to this node.                                                                                                                     |
-      | output         | `String`                            | Result of the node output template for the content of this node.                                                                                           |
-      | digest         | `String`                            | A unique identifier for the content of this node.                                                                                                          |
-      | trace          | `Array`                             | A stack trace describing the location of this node in the input document.                                                                                  |
-      | section_number | `String`                            | A LaTeX-style section number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node.  |
-      | ordinal_number | `Integer`                           | An order-of-occurrence number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node. |
-      | depth          | `Integer`                           | Distance from the root of the document tree to this node.                                                                                                  |
+      | definition     | `Hash`                              | The definition of this type of node, taken directly from the <%= xref "SpecFile", "format specification file" %>.                                          |
+      | arguments      | `Array`                             | Arguments passed to this node.                                                                                                                             |
+      | backtrace      | `Array`                             | A stack trace describing the location of this node in the input document.                                                                                  |
       | parent         | `ERBook::Document::Node`            | The `ERBook::Document::Node` object which contains this node. The value of this property will be `nil` if this node is a root of the document tree.        |
       | children       | `Array` of `ERBook::Document::Node` | List of child nodes from the document tree.                                                                                                                |
+      | depth          | `Integer`                           | Distance from the root of the document tree to this node.                                                                                                  |
+      | section_number | `String`                            | A LaTeX-style section number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node.  |
+      | ordinal_number | `Integer`                           | An order-of-occurrence number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node. |
+      | content        | `String`                            | The block of text passed to this node.                                                                                                                     |
+      | output         | `String`                            | Result of the node output template for the content of this node.                                                                                           |
 
-      Furthermore, the `ERBook::Document::Node` class is derived from [Ruby's `OpenStruct` class](http://www.ruby-doc.org/stdlib/libdoc/ostruct/rdoc/classes/OpenStruct.html), so you can define new properties for `ERBook::Document::Node` objects dynamically.
+      Furthermore, the `ERBook::Document::Node` class is derived from [Ruby's `OpenStruct` class](http://www.ruby-doc.org/stdlib/libdoc/ostruct/rdoc/classes/OpenStruct.html), so you can define _additional_ properties for `ERBook::Document::Node` objects dynamically.
 
 
   %|section "Format specification file", "SpecFile"
@@ -116,13 +116,13 @@
 
       A node definition is a mapping from a name (the "node type") to the following set of parameters:
 
-      | Parameter | Type                        | Description                                                                                                                                                                                                                      |
-      | --------- | ----                        | -----------                                                                                                                                                                                                                      |
-      | params    | `String` or `Array` thereof | List of parameters that are expected to be specified during an instantiation of node.  Any additional arguments passed during instantiation are stored in the `argv` attribute of the resulting `ERBook::Document::Node` object. |
-      | number    | `String` or `Array` thereof | When "ordinal", assign an order-of-occurrence number to this node.  When "section", assign a LaTeX-style section number to this node.                                                                                            |
-      | inline    | Boolean                     | Is node's output an in-line string of text that can be embedded anywhere in the document?                                                                                                                                        |
-      | silent    | Boolean                     | Suppress the output of this node at the location it is instantiated?                                                                                                                                                             |
-      | output    | `String`                    | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.                                                                                                                                         |
+      | Parameter | Type                        | Description                                                                                                                                                                                                                           |
+      | --------- | ----                        | -----------                                                                                                                                                                                                                           |
+      | params    | `String` or `Array` thereof | List of parameters that are expected to be specified during an instantiation of node.  Any additional arguments passed during instantiation are stored in the `arguments` attribute of the resulting `ERBook::Document::Node` object. |
+      | number    | `String` or `Array` thereof | When "ordinal", assign an order-of-occurrence number to this node.  When "section", assign a LaTeX-style section number to this node.  Both choices can be specified.                                                                 |
+      | inline    | Boolean                     | Is node's output an in-line string of text that can be embedded anywhere in the document?                                                                                                                                             |
+      | silent    | Boolean                     | Suppress the output of this node at the location it is instantiated?                                                                                                                                                                  |
+      | output    | `String`                    | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.                                                                                                                                              |
 
       You may define additional parameters in a node definition if you want.
 

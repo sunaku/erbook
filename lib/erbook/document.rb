@@ -83,15 +83,15 @@ module ERBook
           #
           def sandbox.__node_impl__ node_type, *node_args, &node_content
             node = Node.new(
-              :type     => node_type,
-              :defn     => @format['nodes'][node_type],
-              :args     => node_args,
-              :trace    => caller,
-              :parent   => @stack.last,
-              :children => []
+              :type       => node_type,
+              :definition => @format['nodes'][node_type],
+              :arguments  => node_args,
+              :backtrace  => caller,
+              :parent     => @stack.last,
+              :children   => []
             )
 
-            Array(node.defn['params']).each do |param|
+            Array(node.definition['params']).each do |param|
               break if node_args.empty?
               node.__send__ "#{param}=", node_args.shift
             end
@@ -187,7 +187,7 @@ module ERBook
             # calculate the output for this node
             actual_output = Template.new(
               "#{@format_file}:nodes:#{n.type}:output",
-              n.defn['output'].to_s.chomp
+              n.definition['output'].to_s.chomp
             ).render_with(@template_vars.merge(:@node => n))
 
             # reveal child nodes' actual output in this node's actual output
@@ -259,11 +259,11 @@ module ERBook
       end
 
       def section_number?
-        Array(defn['number']).include? 'section'
+        Array(definition['number']).include? 'section'
       end
 
       def ordinal_number?
-        Array(defn['number']).include? 'ordinal'
+        Array(definition['number']).include? 'ordinal'
       end
 
       def anchor?
@@ -271,11 +271,11 @@ module ERBook
       end
 
       def inline?
-        defn['inline']
+        definition['inline']
       end
 
       def silent?
-        defn['silent']
+        definition['silent']
       end
     end
 

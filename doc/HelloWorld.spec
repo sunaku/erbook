@@ -42,8 +42,8 @@ nodes:
       My name is <%= @node.name.inspect %> and these are my properties:
 
       <dl style="<%= $style %>">
-        <dt>args</dt>
-        <dd><code><%= @node.args.inspect %></code></dd>
+        <dt>arguments</dt>
+        <dd><code><%= @node.arguments.inspect %></code></dd>
 
         <dt>section_number</dt>
         <dd><code><%= @node.section_number.inspect %></code></dd>
@@ -51,8 +51,8 @@ nodes:
         <dt>ordinal_number</dt>
         <dd><code><%= @node.ordinal_number.inspect %></code></dd>
 
-        <dt>trace</dt>
-        <dd><pre><%= @node.trace.join("\n") %></pre></dd>
+        <dt>backtrace</dt>
+        <dd><pre><%= @node.backtrace.join("\n") %></pre></dd>
 
         <dt>content</dt>
         <dd><%= @node.content %></dd>
