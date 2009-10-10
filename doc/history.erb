@@ -9,6 +9,34 @@
   %|history
 
 
+    %|section "Version 7.3.0 (2009-10-09)"
+
+      This release improves the printer friendliness of the XHTML format.
+
+
+      %|paragraph "New features"
+
+        * Do not omit ERBook internals from node stack traces.
+
+        * Hide "printer friendly" toggle checkbox when printing (but not when viewing the "printer friendly" mode on the computer screen).
+
+        * Hide the "About" section in "printer friendly" mode.
+
+
+      %|paragraph "Bug fixes"
+
+        * Page scrolled to wrong location when links in the table of contents in the "printer friendly" mode were clicked.
+
+        * Print style was not used when printing from "printer friendly" mode.
+
+        * Sans-serif font was not used in headings in print style.
+
+
+      %|paragraph "Housekeeping"
+
+        * Use Ember syntax in <%= xref "HelloWorld.input" %> example.
+
+
     %|section "Version 7.2.0 (2009-10-07)"
 
       This release improves support for Ruby 1.9 and Webkit-based web browsers, reduces gem dependencies, and fixes some bugs.
