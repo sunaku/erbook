@@ -119,14 +119,80 @@
 
       The XHTML format accepts the following document parameters.  To disable the default value for a particular parameter, simply set that parameter to `nil`.  For example, to disable the `$authors` parameter, you would write `$authors = nil` in your input document.
 
-      | Parameter   | Type     | Default value                   | Description                                                                                                                                                                                                 |
-      | ---------   | ----     | -------------                   | -----------                                                                                                                                                                                                 |
-      | `$title`    | `String` | `"$title"`                      | Title of the document.                                                                                                                                                                                      |
-      | `$subtitle` | `String` | `"$subtitle"`                   | Secondary title of the document.                                                                                                                                                                            |
-      | `$authors`  | `Hash`   | `{"$authors" => nil}`           | A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided `String#to_xml_entities` method like this: `{ "Y. Matsumoto" => "mailto:matz@ruby.invalid".to_xml_entities }` |
-      | `$date`     | `String` | `Time.now.strftime("%d %B %Y")` | Date when the document was written.                                                                                                                                                                         |
-      | `$logo`     | `String` | `nil`                           | Arbitrary content that goes above the document title in the default header.                                                                                                                                 |
-      | `$feeds`    | `Hash`   | `nil`                           | A mapping of feed URL to feed format. Here is an example: <code>$feeds = { "my_rss_feed.xml" => "rss", "my_atom_feed.xml" => "atom" }</code>                                                                |
+      %|table
+        %|thead
+          %|tr
+            %|th
+              Parameter
+            %|th
+              Type
+            %|th
+              Default value
+            %|th
+              Description
+        %|tbody
+          %|tr
+            %|td
+              `$title`
+            %|td
+              `String`
+            %|td
+              `"$title"`
+            %|td
+              Primary title of the document.
+          %|tr
+            %|td
+              `$subtitle`
+            %|td
+              `String`
+            %|td
+              `"$subtitle"`
+            %|td
+              Secondary title of the document.
+          %|tr
+            %|td
+              `$authors`
+            %|td
+              `Hash`
+            %|td
+              `{"$authors" => nil}`
+            %|td
+              A mapping of author name to author URL. You can obfuscate e-mail addresses using the provided `String#to_xml_entities` method like this: `{ "A. U. Thor" => "mailto:a@u.thor".to_xml_entities }`
+
+          %|tr
+            %|td
+              `$date`
+            %|td
+              `String`
+            %|td
+              `Time.now.strftime("%d %B %Y")`
+            %|td
+              Date when the document was written.
+          %|tr
+            %|td
+              `$logo`
+            %|td
+              `String`
+            %|td
+              `nil`
+            %|td
+              Arbitrary content that goes above the document title in the default header.
+          %|tr
+            %|td
+              `$feeds`
+            %|td
+              `Hash`
+            %|td
+              `nil`
+            %|td
+              A mapping of feed URL to feed format. Here is an example:
+
+                  $feeds = {
+                    "my_rss_feed.xml"  => "rss",
+                    "my_atom_feed.xml" => "atom"
+                  }
+
+              {:lang=ruby}
 
 
     %|section "Methods"
@@ -169,9 +235,23 @@
 
       Furthermore, <%= xref "SpecFile.nodes", "node definitions" %> in the XHTML format have two additional parameters:
 
-      | Parameter | Type                        | Description                                                                                                                          |
-      | --------- | ----                        | -----------                                                                                                                          |
-      | index     | `String` or `Array` thereof | When "tree", include this node in the **Table of Contents** (TOC).  When "list", include this node in the **List of Figures** (LOF). |
+      %|table
+        %|thead
+          %|tr
+            %|th
+              Parameter
+            %|th
+              Type
+            %|th
+              Description
+        %|tbody
+          %|tr
+            %|td
+              index
+            %|td
+              `String` or `Array` thereof
+            %|td
+              When "tree", include this node in the **Table of Contents** (TOC).  When "list", include this node in the **List of Figures** (LOF).  Both choices can be specified simultaneously.
 
 
       %|section "Structural nodes"

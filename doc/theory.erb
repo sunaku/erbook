@@ -62,12 +62,34 @@
 
     Technically, nodes are Ruby method invocations composed of the following:
 
-    | Component                             | Description                                                                                          |
-    | ---------                             | -----------                                                                                          |
-    | `node_type`                           | name of the method being invoked                                                                     |
-    | `node_argument1, node_argument2, ...` | arguments for the method invocation                                                                  |
-    | `node_content`                        | a block argument being passed to the method invocation                                               |
-    | `node_object`                         | a `ERBook::Document::Node` object (see <%= xref "Node.class" %>) representing this method invocation |
+    %|table
+      %|thead
+        %|tr
+          %|th
+            Component
+          %|th
+            Description
+      %|tbody
+        %|tr
+          %|td
+            `node_type`
+          %|td
+            Name of the method being invoked.
+        %|tr
+          %|td
+            `node_argument1, node_argument2, ...`
+          %|td
+            Arguments for the method invocation.
+        %|tr
+          %|td
+            `node_content`
+          %|td
+            A block argument being passed to the method invocation.
+        %|tr
+          %|td
+            `node_object`
+          %|td
+            A `ERBook::Document::Node` object (see <%= xref "Node.class" %>) representing this method invocation.
 
     A <%= xref "SpecFile", "format specification file" %> defines what types of nodes an input document may use.
 
@@ -76,19 +98,93 @@
 
       When <%= $project %> builds a document tree from the nodes in an input document, it stores information about these nodes into `ERBook::Document::Node` objects.  A `ERBook::Document::Node` object has the following properties (methods):
 
-      | Property       | Type                                | Description                                                                                                                                                |
-      | --------       | ----                                | -----------                                                                                                                                                |
-      | type           | `String`                            | Name of the type of this node.                                                                                                                             |
-      | definition     | `Hash`                              | The definition of this type of node, taken directly from the <%= xref "SpecFile", "format specification file" %>.                                          |
-      | arguments      | `Array`                             | Arguments passed to this node.                                                                                                                             |
-      | backtrace      | `Array`                             | A stack trace describing the location of this node in the input document.                                                                                  |
-      | parent         | `ERBook::Document::Node`            | The `ERBook::Document::Node` object which contains this node. The value of this property will be `nil` if this node is a root of the document tree.        |
-      | children       | `Array` of `ERBook::Document::Node` | List of child nodes from the document tree.                                                                                                                |
-      | depth          | `Integer`                           | Distance from the root of the document tree to this node.                                                                                                  |
-      | section_number | `String`                            | A LaTeX-style section number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node.  |
-      | ordinal_number | `Integer`                           | An order-of-occurrence number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node. |
-      | content        | `String`                            | The block of text passed to this node.                                                                                                                     |
-      | output         | `String`                            | Result of the node output template for the content of this node.                                                                                           |
+      %|table
+        %|thead
+          %|tr
+            %|th
+              Property
+            %|th
+              Type
+            %|th
+              Description
+        %|tbody
+          %|tr
+            %|td
+              type
+            %|td
+              `String`
+            %|td
+              Name of the type of this node.
+          %|tr
+            %|td
+              definition
+            %|td
+              `Hash`
+            %|td
+              The definition of this type of node, taken directly from the <%= xref "SpecFile", "format specification file" %>.
+          %|tr
+            %|td
+              arguments
+            %|td
+              `Array`
+            %|td
+              Arguments passed to this node.
+          %|tr
+            %|td
+              backtrace
+            %|td
+              `Array`
+            %|td
+              A stack trace describing the location of this node in the input document.
+          %|tr
+            %|td
+              parent
+            %|td
+              `ERBook::Document::Node`
+            %|td
+              The `ERBook::Document::Node` object which contains this node. The value of this property will be `nil` if this node is a root of the document tree.
+          %|tr
+            %|td
+              children
+            %|td
+              `Array` of `ERBook::Document::Node`
+            %|td
+              List of child nodes from the document tree.
+          %|tr
+            %|td
+              depth
+            %|td
+              `Integer`
+            %|td
+              Distance from the root of the document tree to this node.
+          %|tr
+            %|td
+              section_number
+            %|td
+              `String`
+            %|td
+              A LaTeX-style section number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node.
+          %|tr
+            %|td
+              ordinal_number
+            %|td
+              `Integer`
+            %|td
+              An order-of-occurrence number for this node.  This property is only present if enabled in the **number** parameter in the definition of this type of node.
+          %|tr
+            %|td
+              content
+            %|td
+              `String`
+            %|td
+              The block of text passed to this node.
+          %|tr
+            %|td
+              output
+            %|td
+              `String`
+            %|td
+              Result of the node output template for the content of this node.
 
       Furthermore, the `ERBook::Document::Node` class is derived from [Ruby's `OpenStruct` class](http://www.ruby-doc.org/stdlib/libdoc/ostruct/rdoc/classes/OpenStruct.html), so you can define _additional_ properties for `ERBook::Document::Node` objects dynamically.
 
@@ -97,18 +193,51 @@
 
     A format specification file is a plain-text file marked up in [YAML syntax](http://yaml4r.sourceforge.net/cookbook/). Through the following parameters, it defines (1) what types of nodes an input document may contain, (2) how the content of those nodes is transformed into output, and (3) how the processed document is transformed into the output document.
 
-    | Parameter | Type     | Description                                                                                                                                                                                                                                        |
-    | --------- | ----     | -----------                                                                                                                                                                                                                                        |
-    | desc      | `String` | A short description of the output format.                                                                                                                                                                                                          |
-    | code      | `String` | Ruby code that will be loaded before the input document is processed. This source code will be evaluated inside the main <%= $project %> executable, so any file-system or path-dependent portions of this source code should take appropriate precautions. |
-    | nodes     | Hash     | A listing of <%= xref "SpecFile.nodes", "node definitions" %>.                                                                                                                                                                                     |
-    | output    | `String` | An eRuby template for the final output document. See <%= xref "SpecFile.output" %>.                                                                                                                                                                |
+    %|table
+      %|thead
+        %|tr
+          %|th
+            Parameter
+          %|th
+            Type
+          %|th
+            Description
+      %|tbody
+        %|tr
+          %|td
+            desc
+          %|td
+            `String`
+          %|td
+            A short description of the output format.
+        %|tr
+          %|td
+            code
+          %|td
+            `String`
+          %|td
+            Ruby code that will be loaded before the input document is processed. This source code will be evaluated inside the main <%= $project %> executable, so any file-system or path-dependent portions of this source code should take appropriate precautions.
+        %|tr
+          %|td
+            nodes
+          %|td
+            Hash
+          %|td
+            A listing of <%= xref "SpecFile.nodes", "node definitions" %>.
+        %|tr
+          %|td
+            output
+          %|td
+            `String`
+          %|td
+            An eRuby template for the final output document. See <%= xref "SpecFile.output" %>.
+
 
     <%
       # XXX: "declare" this local variable here (in the parent
       #      scope) because it is initialized and used in two
       #      different child scopes that exist at different depths
-      common_template_vars = nil
+      output_template_table_builder = nil
     %>
 
 
@@ -116,13 +245,51 @@
 
       A node definition is a mapping from a name (the "node type") to the following set of parameters:
 
-      | Parameter | Type                        | Description                                                                                                                                                                                                                           |
-      | --------- | ----                        | -----------                                                                                                                                                                                                                           |
-      | params    | `String` or `Array` thereof | List of parameters that are expected to be specified during an instantiation of node.  Any additional arguments passed during instantiation are stored in the `arguments` attribute of the resulting `ERBook::Document::Node` object. |
-      | number    | `String` or `Array` thereof | When "ordinal", assign an order-of-occurrence number to this node.  When "section", assign a LaTeX-style section number to this node.  Both choices can be specified.                                                                 |
-      | inline    | Boolean                     | Is node's output an in-line string of text that can be embedded anywhere in the document?                                                                                                                                             |
-      | silent    | Boolean                     | Suppress the output of this node at the location it is instantiated?                                                                                                                                                                  |
-      | output    | `String`                    | An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.                                                                                                                                              |
+      %|table
+        %|thead
+          %|tr
+            %|th
+              Parameter
+            %|th
+              Type
+            %|th
+              Description
+        %|tbody
+          %|tr
+            %|td
+              params
+            %|td
+              `String` or `Array` thereof
+            %|td
+              List of parameters that are expected to be specified during an instantiation of node.  Any additional arguments passed during instantiation are stored in the `arguments` attribute of the resulting `ERBook::Document::Node` object.
+          %|tr
+            %|td
+              number
+            %|td
+              `String` or `Array` thereof
+            %|td
+              When "ordinal", assign an order of occurrence number to this node.  When "section", assign a LaTeX-style section number to this node.  Both choices can be specified simultaneously.
+          %|tr
+            %|td
+              inline
+            %|td
+              Boolean
+            %|td
+              Is node's output an in-line string of text that can be embedded anywhere in the document?
+          %|tr
+            %|td
+              silent
+            %|td
+              Boolean
+            %|td
+              Suppress the output of this node at the location it is instantiated?
+          %|tr
+            %|td
+              output
+            %|td
+              `String`
+            %|td
+              An eRuby template for the content of this node. See <%= xref "SpecFile.nodes.output" %>.
 
       You may define additional parameters in a node definition if you want.
 
@@ -133,24 +300,84 @@
 
         The following variables are available for use in this template:
 
-        | Variable         | Type                                | Description                                                                                      |
-        | --------         | ----                                | -----------                                                                                      |
-        | `@node`          | `ERBook::Document::Node`            | The node for which this template is being evaluated.                                             |
-        <%= common_template_vars = %{
-        | `@roots`         | `Array` of `ERBook::Document::Node` | All root nodes in the document tree.                                                             |
-        | `@nodes`         | `Array` of `ERBook::Document::Node` | All nodes in the document tree.                                                                  |
-        | `@nodes_by_type` | `Hash`                              | Mapping from node type (`String`) to array of `ERBook::Document::Node` objects having that type. |
-        | `@format`        | `Hash`                              | Data from the format specification file.                                                         |
+        %|output_template_table_builder = lambda do |additional_rows|
+          %|table
+            %|thead
+              %|tr
+                %|th
+                  Variable
+                %|th
+                  Type
+                %|th
+                  Description
+            %|tbody
+              % additional_rows.call
+              %|tr
+                %|td
+                  `@roots`
+                %|td
+                  `Array` of `ERBook::Document::Node`
+                %|td
+                  All root nodes in the document tree.
+              %|tr
+                %|td
+                  `@nodes`
+                %|td
+                  `Array` of `ERBook::Document::Node`
+                %|td
+                  All nodes in the document tree.
+              %|tr
+                %|td
+                  `@nodes_by_type`
+                %|td
+                  `Hash`
+                %|td
+                  Mapping from node type (`String`) to array of `ERBook::Document::Node` objects having that type.
+              %|tr
+                %|td
+                  `@format`
+                %|td
+                  `Hash`
+                %|td
+                  Data from the format specification file.
 
-        #{PROJECT} also provides the following mappings inside the `@format` variable:
+          <%= PROJECT %> also provides the following mappings inside the `@format` variable:
 
-        | Expression       | Type     | Description                                    |
-        | ----------       | ----     | -----------                                    |
-        | `@format[:name]` | `String` | Short-hand name of the current format.         |
-        | `@format[:file]` | `String` | Path of the current format specification file. |
-        }.lstrip.gsub(/^ +/, '')
-        %>
+          %|table
+            %|thead
+              %|tr
+                %|th
+                  Expression
+                %|th
+                  Type
+                %|th
+                  Description
+            %|tbody
+              %|tr
+                %|td
+                  `@format[:name]`
+                %|td
+                  `String`
+                %|td
+                  Short-hand name of the current format.
+              %|tr
+                %|td
+                  `@format[:file]`
+                %|td
+                  `String`
+                %|td
+                  Path of the current format specification file.
+              %|tr
 
+        % output_template_table_builder.call lambda {
+          %|tr
+            %|td
+              `@node`
+            %|td
+              `ERBook::Document::Node`
+            %|td
+              The node for which this template is being evaluated.
+        % }
 
     %|section "Document output template", "SpecFile.output"
 
@@ -158,10 +385,15 @@
 
       The following variables are available for use in this template:
 
-      | Variable   | Type     | Description                        |
-      | --------   | ----     | -----------                        |
-      | `@content` | `String` | Content of the processed document. |
-      <%= common_template_vars %>
+        % output_template_table_builder.call lambda {
+          %|tr
+            %|td
+              `@content`
+            %|td
+              `String`
+            %|td
+              Content of the processed document.
+        % }
 
 
     %|section "Creating your own document format", "HelloWorld"
