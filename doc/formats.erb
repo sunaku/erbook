@@ -23,26 +23,17 @@
 
       The <tt>lib/<%= $program %>/to_xhtml.rb</tt> file inside <%= $project %>'s installation directory (see <%= xref "Package contents" %>) defines the following methods:
 
-      * `String#to_xhtml` - Transforms this string into XHTML while ensuring that the result contains one or more block-level elements at the root.
+      * `String#to_xhtml` - Transforms this string into XHTML.
 
-      * `String#to_inline_xhtml` - Transforms this string into an *inline* XHTML string (one that does not contain any block-level XHTML elements at the root).
-
-      The default implementation of the `String#to_xhtml` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>to_xhtml.rb</tt> file and adjust the source code of the default `String#to_xhtml` and `String#to_inline_xhtml` methods accordingly.
+      The default implementation of the `String#to_xhtml` method employs the [Markdown](http://daringfireball.net/projects/markdown/) markup system. If you do not like Markdown or wish to use a different markup system for text in your documents, then simply edit the <tt>to_xhtml.rb</tt> file and adjust the source code of the default `String#to_xhtml` method accordingly.
 
       For example, if you replace the entire <tt>to_xhtml.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
 
       %|code :ruby
         class String
-          # Transforms this string into XHTML while ensuring that the
-          # result contains one or more block-level elements at the root.
+          # Transforms this string into XHTML.
           def to_xhtml
             '<p style="border: thin solid red">' + self + '</p>'
-          end
-
-          # Transforms this string into an *inline* XHTML string (one that
-          # does not contain any block-level XHTML elements at the root).
-          def to_inline_xhtml
-            self
           end
         end
 

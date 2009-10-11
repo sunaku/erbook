@@ -9,7 +9,7 @@ code: |
   ICONS_DIR  = File.join(ERBook::FORMATS_DIR, 'xhtml', 'icons')
   JQUERY_DIR = File.join(ERBook::FORMATS_DIR, 'xhtml', 'jquery')
 
-  # load the String#to_xhtml and String#to_inline_xhtml methods
+  # load the String#to_xhtml methods
   require 'erbook/to_xhtml'
 
   class String
@@ -248,7 +248,7 @@ code: |
         # Returns the title of this node as XHTML.
         #
         def title_xhtml
-          title.to_s.to_inline_xhtml
+          title.to_s.to_xhtml
         end
 
         ##
@@ -256,13 +256,6 @@ code: |
         #
         def content_xhtml
           content.join.to_xhtml
-        end
-
-        ##
-        # Returns the content of this node as inline XHTML.
-        #
-        def content_inline_xhtml
-          content.join.to_inline_xhtml
         end
 
         ##
@@ -336,7 +329,7 @@ code: |
             %{<div class="tabs"><ul>} +
 
             pc.map do |c|
-              %{<li><a href="##{c.here_frag}">#{c.title.to_s.to_inline_xhtml}</a></li>}
+              %{<li><a href="##{c.here_frag}">#{c.title.to_s.to_xhtml}</a></li>}
             end.join +
 
             %{</ul>}
@@ -400,7 +393,7 @@ code: |
               [prefix, (%{"#{title}"} if label && title)].compact.join('. ')
             end
 
-          label_xhtml = (label || title).to_s.to_inline_xhtml
+          label_xhtml = (label || title).to_s.to_xhtml
 
           %{<a class="xref" href="##{here_frag}" title="#{::ERB::Util.h caption}">#{label_xhtml}</a>}
         end
@@ -578,14 +571,14 @@ nodes:
       output: |
         <ins><table border="1"<%=
           (@node.xml_atts || {}).to_xml_atts
-        %>><%= @node.content_inline_xhtml %></table></ins>
+        %>><%= @node.content_xhtml %></table></ins>
 
     thead: &table_child
       <<: *table
       output: |
         <<%= @node.type %><%=
           (@node.xml_atts || {}).to_xml_atts
-        %>><%= @node.content_inline_xhtml %></<%= @node.type %>>
+        %>><%= @node.content_xhtml %></<%= @node.type %>>
 
     tbody:  *table_child
     tfoot:  *table_child
@@ -665,7 +658,7 @@ output: |
             (n.section_number.to_s + '&nbsp;&nbsp;' if n.section_number),
             n.list_frag,
             n.here_frag,
-            n.title.to_s.to_inline_xhtml
+            n.title.to_s.to_xhtml
           ]
 
           %{<li>#{entry}#{"<ul>#{nested}</ul>" if nested}</li>}
@@ -692,7 +685,7 @@ output: |
       lof_sections_frag_and_label = []
       lof = lof_enums.sort.map do |type, nodes|
         nested = nodes.map do |n|
-          %{<li><a id="#{n.list_frag}" href="##{n.here_frag}">#{n.title.to_s.to_inline_xhtml}</a></li>}
+          %{<li><a id="#{n.list_frag}" href="##{n.here_frag}">#{n.title.to_s.to_xhtml}</a></li>}
         end.join
 
         label = ERBook::PHRASES[type.capitalize << 's']
@@ -715,7 +708,7 @@ output: |
       % if $title || $subtitle
         <title><%=
           [$title, $subtitle].compact.map do |t|
-            t.to_s.to_inline_xhtml
+            t.to_s.to_xhtml
           end.join(' &mdash; ')
         %></title>
 
@@ -801,10 +794,10 @@ output: |
 
             <div class="title_and_subtitle">
               % if $title
-                <h1 class="title"><%= $title.to_s.to_inline_xhtml %></h1>
+                <h1 class="title"><%= $title.to_s.to_xhtml %></h1>
 
               % if $subtitle
-                <h2 class="subtitle"><%= $subtitle.to_s.to_inline_xhtml %></h2>
+                <h2 class="subtitle"><%= $subtitle.to_s.to_xhtml %></h2>
             </div>
 
             <div class="authors_and_date">
@@ -859,7 +852,7 @@ output: |
             <h1 style="display: none"><%= ERBook::PHRASES['Document'] %></h1>
             <ul>
               % @roots.select {|n| n.index_toc? }.each do |n|
-                <li><a href="#<%= n.here_frag %>"><%= n.title.to_s.to_inline_xhtml %></a></li>
+                <li><a href="#<%= n.here_frag %>"><%= n.title.to_s.to_xhtml %></a></li>
             </ul>
 
             %= @content

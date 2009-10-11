@@ -1,5 +1,5 @@
-# This file defines the String#to_xhtml and String#to_inline_xhtml
-# methods, which are invoked to transform plain text into XHTML.
+# This file defines the String#to_xhtml method which
+# is invoked to transform plain text into XHTML.
 #
 # This particular implementation features the Markdown
 # formatting system via Maruku, syntax coloring via CodeRay,
@@ -44,25 +44,12 @@ class String
   }
 
   ##
-  # Transforms this string into an *inline* XHTML string (one that
-  # does not contain any block-level XHTML elements at the root).
+  # Transforms this string into XHTML.
   #
-  def to_inline_xhtml
-    to_xhtml true
-  end
-
-  ##
-  # Transforms this string into XHTML while ensuring that the
-  # result contains one or more block-level elements at the root.
-  #
-  # [inline]
-  #   If true, the resulting XHTML will *not*
-  #   contain a block-level element at the root.
-  #
-  def to_xhtml inline = false
+  def to_xhtml
     with_protected_tags(self, VERBATIM_TAGS, true) do |text|
       html = with_protected_tags(text, PROTECTED_TAGS, false) do
-        |s| s.thru_maruku inline
+        |s| s.thru_maruku
       end
 
       # Markdown's "code spans" should really be "pre spans"
@@ -90,11 +77,7 @@ class String
   ##
   # Returns the result of running this string through Maruku.
   #
-  # [inline]
-  #   If true, the resulting XHTML will *not*
-  #   be wrapped in a XHTML paragraph element.
-  #
-  def thru_maruku inline = false #:nodoc:
+  def thru_maruku #:nodoc:
     #
     # XXX: add a newline at the beginning of the text to
     #      prevent Maruku from interpreting the first line
@@ -104,9 +87,10 @@ class String
     #      see this bug report for details:
     #      http://rubyforge.org/tracker/?func=detail&atid=10735&aid=25697&group_id=2795
     #
-    html = Maruku.new("\n#{self}").to_html
-    html.sub! %r{\A<p>(.*)</p>\Z}, '\1' if inline
-    html
+    Maruku.new("\n#{self}").to_html.
+
+    # omit the <p> added by Maruku
+    sub(%r{\A<p>(.*)</p>\Z}, '\1')
   end
 
   ##
