@@ -8,8 +8,14 @@
 
   %|section "Command-line interface"
 
+    When you run this command:
+
+        <%= $program %> --help
+
+    You will see this output:
+
     %|text
-      %= verbatim `ruby bin/#{$program} -h`
+      %= verbatim `ruby bin/#{$program} --help`
 
     The first command-line argument to <%= $project %> is either the name of a predefined format (FormatName) or the path to a <%= xref "SpecFile", "format specification file" %> (FormatFile).
 
@@ -34,9 +40,9 @@
         Otherwise, Microsoft web browsers _will not display_ your XHTML document and will instead prompt the reader to save your XHTML document as a file on their computer.  See [this detailed explanation](http://www.howtocreate.co.uk/wrongWithIE/?chapter=XHTML) for details.
 
 
-  %|section "Unindenting nodes hierarchically"
+    %|section "Unindenting nodes hierarchically"
 
-    When writing <%= $project %> documents, I prefer to indent the content of nodes according to their depth because my [text editor of choice](http://jedit.org) automatically folds blocks of text based on indentation.
+      When writing <%= $project %> documents, I prefer to indent the content of nodes according to their depth because my [text editor of choice](http://jedit.org) automatically folds blocks of text based on indentation.
 
-    If you also prefer to write documents in this way, be sure to pass the <tt>--unindent</tt> option to <%= $project %> so that the indentation will not affect the resulting output.
+      If you also prefer to write documents in this way, be sure to pass the <tt>--unindent</tt> option to <%= $project %> so that the indentation will not affect the resulting output.
 

@@ -437,16 +437,16 @@ code: |
 nodes:
   # theory
 
-    node: &wrapper
+    node: &node
       index:  false
       chain:  false
       number: false
-      inline: true
       silent: false
+      inline: true
       output: <%= @node.content_xhtml %>
 
     text: &text
-      <<: *wrapper
+      <<: *node
       inline: false
       output: <%= @node.wrap_content_xhtml :pre %>
 
@@ -458,7 +458,7 @@ nodes:
   # structure
 
     header: &header
-      <<: *wrapper
+      <<: *node
       silent: true
 
     header_outside_above: &header_insert
@@ -479,7 +479,7 @@ nodes:
     footer_outside_below: *header_insert
 
     abstract:
-      <<: *wrapper
+      <<: *node
       output: |
         <div id="<%= @node.type_frag %>">
           <h1 class="title"><%= @node.type_label %></h1>
@@ -492,8 +492,8 @@ nodes:
       index:  tree
       chain:  true
       number: section
-      inline: false
       silent: false
+      inline: false
       params: [title, id]
       output: |
         <%= @node.parent_tabs_begin %>
@@ -543,8 +543,8 @@ nodes:
       index:  list
       chain:  true
       number: ordinal
-      inline: false
       silent: false
+      inline: false
       params: [title, id, type]
       output: |
         <%
@@ -570,7 +570,7 @@ nodes:
   # tables
 
     table: &table
-      <<: *wrapper
+      <<: *node
       inline: false
       params: [xml_atts]
       output: |
@@ -593,7 +593,7 @@ nodes:
 
   # cross-references
     xref:
-      <<: *wrapper
+      <<: *node
       params: [query, label]
       output: |
         <%=
@@ -614,12 +614,12 @@ nodes:
       index:  false
       chain:  false
       number: ordinal
-      inline: false
       silent: true
+      inline: false
       params: [title, id]
 
     cite:
-      <<: *wrapper
+      <<: *node
       params: [target]
       output: |
         <%=
@@ -1551,7 +1551,6 @@ styles: # these are SASS templates
 
       &:visited
         color: #800080
-
 
       // decorate external hyperlinks with a visual indicator
       &[href]:not([href^="#"])

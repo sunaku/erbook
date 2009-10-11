@@ -100,8 +100,9 @@ class String
   # or a class="para" attribute, according to whether it
   # spans a single line or multiple lines of code.
   #
-  # In the latter case, the <code> element is replaced with a <pre> element
-  # so that its multi-line body appears correctly in text-mode web browsers.
+  # In the latter case, the <code> element is replaced
+  # with a <pre> element so that its multi-line body
+  # appears correctly in text-mode web browsers.
   #
   # If a <code> element has a lang="..." attribute,
   # then that attribute's value is considered to be

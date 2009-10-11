@@ -81,7 +81,7 @@ module ERBook
           # Handles the method call from a node
           # placeholder in the input document.
           #
-          def sandbox.__node_impl__ node_type, *node_args, &node_content
+          def sandbox.__node_handler__ node_type, *node_args, &node_content
             node = Node.new(
               :type       => node_type,
               :definition => @format['nodes'][node_type],
@@ -153,7 +153,7 @@ module ERBook
             #      does not accept a block until Ruby 1.9
             file, line = __FILE__, __LINE__; eval %{
               def sandbox.#{type} *node_args, &node_content
-                __node_impl__ #{type.inspect}, *node_args, &node_content
+                __node_handler__ #{type.inspect}, *node_args, &node_content
               end
             }, binding, file, line
           end
