@@ -143,7 +143,11 @@ class String
         tail = "</#{elem}>"
       end
 
-      %{#{head} class="#{span}"#{atts}>#{body}#{tail}}
+      unless atts.sub!(/\b(class=('|"))(.*?\2)/){ $1 + span + ' ' + $3 }
+        atts << %{ class="#{span}"}
+      end
+
+      %{#{head}#{atts}>#{body}#{tail}}
     end
   end
 
