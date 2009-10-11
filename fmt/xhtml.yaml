@@ -550,9 +550,9 @@ nodes:
       silent: false
       params: [xml_atts]
       output: |
-        <table border="1"<%=
+        <ins><table border="1"<%=
           (@node.xml_atts || {}).to_xml_atts
-        %>><%= @node.content_xhtml %></table>
+        %>><%= @node.content_inline_xhtml %></table></ins>
 
     thead: &table_child
       <<: *table
