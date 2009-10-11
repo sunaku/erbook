@@ -9,6 +9,51 @@
   %|history
 
 
+    %|section "Version 8.0.0 (2009-10-10)"
+
+      This release simplifies <%= xref "SpecFile.nodes", "node definitions" %>, adds <%= xref "Table nodes" %> for building tables the HTML way, and introduces <%= xref "Arbitrary floats" %> to combat the [explosion of special-purpose document nodes](http://www.docbook.org/tdg/en/html/part2.html).
+
+
+      %|paragraph "Incompatible changes"
+
+        * Reduce and rename <%= xref "SpecFile.nodes", "node definitions" %> attributes:
+
+          * `toc: true   ` &rarr; `index: tree    `
+          * `lof: true   ` &rarr; `index: list    `
+          * `index: true ` &rarr; `number: section`
+          * `number: true` &rarr; `number: ordinal`
+          * `depth: true ` &rarr; (removed)
+          * `bypass: true` &rarr; (removed)
+
+        * Rename <%= xref "Node.class" %> properties to be more self-documenting:
+
+          * args   &rarr; arguments
+          * defn   &rarr; definition
+          * trace  &rarr; backtrace
+          * index  &rarr; section_number
+          * number &rarr; ordinal_number
+
+        * Replace formal blocks (figure, table, example, equation, procedure) with <%= xref "Arbitrary floats" %>.
+
+        * Append an exclamation mark (!) to the names of <%= xref "Admonition nodes" %>, thereby making them a special case of <%= xref "Arbitrary floats" %>.
+
+
+      %|paragraph "New features"
+
+        * Add "params" attribute to <%= xref "SpecFile.nodes", "node definitions" %>.
+
+        * Add <%= xref "Table nodes" %> for building tables the HTML way.
+
+
+      %|paragraph "Housekeeping"
+
+        * Use YAML hash merging to DRY node definitions in XHTML format.
+
+        * Use <%= xref "Table nodes" %> instead of PHP Markdown Extra table syntax in the user manual.
+
+        * Remove the "digest" <%= xref "SpecFile.nodes" %> attribute from the user manual.  Its use was discontinued a few major versions ago.
+
+
     %|section "Version 7.3.0 (2009-10-09)"
 
       This release improves the printer friendliness of the XHTML format.
