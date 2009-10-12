@@ -124,15 +124,21 @@ code: |
         # Returns a CSS url() containing embedded image data.
         #
         def data_css
-          %{url("#{data_uri}")}
+          %{url(#{embed_uri})}
         end
+
+        ##
+        # Returns a temporary data URI that will be replaced
+        # with the actual data URI at runtime by javascript.
+        #
+        alias embed_uri object_id
 
         ##
         # Returns an image tag that renders an embedded data URI.
         #
         def to_xhtml atts = {}
           atts[:alt] ||= name
-          atts[:src] = data_uri
+          atts[:src] = embed_uri
           atts[:class] = :icon
           "<img#{atts.to_xml_atts}/>"
         end
@@ -1220,6 +1226,44 @@ javascript: |
         })
       ).append(" <%= ERBook::PHRASES['Printer friendly'] %>")
     );
+
+    //
+    // activate embedded data URIs
+    //
+    var data_uri_by_embed_uri = <%=
+      result = {}
+      ICONS.each do |icon|
+        result[icon.embed_uri] = icon.data_uri
+      end
+
+      require 'json'
+      result.to_json
+    %>;
+
+    $('img[src]').each(function() {
+      var image = $(this);
+      var data_uri = data_uri_by_embed_uri[image.attr('src')];
+
+      if (data_uri) {
+        image.attr('src', data_uri);
+      }
+    });
+
+    $('style').each(function() {
+      var style = $(this);
+      var css = style.text();
+
+      if (css) {
+        for (var embed_uri in data_uri_by_embed_uri) {
+          var src = new RegExp('\\burl\\(' + embed_uri + '\\)', 'g');
+          var dst = 'url("' + data_uri_by_embed_uri[embed_uri] + '")';
+
+          css = css.replace(src, dst);
+        }
+
+        style.text(css);
+      }
+    });
 
     //
     // ready for action!

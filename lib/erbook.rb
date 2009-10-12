@@ -19,6 +19,7 @@ Inochi.init :ERBook,
     'coderay'    => '>= 0.8',   # for syntax coloring of source code
     'haml'       => '>= 2.2.2', # for generating HTML and CSS
     'mime-types' => '>= 1.16',  # for detecting MIME types
+    'json'       => nil,        # for emitting JSON
   }
 
 module ERBook
