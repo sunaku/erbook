@@ -722,36 +722,6 @@ output: |
 
           css
         %>
-
-        .ui-widget
-        {
-            /* prevent nested widgets from having larger fonts */
-            font-size: 1em;
-        }
-
-        .ui-tabs .ui-tabs-nav li.ui-tabs-selected a
-        {
-            cursor: pointer;
-        }
-
-        /* decorate external hyperlinks with a visual indicator */
-        a[href]:not([href^="#"])
-        {
-            background          : <%= ICON_BY_NAME['hyperlink'].data_css %>;
-            background-position : center right;
-            background-repeat   : no-repeat;
-            padding-right       : 13px;
-        }
-
-        /* display icon for blockquote elements */
-        blockquote
-        {
-            background-image    : <%= ICON_BY_NAME['quote'].data_css %>;
-            background-repeat   : no-repeat;
-            margin-left         : 0;
-            padding-left        : 65px;
-            min-height          : 50px;
-        }
       /*]]>*/
       </style>
 
@@ -1283,6 +1253,11 @@ styles: # these are SASS templates
     blockquote
       color: #333
       font-style: italic
+      background-image: <%= ICON_BY_NAME['quote'].data_css %>
+      background-repeat: no-repeat
+      margin-left: 0
+      padding-left: 65px
+      min-height: 50px
 
 
     hr
@@ -1468,6 +1443,15 @@ styles: # these are SASS templates
       clear: both
 
 
+    .ui-widget
+      // prevent nested widgets from having larger fonts
+      font-size: 1em
+
+
+    .ui-tabs .ui-tabs-nav li.ui-tabs-selected a
+      cursor: pointer
+
+
     tt
       background-color: #F0F8FF
 
@@ -1516,6 +1500,14 @@ styles: # these are SASS templates
 
       &:visited
         color: #800080
+
+
+      // decorate external hyperlinks with a visual indicator
+      &[href]:not([href^="#"])
+        background: <%= ICON_BY_NAME['hyperlink'].data_css %>
+        background-position: center right
+        background-repeat: no-repeat
+        padding-right: 13px
 
 
     #__header__ >
