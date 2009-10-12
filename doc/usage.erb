@@ -8,7 +8,8 @@
 
   %|section "Command-line interface"
 
-    <pre><%= `ruby bin/#{$program} -h` %></pre>
+    %|text
+      %= verbatim `ruby bin/#{$program} -h`
 
     The first command-line argument to <%= $project %> is either the name of a predefined format (FormatName) or the path to a <%= xref "SpecFile", "format specification file" %> (FormatFile).
 

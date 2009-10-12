@@ -31,21 +31,20 @@
 
       For example, if you replace the entire <tt>to_xhtml.rb</tt> file with the following code, then the output of all nodes will appear within red boxes in the final output document.
 
-          class String
-            # Transforms this string into XHTML while ensuring that the
-            # result contains one or more block-level elements at the root.
-            def to_xhtml
-              '<p style="border: thin solid red">' + self + '</p>'
-            end
-
-            # Transforms this string into an *inline* XHTML string (one that
-            # does not contain any block-level XHTML elements at the root).
-            def to_inline_xhtml
-              self
-            end
+      %|code :ruby
+        class String
+          # Transforms this string into XHTML while ensuring that the
+          # result contains one or more block-level elements at the root.
+          def to_xhtml
+            '<p style="border: thin solid red">' + self + '</p>'
           end
 
-      {:lang=ruby}
+          # Transforms this string into an *inline* XHTML string (one that
+          # does not contain any block-level XHTML elements at the root).
+          def to_inline_xhtml
+            self
+          end
+        end
 
       In addition to supporting Markdown syntax, the default implementation has some additional features which are described in the following subsections.
 
@@ -90,24 +89,27 @@
 
           For example, here is some source code _without_ the `lang` attribute:
 
-          <code><%= verbatim sampleCode %></code>
+          %|code
+            %= verbatim sampleCode
 
           And here is the same source code with a `lang="c"` attribute:
 
-          <code lang="c"><%= verbatim sampleCode %></code>
+          %|code :c
+            %= verbatim sampleCode
 
           And here is the same source code with a `lang="html"` attribute:
 
-          <code lang="html"><%= verbatim sampleCode %></code>
+          %|code :html
+            %= verbatim sampleCode
 
 
       %|section "Smart sizing of source code"
 
         Source code is _automatically sized_ to be displayed as either a line or paragraph of text, depending on whether it contains line breaks.
 
-        For example, here is a single line <code>life = true or false</code> of code. And here is a paragraph <code>life =
+        For example, here is a single line `life = true or false` of code. And here is a paragraph `life =
           true or
-        false</code> of code.
+        false` of code.
 
 
       %|section "Protecting verbatim text"
@@ -187,12 +189,11 @@
             %|td
               A mapping of feed URL to feed format. Here is an example:
 
-                  $feeds = {
-                    "my_rss_feed.xml"  => "rss",
-                    "my_atom_feed.xml" => "atom"
-                  }
-
-              {:lang=ruby}
+              %|code :ruby
+                $feeds = {
+                  "my_rss_feed.xml"  => "rss",
+                  "my_atom_feed.xml" => "atom"
+                }
 
 
     %|section "Methods"

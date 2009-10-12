@@ -266,6 +266,15 @@ code: |
         end
 
         ##
+        # Returns the result of wrapping
+        # this node's content in the given
+        # tag and converting it into XHTML.
+        #
+        def wrap_content_xhtml tag, atts = {}
+          %{<#{tag}#{atts.to_xml_atts}>#{content.join}</#{tag}>}.to_xhtml
+        end
+
+        ##
         # Returns the content of this node as XHTML inside a <div/>.
         #
         def content_xhtml_div #:nodoc:
@@ -441,6 +450,16 @@ nodes:
       inline: true
       silent: false
       output: <%= @node.content_xhtml %>
+
+    text: &text
+      <<: *wrapper
+      inline: false
+      output: <%= @node.wrap_content_xhtml :pre %>
+
+    code:
+      <<: *text
+      params: language
+      output: <%= @node.wrap_content_xhtml :code, :lang => @node.language %>
 
   # structure
 

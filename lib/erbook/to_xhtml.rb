@@ -128,7 +128,9 @@ class String
   def thru_coderay #:nodoc:
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
       elem, atts, code = $1, $2, CGI.unescapeHTML($3).sub(/\A\r?\n/, '')
-      lang = atts[/\blang=('|")(.*?)\1/i, 2] || :ruby
+
+      lang = atts[/\blang=('|")(.*?)\1/i, 2]
+      lang = :ruby if lang !~ /\S/
 
       body = CodeRay.scan(code, lang).html(:css => :style)
 
