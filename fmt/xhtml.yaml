@@ -569,10 +569,8 @@ nodes:
   # tables
 
     table: &table
-      index: false
-      number: false
-      inline: true
-      silent: false
+      <<: *wrapper
+      inline: false
       params: [xml_atts]
       output: |
         <ins><table border="1"<%=
@@ -594,10 +592,7 @@ nodes:
 
   # cross-references
     xref:
-      index:  false
-      number: false
-      inline: true
-      silent: false
+      <<: *wrapper
       params: [query, label]
       output: |
         <%=
@@ -622,10 +617,7 @@ nodes:
       params: [title, id]
 
     cite:
-      index:  false
-      number: false
-      inline: true
-      silent: false
+      <<: *wrapper
       params: [target]
       output: |
         <%=
