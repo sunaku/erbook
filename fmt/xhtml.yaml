@@ -1622,11 +1622,20 @@ styles: # these are SASS templates
       float: right
       clear: right
 
-      > a > img
-        border-top: thick solid #FFFFFF
+      > a > img:hover
+        background-color: yellow
 
-        &:hover
-          border-top: thick solid #FA8072
+
+    // make navigation menu appear on the tab bar
+    .ui-tabs > .ui-tabs-panel > .nav
+      position: relative
+      margin-top: -3.375em
+      margin-right: -1em
+
+
+    // prevent tabs on tab bar from ovelapping with the above navigation menu
+    .ui-tabs > .ui-tabs-nav > li:last-child
+      margin-right: 9em
 
 
     #__nfo__ > table td:first-child, #__nfo__ > .validations
