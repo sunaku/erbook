@@ -1147,26 +1147,21 @@ javascript: |
           }
         }
 
-        var scroll_target_offset = Math.floor(scroll_target.offset().top);
-        var did_highlight_effect = false;
+        var scroll_offset = scroll_target.offset().top;
+
+        //
+        // set body height so that any element can be
+        // brought to the top of the screen via scrolling
+        //
+        var document_height = $(document).height();
+        var window_height   = $(window).height();
+        if (document_height - scroll_offset <= window_height) {
+          $('body').css('min-height', document_height + window_height);
+        }
 
         $('html, body').animate(
-          { scrollTop: scroll_target_offset },
-          'slow', 'swing', function() {
-            var screen_after_scroll = Math.floor($(window).scrollTop());
+          { scrollTop: scroll_offset }, 'slow', 'swing', function() {
             set_hash(hash, target_is_panel);
-
-            if (screen_after_scroll != scroll_target_offset) {
-              //
-              // nothing changed on the screen.
-              // the target was already visible.
-              // highlight it to notify the user.
-              //
-              if (!did_highlight_effect) {
-                target.effect('highlight', 'slow');
-                did_highlight_effect = true;
-              }
-            }
           }
         );
       }
