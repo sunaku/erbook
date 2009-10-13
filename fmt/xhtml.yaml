@@ -1105,12 +1105,10 @@ javascript: |
         var target_is_panel = target.is('div') &&
           target.parent('.ui-tabs').length;
 
-        var target_initially_hidden = target.is(':hidden');
-
         //
         // reveal all tabs which contain the target
         //
-        if (target_initially_hidden) {
+        if (target.is(':hidden')) {
           var panels = target.parents('.ui-tabs > div:hidden').get().reverse();
 
           if (target_is_panel) {
@@ -1149,20 +1147,16 @@ javascript: |
           }
         }
 
-        var screen_before_scroll = $(window).scrollTop();
+        var scroll_target_offset = Math.floor(scroll_target.offset().top);
         var did_highlight_effect = false;
 
         $('html, body').animate(
-          { scrollTop: Math.floor(scroll_target.offset().top) },
+          { scrollTop: scroll_target_offset },
           'slow', 'swing', function() {
-            var screen_after_scroll = $(window).scrollTop();
-
+            var screen_after_scroll = Math.floor($(window).scrollTop());
             set_hash(hash, target_is_panel);
 
-            if (
-              !target_initially_hidden &&
-              screen_after_scroll == screen_before_scroll
-            ) {
+            if (screen_after_scroll != scroll_target_offset) {
               //
               // nothing changed on the screen.
               // the target was already visible.
