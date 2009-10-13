@@ -128,7 +128,7 @@ code: |
         end
 
         ##
-        # Returns an <img/> tag that renders an embedded data URI.
+        # Returns an image tag that renders an embedded data URI.
         #
         def to_xhtml atts = {}
           atts[:alt] ||= name
@@ -169,7 +169,7 @@ code: |
       end
 
       ##
-      # Returns an <img/> tag that embeds the given image file.
+      # Returns an image tag that embeds the given image file.
       #
       # [path]
       #   path to the image file
@@ -178,7 +178,7 @@ code: |
       #   format of the image file (e.g. PNG, JPEG, GIF, etc.)
       #
       # [atts]
-      #   additional attributes for the <img> tag
+      #   additional attributes for the image tag
       #
       def embed_image_file path, format = path[/\w+/], atts = {}
         data = ERBook.base_64_encode File.read(path)
@@ -186,7 +186,7 @@ code: |
       end
 
       ##
-      # Returns an <img/> tag that embeds the given raw image data.
+      # Returns an image tag that embeds the given raw image data.
       #
       # [data]
       #   raw image data
@@ -195,7 +195,7 @@ code: |
       #   format of the image file (e.g. PNG, JPEG, GIF, etc.)
       #
       # [atts]
-      #   additional attributes for the <img> tag
+      #   additional attributes for the image tag
       #
       def embed_image_data data, format, atts = {}
         atts[:src] = ERBook.base_64_embed_image_data(data, format)
