@@ -1150,6 +1150,7 @@ javascript: |
         }
 
         var screen_before_scroll = $(window).scrollTop();
+        var did_highlight_effect = false;
 
         $('html, body').animate(
           { scrollTop: Math.floor(scroll_target.offset().top) },
@@ -1167,7 +1168,10 @@ javascript: |
               // the target was already visible.
               // highlight it to notify the user.
               //
-              target.effect('highlight', 'slow');
+              if (!did_highlight_effect) {
+                target.effect('highlight', 'slow');
+                did_highlight_effect = true;
+              }
             }
           }
         );
