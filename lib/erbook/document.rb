@@ -200,9 +200,16 @@ module ERBook
                 actual_output[c.output] = actual_output_by_node[c]
 
               else
-                # pull block-level child out of paragraph tag added by Maruku
-                actual_output.sub! %r/(<p>\s*)?#{Regexp.quote c.output}/ do
-                  actual_output_by_node[c] + $1.to_s
+                # remove <p> around block-level child (added by Markdown)
+                actual_output.sub! %r{(<p>\s*)?#{
+                  Regexp.quote c.output
+                }(\s*</p>)?} do
+                  actual_output_by_node[c] +
+                    if $1 and $2
+                      ''
+                    else
+                      [$1, $2].join
+                    end
                 end
               end
             end
