@@ -163,7 +163,7 @@ module ERBook
           @processed_document = template.buffer
 
         # chain block-level nodes together for local navigation
-          block_nodes = @nodes.select {|n| n.anchor? }
+          block_nodes = @nodes.select {|n| n.chain? }
 
           require 'enumerator'
           block_nodes.each_cons(2) do |a, b|
@@ -273,8 +273,11 @@ module ERBook
         Array(definition['number']).include? 'ordinal'
       end
 
-      def anchor?
-        not inline? and not silent?
+      ##
+      # Include this node in the previous/next navigation chain?
+      #
+      def chain?
+        definition['chain']
       end
 
       def inline?
