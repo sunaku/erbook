@@ -1620,6 +1620,7 @@ styles: # these are SASS templates
 
     .nav
       float: right
+      clear: right
 
       > a > img
         border-top: thick solid #FFFFFF
