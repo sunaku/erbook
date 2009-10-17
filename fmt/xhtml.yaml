@@ -1321,12 +1321,11 @@ styles: # these are SASS templates
     code.para
       white-space: pre
 
-    ins > pre
-      text-decoration: none
 
+    // proper container (according to XHTML validation) for
+    // inserting block-level elements in arbitrary locations
     ins
-      // for IE only, because the above "ins > pre" does not work
-      .text-decoration: none
+      text-decoration: none
 
 
     a > img
