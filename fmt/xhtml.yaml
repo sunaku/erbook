@@ -695,8 +695,8 @@ output: |
         %{<div id="#{frag}"><h2 class="title">#{label}</h2> <ol>#{nested}</ol></div>}
       end
   %><?xml version="1.0" encoding="utf-8"?>
-  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -773,11 +773,13 @@ output: |
       %>
 
       <div id="__loading__">
-        <%= ERBook::PHRASES['Loading...'] %> <noscript><%= ERBook::PHRASES['Failed!'] %>
-          <p><%= ERBook::PHRASES['Please enable JavaScript in your Web browser.'] %></p>
-
-          %= text_only_browser_divider
-        </noscript>
+        <%= ERBook::PHRASES['Loading...'] %> <noscript><%=
+          "<ins>%s</ins> <p>%s</p> %s" % [
+            ERBook::PHRASES['Failed!'],
+            ERBook::PHRASES['Please enable JavaScript in your Web browser.'],
+            text_only_browser_divider
+          ]
+        %></noscript>
       </div>
 
       <div id="__body__">
@@ -922,7 +924,7 @@ output: |
             <p class="validations">
               <a href="http://validator.w3.org/check?uri=referer"><img
                   src="http://www.w3.org/Icons/valid-xhtml10-blue"
-                  alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+                  alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a>
 
               <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3"><img
                 src="http://jigsaw.w3.org/css-validator/images/vcss-blue"
