@@ -93,7 +93,7 @@ code: |
       data = base_64_encode_file(path)
 
       require 'mime/types'
-      mime = MIME::Types.of(path)
+      mime = MIME::Types.of(path).to_a.join(',')
 
       base_64_embed data, mime
     end
