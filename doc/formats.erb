@@ -381,6 +381,16 @@
                 <% end %>
 
 
+          %|section "command!", "xhtml.nodes.command!"
+
+            A command that is to be run at a command-line.
+
+
+            %|command! "echo -n 'This is an example! '; date " do |node|
+              %|text
+                %= `#{node.title}`
+
+
       %|section "Admonition nodes"
 
         An admonition is basically a box that is indented more deeply than the text surrounding it.  It is typically used to convey extraneous or pertinent information about the application of ideas discussed in the surrounding text.

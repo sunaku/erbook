@@ -547,6 +547,11 @@ nodes:
       silent: false
       params: [title, id, type]
       output: |
+        <%
+          if @node.type == 'command' and @node.title
+            @node.title = "<tt>#{verbatim @node.title}</tt>"
+          end
+        %>
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
