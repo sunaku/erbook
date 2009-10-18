@@ -1558,13 +1558,7 @@ styles: # these are SASS templates
 
     #__header__ >
       .logo
-        float: left
-        margin-right: 1em
-        margin-top: 0.25em
-
-        img
-          max-height: 4em
-          max-width: 4em
+        text-align: center
 
       .title_and_subtitle
         float: left
