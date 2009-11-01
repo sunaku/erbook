@@ -959,22 +959,9 @@ output: |
 javascript: |
   $(function() {
     /*<%= File.read File.join(ERBook::INSTALL, 'LICENSE') %>*/
+    "use strict";
 
-    //
-    // respond to changes in window location
-    //
-    var $last_hash = null;
-
-    function on_hash_change() {
-      var curr_hash = window.location.hash;
-
-      if (curr_hash && curr_hash != $last_hash) {
-        $last_hash = curr_hash;
-        reveal_hash(curr_hash);
-      }
-
-      setTimeout(on_hash_change, 300);
-    }
+    var $last_hash;
 
     //
     // Sets the location bar hash to the given value.
@@ -984,11 +971,11 @@ javascript: |
     //  the element corresponding to the given hash.
     //
     function set_hash(hash, prevent_jump) {
-      if ($last_hash == hash) {
+      if (hash === $last_hash) {
         return;
       }
 
-      var set_the_hash = function() {
+      function set_the_hash() {
         //
         // XXX: bypass on_hash_change() by setting $last_hash
         //
@@ -1109,8 +1096,8 @@ javascript: |
             panels.push(target);
           }
 
-          for (var i in panels) {
-            var panel = $(panels[i]);
+          $(panels).each(function() {
+            var panel = $(this);
             var tabs_widget = panel.parent('.ui-tabs');
             var selected_index = tabs_widget.tabs('option', 'selected');
 
@@ -1121,10 +1108,10 @@ javascript: |
             var tab = tab_by_panel(panel, tabs_widget);
             var wanted_index = tab.prevAll('li').length;
 
-            if (wanted_index != selected_index) {
+            if (wanted_index !== selected_index) {
               tabs_widget.tabs('select', wanted_index);
             }
-          }
+          });
         }
 
         //
@@ -1202,7 +1189,7 @@ javascript: |
               styles.attr('media', dst);
               var after = checkbox.offset();
 
-              if (after.top == before.top && after.left == before.left) {
+              if (after.top === before.top && after.left === before.left) {
                 //
                 // try reinserting the <style> into document.
                 // this works in Webkit browsers, which ignore
@@ -1248,10 +1235,10 @@ javascript: |
 
     $('img[src]').each(function() {
       var image = $(this);
-      var data_uri = data_uri_by_embed_uri[image.attr('src')];
+      var embed_uri = image.attr('src');
 
-      if (data_uri) {
-        image.attr('src', data_uri);
+      if (data_uri_by_embed_uri.hasOwnProperty(embed_uri)) {
+        image.attr('src', data_uri_by_embed_uri[embed_uri]);
       }
     });
 
@@ -1261,10 +1248,12 @@ javascript: |
 
       if (css) {
         for (var embed_uri in data_uri_by_embed_uri) {
-          var src = new RegExp('\\burl\\(' + embed_uri + '\\)', 'g');
-          var dst = 'url("' + data_uri_by_embed_uri[embed_uri] + '")';
+          if (data_uri_by_embed_uri.hasOwnProperty(embed_uri)) {
+            var src = new RegExp('\\burl\\(' + embed_uri + '\\)', 'g');
+            var dst = 'url("' + data_uri_by_embed_uri[embed_uri] + '")';
 
-          css = css.replace(src, dst);
+            css = css.replace(src, dst);
+          }
         }
 
         style.text(css);
@@ -1277,6 +1266,21 @@ javascript: |
     $('#__loading__').append("<%= ERBook::PHRASES['Ready!'] %>").
     fadeOut('slow', function() {
       $('#__body__').show();
+
+      //
+      // respond to changes in window location
+      //
+      function on_hash_change() {
+        var current_hash = window.location.hash;
+
+        if (current_hash && current_hash !== $last_hash) {
+          $last_hash = current_hash;
+          reveal_hash(current_hash);
+        }
+
+        setTimeout(on_hash_change, 300);
+      }
+
       on_hash_change();
     });
   });
