@@ -958,9 +958,7 @@ output: |
 
 javascript: |
   $(function() {
-    /*
-    %< File.join(ERBook::INSTALL, 'LICENSE')
-    */
+    /*<%= File.read File.join(ERBook::INSTALL, 'LICENSE') %>*/
 
     //
     // respond to changes in window location
