@@ -350,15 +350,15 @@ code: |
           children.select {|c| c.index_toc? }
         end
 
-        HERE_TEXT = ERBook::PHRASES['Focus this segment']
-        PREV_TEXT = ERBook::PHRASES['Focus previous segment']
-        NEXT_TEXT = ERBook::PHRASES['Focus next segment']
-        LIST_TEXT = ERBook::PHRASES['Return to listing']
+        HERE_TEXT = ERBook::PHRASES['Here']
+        PREV_TEXT = ERBook::PHRASES['Previous']
+        NEXT_TEXT = ERBook::PHRASES['Next']
+        LIST_TEXT = ERBook::PHRASES['Contents']
 
-        HERE_SIGN = ICON_BY_NAME['nav_here'].to_xhtml(:alt => HERE_TEXT)
-        PREV_SIGN = ICON_BY_NAME['nav_prev'].to_xhtml(:alt => PREV_TEXT)
-        NEXT_SIGN = ICON_BY_NAME['nav_next'].to_xhtml(:alt => NEXT_TEXT)
-        LIST_SIGN = ICON_BY_NAME['nav_list'].to_xhtml(:alt => LIST_TEXT)
+        HERE_SIGN = ICON_BY_NAME['nav_here'].to_xhtml(:alt => "[#{HERE_TEXT}]")
+        PREV_SIGN = ICON_BY_NAME['nav_prev'].to_xhtml(:alt => "[#{PREV_TEXT}]")
+        NEXT_SIGN = ICON_BY_NAME['nav_next'].to_xhtml(:alt => "[#{NEXT_TEXT}]")
+        LIST_SIGN = ICON_BY_NAME['nav_list'].to_xhtml(:alt => "[#{LIST_TEXT}]")
 
         ##
         # Calculates a local navigation menu containing links
