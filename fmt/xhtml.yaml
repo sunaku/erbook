@@ -953,6 +953,28 @@ javascript: |
     /*<%= File.read File.join(ERBook::INSTALL, 'LICENSE') %>*/
     "use strict";
 
+    //--------------------------------------------------------------------------
+    // utility logic
+    //--------------------------------------------------------------------------
+
+    //
+    // Returns the tab corresponding to the
+    // given panel in the given tabs widget.
+    //
+    function tab_by_panel(panel, tabs_widget) {
+      if (!tabs_widget) {
+        tabs_widget = panel.parent('.ui-tabs');
+      }
+
+      return tabs_widget.find(
+        '.ui-tabs-nav > li > a[href=#'+ panel.attr('id') +']'
+      ).parent('li');
+    }
+
+    //--------------------------------------------------------------------------
+    // document location
+    //--------------------------------------------------------------------------
+
     var $last_hash;
 
     //
@@ -968,9 +990,7 @@ javascript: |
       }
 
       function set_the_hash() {
-        //
         // XXX: bypass on_hash_change() by setting $last_hash
-        //
         window.location.hash = $last_hash = hash;
       }
 
@@ -1003,7 +1023,7 @@ javascript: |
           //   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
           //   THE SOFTWARE.
           //
-          // This plugin is documented at:
+          // The jQuery.LocalScroll plugin is documented at:
           //
           //   http://flesler.blogspot.com/2007/10/jquerylocalscroll-10.html
           //
@@ -1011,12 +1031,11 @@ javascript: |
           //
           //   http://flesler-plugins.googlecode.com/svn/trunk/jquery.localScroll/jquery.localScroll.js
           //
+
           var target_id = target.attr('id');
 
-          //
           // temporarily place a dummy element at the current
           // screen position and give it the ID of the target
-          //
           var original_screen_position = $(window).scrollTop();
 
           var dummy = $('<span/>').attr('id', target_id).css({
@@ -1026,23 +1045,17 @@ javascript: |
 
           target.removeAttr('id').before(dummy);
 
-          //
           // when we set the hash, the browser will jump to the
           // dummy, which is where the browser screen currently
           // is, and therefore the jump will not be visualized!
-          //
           set_the_hash();
 
-          //
           // undo the temporary changes
-          //
           dummy.remove();
           target.attr('id', target_id);
 
-          //
           // the above approach does not work for Opera and IE.
           // they ignore the dummy and jump to the actual target
-          //
           $(window).scrollTop(original_screen_position);
 
           return;
@@ -1050,20 +1063,6 @@ javascript: |
       }
 
       set_the_hash();
-    }
-
-    //
-    // Returns the tab corresponding to the
-    // given panel in the given tabs widget.
-    //
-    function tab_by_panel(panel, tabs_widget) {
-      if (!tabs_widget) {
-        tabs_widget = panel.parent('.ui-tabs');
-      }
-
-      return tabs_widget.find(
-        '.ui-tabs-nav > li > a[href=#'+ panel.attr('id') +']'
-      ).parent('li');
     }
 
     //
@@ -1078,9 +1077,7 @@ javascript: |
         var target_is_panel = target.is('div') &&
           target.parent('.ui-tabs').length;
 
-        //
         // reveal all tabs which contain the target
-        //
         if (target.is(':hidden')) {
           var panels = target.parents('.ui-tabs > div:hidden').get().reverse();
 
@@ -1093,10 +1090,8 @@ javascript: |
             var tabs_widget = panel.parent('.ui-tabs');
             var selected_index = tabs_widget.tabs('option', 'selected');
 
-            //
             // map the panel to its tab because tabs do not
             // have to be in the same order as their panels
-            //
             var tab = tab_by_panel(panel, tabs_widget);
             var wanted_index = tab.prevAll('li').length;
 
@@ -1106,10 +1101,8 @@ javascript: |
           });
         }
 
-        //
         // scroll to the tab bar instead of the target
         // because it contains the title for the target
-        //
         var scroll_target = target;
 
         if (target_is_panel) {
@@ -1122,10 +1115,8 @@ javascript: |
 
         var scroll_offset = scroll_target.offset().top;
 
-        //
         // set body height so that any element can be
         // brought to the top of the screen via scrolling
-        //
         var document_height = $(document).height();
         var window_height   = $(window).height();
         if (document_height - scroll_offset <= window_height) {
@@ -1140,32 +1131,10 @@ javascript: |
       }
     }
 
-    //
-    // create jQuery UI tabs
-    //
-    $('.tabs').tabs();
+    //--------------------------------------------------------------------------
+    // create print preview toggle
+    //--------------------------------------------------------------------------
 
-    //
-    // make internal hyperlinks reveal their targets when clicked
-    //
-    $('a[href^=#]').click(function() {
-      var link = $(this);
-      var hash = link.attr('href');
-
-      if (link.parent('li').parent('.ui-tabs-nav').length) {
-        // tab clicks should not cause the screen to scroll
-        set_hash(hash, true);
-      }
-      else {
-        reveal_hash(hash);
-      }
-
-      return false;
-    });
-
-    //
-    // checkbox for printer friendly stylesheet
-    //
     $('#_header > .authors_and_date').append(
       $('<span/>').addClass('printer_friendly_toggle').append(
         $('<input/>').attr('type', 'checkbox').
@@ -1175,19 +1144,16 @@ javascript: |
           function change_media(src, dst) {
             var styles = $('style[media="'+ src +'"]');
             if (styles.length) {
-              //
               // try changing the media in-place
-              //
               var before = checkbox.offset();
               styles.attr('media', dst);
               var after = checkbox.offset();
 
+              // but if that did not work
               if (after.top === before.top && after.left === before.left) {
-                //
                 // try reinserting the <style> into document.
                 // this works in Webkit browsers, which ignore
                 // the in-place changing approach tried above.
-                //
                 styles.each(function() {
                   var style = $(this);
                   var parent = style.parent();
@@ -1216,9 +1182,10 @@ javascript: |
       )
     );
 
-    //
-    // activate embedded data URIs
-    //
+    //--------------------------------------------------------------------------
+    // activate base64 data URIs
+    //--------------------------------------------------------------------------
+
     var data_uri_by_embed_uri = <%=
       result = {}
       ICONS.each do |icon|
@@ -1256,19 +1223,41 @@ javascript: |
       }
     });
 
-    //
-    // ready for action!
-    //
+    //--------------------------------------------------------------------------
+    // create jQuery UI tabs
+    //--------------------------------------------------------------------------
+
+    $('.tabs').tabs();
+
+    // make internal hyperlinks reveal their targets (which may be
+    // nested within many levels of jQuery UI tabs) when clicked
+    $('a[href^=#]').click(function() {
+      var link = $(this);
+      var hash = link.attr('href');
+
+      if (link.parent('li').parent('.ui-tabs-nav').length) {
+        // tab clicks should not cause the screen to scroll
+        set_hash(hash, true);
+      }
+      else {
+        reveal(hash);
+      }
+
+      return false;
+    });
+
+    //--------------------------------------------------------------------------
+    // unveil the document
+    //--------------------------------------------------------------------------
+
     $('#_loading').append(<%= ERBook::PHRASES['Ready!'].inspect %>).
     fadeOut('slow', function() {
       $(this).remove();
 
       $('#_body').show();
 
-      //
       // respond to changes in window location
-      //
-      function on_hash_change() {
+      (function on_hash_change() {
         var current_hash = window.location.hash;
 
         if (current_hash && current_hash !== $last_hash) {
@@ -1277,9 +1266,7 @@ javascript: |
         }
 
         setTimeout(on_hash_change, 300);
-      }
-
-      on_hash_change();
+      })();
     });
   });
 
