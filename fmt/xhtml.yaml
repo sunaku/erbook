@@ -1168,7 +1168,8 @@ javascript: |
     //
     $('#_header > .authors_and_date').append(
       $('<span/>').addClass('printer_friendly_toggle').append(
-        $('<input/>').attr('type', 'checkbox').click(function() {
+        $('<input/>').attr('type', 'checkbox').
+        attr('id', 'printer_friendly_toggle').click(function() {
           var checkbox = $(this);
 
           function change_media(src, dst) {
@@ -1209,7 +1210,10 @@ javascript: |
 
           return true;
         })
-      ).append(" <%= ERBook::PHRASES['Printer friendly'] %>")
+      ).append(
+        $('<label/>').attr('for', 'printer_friendly_toggle').
+        text(<%= ERBook::PHRASES['Printer friendly'].inspect %>)
+      )
     );
 
     //
@@ -1406,6 +1410,9 @@ styles: # these are SASS templates
     @media screen
       #_header .printer_friendly_toggle
         display: inline
+
+        label:hover
+          cursor: pointer
 
 
     #_abstract
