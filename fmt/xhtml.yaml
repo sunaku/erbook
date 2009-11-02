@@ -777,15 +777,7 @@ output: |
         }.strip
       %>
 
-      <div id="__loading__">
-        <%= ERBook::PHRASES['Loading...'] %> <noscript><%=
-          "<ins>%s</ins> <p>%s</p> %s" % [
-            ERBook::PHRASES['Failed!'],
-            ERBook::PHRASES['Please enable JavaScript in your Web browser.'],
-            text_only_browser_divider
-          ]
-        %></noscript>
-      </div>
+      <div id="__loading__"></div>
 
       <div id="__body__">
         %= node.output if node = @nodes_by_type['header_outside_above'].first
@@ -1263,8 +1255,10 @@ javascript: |
     //
     // ready for action!
     //
-    $('#__loading__').append("<%= ERBook::PHRASES['Ready!'] %>").
+    $('#__loading__').append(<%= ERBook::PHRASES['Ready!'].inspect %>).
     fadeOut('slow', function() {
+      $(this).remove();
+
       $('#__body__').show();
 
       //
@@ -1486,6 +1480,9 @@ styles: # these are SASS templates
       padding: 0.5em
       background-color: #FFFFFF
 
+
+    #__loading__:before
+      content: <%= ERBook::PHRASES['Loading...'].inspect %>
 
     #__body__, #__abstract__ > .title, #__toc__ > .title, .part > .title, .chapter > .title, .section > .title, .paragraph > .title, #__bib__ > .title
       display: none
