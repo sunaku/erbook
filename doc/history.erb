@@ -9,6 +9,46 @@
   %|history
 
 
+    %|section "Version 9.1.0 (2009-11-03)"
+
+      This release adds JavaScript-based search functionality, improves usability, and fixes some bugs---all in the XHTML format.
+
+
+      %|paragraph "New features"
+
+        * Add JavaScript-based search functionality to XHTML format.
+
+        * Make paragraph nodes flow with the body (don't put tabs around them).
+
+        * Make external hyperlinks open in a separate window.
+
+        * Make "Printer friendly" label clickable like the checkbox.
+
+
+      %|paragraph "Bug fixes"
+
+        * The first character of a URI fragment can be an underscore, according to the W3C XHTML 1.0 Strict validator!.
+
+        * Scroll to nearest visible element if scroll target is naturally hidden (e.g. because of a CSS rule).
+
+        * Prevent scroll animation callback from being called twice.
+
+        * Do not show "Loading... failed" message in text-only web browsers.
+
+        * Fix empty "lang" attributes in the output of the syntax coloring library.
+
+
+      %|paragraph "Housekeeping"
+
+        * Rename the IDs of core XHTML structures to be self-documenting.
+
+        * Shorten mini navigation link labels for text-only web browsers.
+
+        * Refactor JavaScript according to JSLint suggestions.
+
+        * Project license was not being emitted into JavaScript code.
+
+
     %|section "Version 9.0.0 (2009-10-18)"
 
       This release adds new nodes to the XHTML format, reduces the size of generated XHTML documents and also improves their usability and validity.
