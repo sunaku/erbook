@@ -22,14 +22,14 @@ code: |
 
     ##
     # Transforms this string into a valid URI fragment.
-    # See http://www.nmt.edu/tcc/help/pubs/xhtml/id-type.html
+    # See http://www.w3.org/TR/REC-html40/types.html#type-name
     #
     def to_uri_fragment
       # remove XML tags from the input
       buf = gsub(/<.*?>/, '')
 
-      # The first or only character must be a letter.
-      buf.insert(0, 'a') unless buf[0,1] =~ /[[:alpha:]]/
+      # The first or only character must be a letter or an underscore (_).
+      buf.insert(0, 'a') unless buf[0,1] =~ /[[:alpha:]_]/
 
       # The remaining characters must be letters, digits, hyphens (-),
       # underscores (_), colons (:), or periods (.) or Unicode characters
