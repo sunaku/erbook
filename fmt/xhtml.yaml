@@ -938,7 +938,7 @@ output: |
           %= node.output if node = @nodes_by_type['footer_inside_above'].first
 
           % if footer = @nodes_by_type['footer'].first
-            %= footer.content.to_s.to_xhtml
+            %= footer.content_xhtml
 
           %= node.output if node = @nodes_by_type['footer_inside_below'].first
         </div>
