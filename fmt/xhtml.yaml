@@ -1246,6 +1246,9 @@ javascript: |
       return false;
     });
 
+    // make external hyperlinks open in a separate window
+    $('a[href]').not('[href^=#]').attr('target', '_blank');
+
     //--------------------------------------------------------------------------
     // unveil the document
     //--------------------------------------------------------------------------
