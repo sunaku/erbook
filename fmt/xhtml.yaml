@@ -1113,7 +1113,7 @@ javascript: |
           }
         }
 
-        var scroll_offset = scroll_target.offset().top;
+        var scroll_offset = Math.floor(scroll_target.offset().top);
 
         // set body height so that any element can be
         // brought to the top of the screen via scrolling
@@ -1123,9 +1123,17 @@ javascript: |
           $('body').css('min-height', document_height + window_height);
         }
 
+        var pending = true;
         $('html, body').animate(
           { scrollTop: scroll_offset }, 'slow', 'swing', function() {
-            set_hash(hash, target_is_panel);
+            // prevent the body of this function from being
+            // executed twice -- because there are 2 target
+            // elements in the animation list and only one
+            // of them actually works in different browsers!
+            if (pending && scroll_offset === $(window).scrollTop()) {
+              pending = false;
+              set_hash(hash, target_is_panel);
+            }
           }
         );
       }
