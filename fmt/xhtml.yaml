@@ -526,6 +526,7 @@ nodes:
 
     paragraph:
       <<: *latex
+      index:  false
       number: false
       output: |
         <%= @node.parent_tabs_begin %>
@@ -1454,6 +1455,10 @@ styles: # these are SASS templates
       margin-top: 2em
 
 
+    .paragraph > .content
+      margin: 1em
+
+
     .tip, .note, .caution, .warning, .important, .figure, .table, .example, .equation, .procedure
       margin: 3em
 
@@ -1495,7 +1500,7 @@ styles: # these are SASS templates
     #_loading:before
       content: <%= ERBook::PHRASES['Loading...'].inspect %>
 
-    #_body, #_abstract > .title, #_contents > .title, .part > .title, .chapter > .title, .section > .title, .paragraph > .title, #_references > .title
+    #_body, #_abstract > .title, #_contents > .title, .part > .title, .chapter > .title, .section > .title, #_references > .title
       display: none
 
 
