@@ -114,8 +114,10 @@ class String
     gsub %r{<(code)(.*?)>(.*?)</\1>}m do
       elem, atts, code = $1, $2, CGI.unescapeHTML($3).sub(/\A\r?\n/, '')
 
-      lang = atts[/\blang=('|")(.*?)\1/i, 2]
+      lang_regexp = /\blang=('|")(.*?)\1/io
+      lang = atts[lang_regexp, 2]
       lang = :ruby if lang !~ /\S/
+      atts.sub! lang_regexp, %{lang="#{lang}"}
 
       body = CodeRay.scan(code, lang).html(:css => :style)
 
