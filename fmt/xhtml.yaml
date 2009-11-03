@@ -1101,6 +1101,12 @@ javascript: |
           });
         }
 
+        // scroll to nearest visible element if the target
+        // is naturally hidden (e.g. because of a CSS rule)
+        if (target.is(':hidden')) {
+          target = target.closest(':not(:hidden)');
+        }
+
         // scroll to the tab bar instead of the target
         // because it contains the title for the target
         var scroll_target = target;
