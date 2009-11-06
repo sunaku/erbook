@@ -1291,12 +1291,13 @@ javascript: |
             var matching_elems = $('#_body').
               find(':matches("'+ query.replace(/"/, '\\"') +'")');
 
+            status.text('').progressbar();
+
             var prev_match;
             var prev_elem;
 
             function process_match(i, n) {
-              status.text(status.text().
-                replace(/( \d+%)?$/, ' ' + Math.round(i / n * 100) + '%'));
+              status.progressbar('value', Math.round(i / n * 100));
 
               var elem = matching_elems.eq(i);
 
@@ -1327,6 +1328,8 @@ javascript: |
                 if (prev_match && prev_match.length) {
                   emit_result(prev_match);
                 }
+
+                status.progressbar('destroy');
 
                 if (num_results > 0) {
                   status.text(<%= ERBook::PHRASES['%d results', 0].inspect %>.replace('0', num_results));
