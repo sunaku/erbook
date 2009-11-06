@@ -1386,7 +1386,7 @@ javascript: |
           }
 
           return true;
-        })
+        }).css('margin-right', '0.3em')
       ).append(
         $('<label/>').attr('for', 'printer_friendly_toggle').
         text(<%= ERBook::PHRASES['Printer friendly'].inspect %>)
