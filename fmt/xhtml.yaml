@@ -1181,7 +1181,21 @@ javascript: |
     ).append(
       $('<form/>').attr('id', '_search_form').append(
         $('<input/>').attr('type', 'text').attr('name', 'q').
-        val(<%= ERBook::PHRASES['Search'].inspect %>)
+        addClass('initial').attr('title', <%=
+          ERBook::PHRASES['Search with regular expression'].inspect
+        %>).focus(function() {
+          var box = $(this);
+
+          if (box.is('.initial')) {
+            box.val('').removeClass('initial');
+          }
+        }).blur(function() {
+          var box = $(this);
+
+          if (! box.val().match(/\S/)) {
+            box.val(box.attr('title')).addClass('initial');
+          }
+        }).blur()
       ).append(
         $('<a/>').attr('href',
           'https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide:Regular_Expressions#Using_Special_Characters'
@@ -1836,6 +1850,15 @@ styles: # these are SASS templates
 
     #_search_form
       text-align: right
+      font-weight: normal
+
+      input
+        margin-top: 0.25em
+
+        &.initial
+          color: gray
+          font-style: italic
+
 
     #_search
       > .status
