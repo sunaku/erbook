@@ -1207,6 +1207,15 @@ javascript: |
           return;
         }
 
+        // detect invalid regexps
+        try {
+          new RegExp(query);
+        }
+        catch(e) {
+          alert(e);
+          return;
+        }
+
         // one search at a time
         if (search_box.attr('disabled')) {
           return;
