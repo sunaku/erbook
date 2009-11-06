@@ -1351,14 +1351,9 @@ javascript: |
                 emit_result(prev_match);
               }
 
-              status.progressbar('destroy');
-
-              if (num_results > 0) {
-                status.text(<%= ERBook::PHRASES['%d results', 0].inspect %>.replace('0', num_results));
-              }
-              else {
-                status.html(<%= ERBook::PHRASES['Not found'].inspect %>);
-              }
+              status.progressbar('destroy').text(<%=
+                ERBook::PHRASES['%d results', 0].inspect
+              %>.replace('0', num_results));
 
               search_box.removeAttr('disabled');
             }
