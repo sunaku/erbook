@@ -1176,7 +1176,7 @@ javascript: |
     $('.tabs:first > ul').append(
       $('<li/>').append(
         $('<a/>').attr('id', '_search_link').attr('href', '#_search').
-        text(<%= ERBook::PHRASES['Search'].inspect %>)
+        text(<%= ERBook::PHRASES['Search'].inspect %>).hide()
       )
     ).append(
       $('<form/>').attr('id', '_search_form').append(
@@ -1190,7 +1190,7 @@ javascript: |
         event.preventDefault();
 
         // display the search results tab
-        $('#_search_link').click();
+        $('#_search_link').show().click();
 
         var form = $(this);
         var query = form.find(':text').val().replace(/^\s+|\s+$/g, '');
