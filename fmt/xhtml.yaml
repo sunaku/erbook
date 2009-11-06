@@ -1199,150 +1199,165 @@ javascript: |
       ).submit(function(event) {
         event.preventDefault();
 
-        // display the search results tab
-        $('#_search_link').show().click();
+        var search_box = $(this).find(':text');
+        var query = search_box.val().replace(/^\s+|\s+$/g, '');
 
-        var form = $(this);
-        var query = form.find(':text').val().replace(/^\s+|\s+$/g, '');
+        // ignore empty queries
+        if (!query.match(/\S/)) {
+          return;
+        }
+
+        // one search at a time
+        if (search_box.attr('disabled')) {
+          return;
+        }
+
+        search_box.attr('disabled', 'disabled');
+
+        // begin the search
         var status = $('#_search > .status');
         var results = $('#_search > .results');
 
-        if (query.match(/\S/)) {
-          results.text(''); // clear previous results
-          status.text(<%= ERBook::PHRASES['Searching...'].inspect %>);
+        // display the search results tab
+        $('#_search_link').show().click();
 
-          // timeout allows status updates to appear
-          setTimeout(function() {
-            var num_results = 0;
+        // clear previous search results
+        results.text('');
+        status.text(<%= ERBook::PHRASES['Searching...'].inspect %>);
 
-            function emit_result(match) {
-              // exclude matches from previous search results,
-              // the table of contents, and jQuery UI tab bars
-              if (match.closest('#_search, #_contents, .ui-tabs-nav').length) {
-                return;
+        // timeout allows status updates to appear
+        setTimeout(function() {
+          var num_results = 0;
+
+          function emit_result(match) {
+            // exclude matches from previous search results,
+            // the table of contents, and jQuery UI tab bars
+            if (match.closest('#_search, #_contents, .ui-tabs-nav').length) {
+              return;
+            }
+
+            var excerpt;
+
+            // resolve tab panels into their section title
+            // because additional matches, which lie within
+            // the content of these tab panels, will come
+            if (match.is('.ui-tabs-panel')) {
+              excerpt = match.find('.title:first').clone().show();
+            }
+            else {
+              excerpt = match.clone();
+            }
+
+            // highlight the query inside the match excerpt
+            excerpt.html(excerpt.html().replace(
+              new RegExp('(<[^>]*)?(' + query + ')', 'ig'),
+              function($0, $1, $2) {
+                // only highlight if not inside an XML tag literal
+                return $1 ? $0 :
+                  '<span class="ui-state-error">' + $2 + '</span>';
               }
+            ));
 
-              var excerpt;
+            num_results += 1;
+            var result = $('<li/>').addClass('result').append(
+              $('<blockquote/>').addClass('excerpt').append(excerpt)
+            ).attr('id', '_search' + num_results).click(
+              function(event) {
+                event.stopPropagation();
 
-              // resolve tab panels into their section title
-              // because additional matches, which lie within
-              // the content of these tab panels, will come
-              if (match.is('.ui-tabs-panel')) {
-                excerpt = match.find('.title:first').clone().show();
-              }
-              else {
-                excerpt = match.clone();
-              }
-
-              // highlight the query inside the match excerpt
-              excerpt.html(excerpt.html().replace(
-                new RegExp('(<[^>]*)?(' + query + ')', 'ig'),
-                function($0, $1, $2) {
-                  // only highlight if not inside an XML tag literal
-                  return $1 ? $0 :
-                    '<span class="ui-state-error">' + $2 + '</span>';
-                }
-              ));
-
-              num_results += 1;
-              var result = $('<li/>').addClass('result').append(
-                $('<blockquote/>').addClass('excerpt').append(excerpt)
-              ).attr('id', '_search' + num_results).click(
-                function(event) {
-                  event.stopPropagation();
-
-                  // save this search result's hash in browser history
-                  // before revealing the matching element so that
-                  // the user can press the back button to return to
-                  // this exact spot in the search results listing
-                  reveal(this, function() {
-                    if (!$(event.target).is('a')) {
-                      reveal(match);
-                    }
-                  });
-                }
-              );
-
-              // show bread-crumb trail for the match
-              var first = true;
-              match.parents('.ui-tabs-panel').each(function() {
-                var panel = $(this);
-                var tab = tab_by_panel(panel);
-
-                if (tab.length) {
-                  if (!first) {
-                    result.prepend(' &rang; ');
+                // save this search result's hash in browser history
+                // before revealing the matching element so that
+                // the user can press the back button to return to
+                // this exact spot in the search results listing
+                reveal(this, function() {
+                  if (!$(event.target).is('a')) {
+                    reveal(match);
                   }
-                  first = false;
-
-                  result.prepend(tab.find('a').clone());
-                }
-              });
-
-              results.append(result);
-
-              // unhide any hidden elements in the search result
-              result.find(':hidden').removeClass('ui-tabs-hide').show();
-
-              // remove tab bars (used for titles) and mini navigation menus
-              result.find('.ui-tabs-nav, .ui-tabs-panel > .nav').remove();
-            };
-
-            var matching_elems = $('#_body').
-              find(':matches("'+ query.replace(/"/, '\\"') +'")');
-
-            status.text('').progressbar();
-
-            var prev_match;
-            var prev_elem;
-
-            function process_match(i, n) {
-              status.progressbar('value', Math.round(i / n * 100));
-
-              var elem = matching_elems.eq(i);
-
-              // ascend to a larger container for more context
-              var match = elem.closest('pre,ul,ol,dl,table,p,div');
-              if (!match.length) {
-                match = elem;
+                });
               }
+            );
 
-              if (
-                prev_match && prev_match.length &&
-                match.get(0) !== prev_match.get(0) && // unique matches only
-                elem.parent().get(0) !== prev_elem.get(0) // leaf nodes only
-              ) {
+            // show bread-crumb trail for the match
+            var first = true;
+            match.parents('.ui-tabs-panel').each(function() {
+              var panel = $(this);
+              var tab = tab_by_panel(panel);
+
+              if (tab.length) {
+                if (!first) {
+                  result.prepend(' &rang; ');
+                }
+                first = false;
+
+                result.prepend(tab.find('a').clone());
+              }
+            });
+
+            results.append(result);
+
+            // unhide any hidden elements in the search result
+            result.find(':hidden').removeClass('ui-tabs-hide').show();
+
+            // remove tab bars (used for titles) and mini navigation menus
+            result.find('.ui-tabs-nav, .ui-tabs-panel > .nav').remove();
+          };
+
+          var matching_elems = $('#_body').
+            find(':matches("'+ query.replace(/"/, '\\"') +'")');
+
+          status.text('').progressbar();
+
+          var prev_match;
+          var prev_elem;
+
+          function process_match(i, n) {
+            status.progressbar('value', Math.round(i / n * 100));
+
+            var elem = matching_elems.eq(i);
+
+            // ascend to a larger container for more context
+            var match = elem.closest('pre,ul,ol,dl,table,p,div');
+            if (!match.length) {
+              match = elem;
+            }
+
+            if (
+              prev_match && prev_match.length &&
+              match.get(0) !== prev_match.get(0) && // unique matches only
+              elem.parent().get(0) !== prev_elem.get(0) // leaf nodes only
+            ) {
+              emit_result(prev_match);
+            }
+
+            prev_elem = elem;
+            prev_match = match;
+
+            if (i < n) {
+              // timeout allows status updates to appear
+              setTimeout(function() { process_match(i + 1, n); }, 0);
+            }
+            else {
+              // handle the last item in this two-stage prev/curr loop
+              if (prev_match && prev_match.length) {
                 emit_result(prev_match);
               }
 
-              prev_elem = elem;
-              prev_match = match;
+              status.progressbar('destroy');
 
-              if (i < n) {
-                // timeout allows status updates to appear
-                setTimeout(function() { process_match(i + 1, n); }, 0);
+              if (num_results > 0) {
+                status.text(<%= ERBook::PHRASES['%d results', 0].inspect %>.replace('0', num_results));
               }
               else {
-                // handle the last item in this two-stage prev/curr loop
-                if (prev_match && prev_match.length) {
-                  emit_result(prev_match);
-                }
-
-                status.progressbar('destroy');
-
-                if (num_results > 0) {
-                  status.text(<%= ERBook::PHRASES['%d results', 0].inspect %>.replace('0', num_results));
-                }
-                else {
-                  status.html(<%= ERBook::PHRASES['Not found'].inspect %>);
-                }
+                status.html(<%= ERBook::PHRASES['Not found'].inspect %>);
               }
+
+              search_box.removeAttr('disabled');
             }
+          }
 
-            process_match(0, matching_elems.length);
+          process_match(0, matching_elems.length);
 
-          }, 0);
-        }
+        }, 0);
 
         return false;
       })
