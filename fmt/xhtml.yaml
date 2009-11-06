@@ -1176,8 +1176,8 @@ javascript: |
     $('.tabs:first > ul').append(
       $('<li/>').append(
         $('<a/>').attr('id', '_search_link').attr('href', '#_search').
-        text(<%= ERBook::PHRASES['Search'].inspect %>).hide()
-      )
+        text(<%= ERBook::PHRASES['Search'].inspect %>)
+      ).hide()
     ).append(
       $('<form/>').attr('id', '_search_form').append(
         $('<input/>').attr('type', 'text').attr('name', 'q').
@@ -1228,7 +1228,7 @@ javascript: |
         var results = $('#_search > .results');
 
         // display the search results tab
-        $('#_search_link').show().click();
+        $('#_search_link').click().parent().show();
 
         // clear previous search results
         results.text('');
