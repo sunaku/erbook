@@ -1196,10 +1196,6 @@ javascript: |
             box.val(box.attr('title')).addClass('initial');
           }
         }).blur()
-      ).append(
-        $('<a/>').attr('href',
-          'https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide:Regular_Expressions#Using_Special_Characters'
-        ).text(<%= ERBook::PHRASES['Help'].inspect %>)
       ).submit(function(event) {
         event.preventDefault();
 
