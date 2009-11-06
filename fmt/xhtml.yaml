@@ -1207,11 +1207,11 @@ javascript: |
         var status = $('#_search > .status');
         var results = $('#_search > .results');
 
-        if (/\S/.test(query)) {
+        if (query.match(/\S/)) {
           results.text(''); // clear previous results
           status.text(<%= ERBook::PHRASES['Searching...'].inspect %>);
 
-          // timeout allows the status.text() to appear
+          // timeout allows status updates to appear
           setTimeout(function() {
             var num_results = 0;
 
@@ -1319,9 +1319,8 @@ javascript: |
               prev_match = match;
 
               if (i < n) {
-                setTimeout(function() {
-                  process_match(i + 1, n);
-                }, 0);
+                // timeout allows status updates to appear
+                setTimeout(function() { process_match(i + 1, n); }, 0);
               }
               else {
                 // handle the last item in this two-stage prev/curr loop
