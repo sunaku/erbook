@@ -8,6 +8,45 @@
 
   %|history
 
+    %|section "Version 9.2.0 (2009-11-06)"
+
+      This release improves the usability of the JavaScript-based search functionality in the XHTML format and fixes a bug in the **footer** node.
+
+
+      %|paragraph "New features"
+
+        * Put search box on the main tab navigation bar.
+
+        * Hide search results tab until search is performed.
+
+        * Show default text in search box and mention regexps.
+
+        * Add jQuery UI progress bar to show search status.
+
+        * Add search mutex -- only one search at a time.
+
+        * Detect & report invalid regexp in search query.
+
+        * Add start & stop buttons to search form.
+
+        * Update all language translations accordingly.
+
+
+      %|paragraph "Bug fixes"
+
+        * The **footer** node was not being converted into XHTML correctly.
+
+        * Implement an even [simpler solution](http://dev.jqueryui.com/ticket/4882) to the multi-row tab alignment problem for jQuery UI tabs.
+
+        * Add gap between checkbox & "printer friendly" label.
+
+
+      %|paragraph "Housekeeping"
+
+        * Show "0 results" instead of "Not found" after a search.
+
+        * Remove "Help" link for regexp syntax reference in search from.  That reference was English-only anyway.
+
 
     %|section "Version 9.1.0 (2009-11-03)"
 
