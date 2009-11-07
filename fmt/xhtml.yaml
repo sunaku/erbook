@@ -1220,7 +1220,7 @@ javascript: |
         var query = search_box.val().replace(/^\s+|\s+$/g, '');
 
         // ignore empty queries
-        if (!query.match(/\S/)) {
+        if (search_box.is('.initial') || !query.match(/\S/)) {
           return;
         }
 
