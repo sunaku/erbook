@@ -972,6 +972,15 @@ javascript: |
       ).parent('li');
     }
 
+    //
+    // Returns a jQuery element containing a jQuery UI icon of the given name.
+    //
+    function ui_icon(name) {
+      return $('<div/>').addClass('ui-state-default ui-corner-all').append(
+        $('<span/>').addClass('ui-icon ui-icon-' + name)
+      );
+    }
+
     //--------------------------------------------------------------------------
     // document location
     //--------------------------------------------------------------------------
@@ -1196,6 +1205,14 @@ javascript: |
             box.val(box.attr('title')).addClass('initial');
           }
         }).blur()
+      ).append(
+        ui_icon('search').attr('id', '_search_start').click(function() {
+          $('#_search_form').submit();
+        })
+      ).append(
+        ui_icon('cancel').attr('id', '_search_stop').hide().click(function() {
+          $(this).attr('clicked', 'clicked');
+        })
       ).submit(function(event) {
         event.preventDefault();
 
@@ -1315,6 +1332,8 @@ javascript: |
             find(':matches("'+ query.replace(/"/, '\\"') +'")');
 
           status.text('').progressbar();
+          var start_button = $('#_search_start').hide();
+          var stop_button = $('#_search_stop').show();
 
           var prev_match;
           var prev_elem;
@@ -1341,7 +1360,7 @@ javascript: |
             prev_elem = elem;
             prev_match = match;
 
-            if (i < n) {
+            if (i < n && !stop_button.attr('clicked')) {
               // timeout allows status updates to appear
               setTimeout(function() { process_match(i + 1, n); }, 0);
             }
@@ -1356,6 +1375,8 @@ javascript: |
               %>.replace('0', num_results));
 
               search_box.removeAttr('disabled');
+              stop_button.hide().removeAttr('clicked');
+              start_button.show();
             }
           }
 
@@ -1490,6 +1511,15 @@ javascript: |
 
     // make external hyperlinks open in a separate window
     $('a[href]').not('[href^=#]').attr('target', '_blank');
+
+    //--------------------------------------------------------------------------
+    // style jQuery UI icons
+    //--------------------------------------------------------------------------
+
+    $('.ui-icon').parent().hover(
+      function() { $(this).addClass('ui-state-hover');    },
+      function() { $(this).removeClass('ui-state-hover'); }
+    );
 
     //--------------------------------------------------------------------------
     // unveil the document
@@ -1875,6 +1905,16 @@ styles: # these are SASS templates
         &.initial
           color: gray
           font-style: italic
+
+      #_search_start, #_search_stop
+        float: right
+
+        // 1:2 ratio
+        margin: 0.1625em
+        padding: 0.325em
+
+        &:hover
+          cursor: pointer
 
 
     #_search
