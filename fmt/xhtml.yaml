@@ -1692,6 +1692,10 @@ styles: # these are SASS templates
         padding-left: 1em
 
 
+    #_references > ol > li
+      margin-bottom: 1em
+
+
     #_footer
       padding-top: 1em
       text-align: center
