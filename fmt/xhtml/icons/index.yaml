@@ -20,3 +20,7 @@ nav_here:   tango-icon-theme-0.8.90/32x32/status/software-update-available.png
 nav_prev:   tango-icon-theme-0.8.90/32x32/actions/go-previous.png
 nav_next:   tango-icon-theme-0.8.90/32x32/actions/go-next.png
 nav_list:   tango-icon-theme-0.8.90/32x32/places/start-here.png
+
+# W3C validator badges
+valid_html: w3.org/valid-xhtml10.png
+valid_css:  w3.org/vcss.gif
