@@ -9,8 +9,8 @@ require 'inochi'
 
 Inochi.init :ERBook,
   :program => 'erbook',
-  :version => '9.2.0',
-  :release => '2009-11-06',
+  :version => '9.2.1',
+  :release => '2009-11-18',
   :website => 'http://snk.tuxfamily.org/lib/erbook/',
   :tagline => 'Write books, manuals, and documents in eRuby',
   :require => {

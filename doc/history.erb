@@ -8,6 +8,29 @@
 
   %|history
 
+    %|section "Version 9.2.1 (2009-11-18)"
+
+      This release fixes some bugs in, and improves the readability and load time of, generated XHTML documents.
+
+
+      %|paragraph "Bug fixes"
+
+        * Prevent search button from starting search when search box untouched.
+
+        * Prevent browser from fetching base-64 embedded URI sources by qualifying their digests with the "cid" URI schema, which is used to identify the parts of a multi-part e-mail message.
+
+          This cuts down on the amount of "404 - File Not Found" errors on the web server which hosts your generated XHTML documents because web browsers will not confuse these embedded "cid" digests as being relative HTTP files.
+
+
+      %|paragraph "Housekeeping"
+
+        * Increase vertical spacing between [References](#_references) for better readability.
+
+        * Embed W3C validator badges as base-64 data URIs to reduce page load time.
+
+        * Split the document processing code in `ERBook::Document` into smaller self-documenting methods.
+
+
     %|section "Version 9.2.0 (2009-11-06)"
 
       This release improves the usability of the JavaScript-based search functionality in the XHTML format and fixes a bug in the **footer** node.
