@@ -7,6 +7,9 @@
 hyperlink:  mediawiki-1.13.2/skins/simple/external.png
 here_frag:  tango-icon-theme-0.8.90/16x16/places/start-here.png
 
+# floats
+command:    tango-icon-theme-0.8.90/48x48/apps/utilities-terminal.png
+
 # admonitions
 important:  tango-icon-theme-0.8.90/48x48/emblems/emblem-important.png
 warning:    tango-icon-theme-0.8.90/48x48/status/dialog-error.png
