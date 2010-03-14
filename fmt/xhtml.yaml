@@ -560,10 +560,12 @@ nodes:
           <%= @node.navigation %>
           <p class="title"><%= @node.ordinal_number_and_title_link %></p>
           <% if ICON_BY_NAME.key? @node.type %>
-            <div class="content">
-              <%= ICON_BY_NAME[@node.type].to_xhtml %>
-              <%= @node.content_xhtml %>
-            </div>
+            <% unless @node.content.join.empty? %>
+              <div class="content">
+                <%= ICON_BY_NAME[@node.type].to_xhtml %>
+                <%= @node.content_xhtml %>
+              </div>
+            <% end %>
           <% else %>
             <%= @node.content_xhtml_div %>
           <% end %>
