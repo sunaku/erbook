@@ -556,7 +556,7 @@ nodes:
           end
         %>
         <%= @node.parent_tabs_begin %>
-        <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
+        <div class="_float <%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <p class="title"><%= @node.ordinal_number_and_title_link %></p>
           <% if ICON_BY_NAME.key? @node.type %>
@@ -1713,7 +1713,7 @@ styles: # these are SASS templates
       margin-top: 0.25em
 
 
-    .paragraph > .title, .tip > .title, .note > .title, .caution > .title, .warning > .title, .important > .title, .figure > .title, .table > .title, .example > .title, .equation > .title, .procedure > .title
+    .paragraph > .title, ._float > .title
       font-size: large
       margin-top: 2em
 
@@ -1722,26 +1722,23 @@ styles: # these are SASS templates
       margin: 1em
 
 
-    .tip, .note, .caution, .warning, .important, .figure, .table, .example, .equation, .procedure
+    ._float
       margin: 3em
 
+      > .content
+        // height of icon
+        min-height: 48px
 
-    .tip .nav, .note .nav, .caution .nav, .warning .nav, .important .nav, .figure .nav, .table .nav, .example .nav, .equation .nav, .procedure .nav
-      margin-right: -3em
+        > .icon
+          float: left
+          margin:
+            top: 0
+            right: 1em
+            bottom: 1em
+            left: 0
 
-
-    .tip > .content, .note > .content, .caution > .content, .warning > .content, .important > .content, .figure > .content, .table > .content, .example > .content, .equation > .content, .procedure > .content
-      // height of icon
-      min-height: 48px
-
-
-    .tip > .content > .icon, .note > .content > .icon, .caution > .content > .icon, .warning > .content > .icon, .important > .content > .icon
-      float: left
-      margin:
-        top: 0
-        right: 1em
-        bottom: 1em
-        left: 0
+      .nav
+        margin-right: -3em
 
 
     .figure >
