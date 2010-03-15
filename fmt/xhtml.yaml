@@ -9,6 +9,8 @@ code: |
   ICONS_DIR  = File.join(ERBook::FORMATS_DIR, 'xhtml', 'icons')
   JQUERY_DIR = File.join(ERBook::FORMATS_DIR, 'xhtml', 'jquery')
 
+  TEXT_ONLY_DIVIDER = %{<div style="display: none"><br/><hr/><br/></div>}
+
   # load the String#to_xhtml methods
   require 'erbook/to_xhtml'
 
@@ -327,7 +329,7 @@ code: |
 
         def parent_tabs_begin #:nodoc:
           if p = parent and pc = p.toc_children and self == pc.first
-            %{<div class="tabs"><ul>} +
+            TEXT_ONLY_DIVIDER + %{<div class="tabs"><ul>} +
 
             pc.map do |c|
               %{<li><a href="##{c.here_frag}">#{c.section_number_and_title_label}</a></li>}
@@ -371,7 +373,7 @@ code: |
           next_link = %{<a title="#{NEXT_TEXT}" href="##{next_frag}">#{NEXT_SIGN}</a>} if next_frag
           list_link = %{<a title="#{LIST_TEXT}" href="##{list_frag}">#{LIST_SIGN}</a>} if list_frag
 
-          %{<a name="#{here_frag}"/><div class="nav">#{here_link} #{prev_link} #{next_link} #{list_link}</div>}
+          TEXT_ONLY_DIVIDER + %{<a name="#{here_frag}"/><div class="nav">#{here_link} #{prev_link} #{next_link} #{list_link}</div>}
         end
 
         ##
@@ -776,12 +778,6 @@ output: |
       </script>
     </head>
     <body>
-      <%
-        text_only_browser_divider = %{
-          <div style="display: none"><br/><hr/><br/></div>
-        }.strip
-      %>
-
       <div id="_loading"></div>
 
       <div id="_body">
@@ -871,7 +867,7 @@ output: |
               </ol>
             </div>
 
-          %= text_only_browser_divider
+          %= TEXT_ONLY_DIVIDER
 
           <div id="_about">
             <p><%=
