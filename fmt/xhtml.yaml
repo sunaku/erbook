@@ -556,12 +556,12 @@ nodes:
           end
         %>
         <%= @node.parent_tabs_begin %>
-        <div class="_float <%= @node.type %>" id="<%= @node.here_frag %>">
+        <div class="_float ui-tabs ui-widget ui-widget-content ui-corner-all <%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
-          <p class="title"><%= @node.ordinal_number_and_title_link %></p>
+          <p class="title ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all"><%= @node.ordinal_number_and_title_link %></p>
           <% if ICON_BY_NAME.key? @node.type %>
             <% unless @node.content.join.empty? %>
-              <div class="content">
+              <div class="content ui-tabs-panel ui-widget-content ui-corner-bottom">
                 <%= ICON_BY_NAME[@node.type].to_xhtml %>
                 <%= @node.content_xhtml %>
               </div>
@@ -1715,7 +1715,7 @@ styles: # these are SASS templates
       margin-top: 0.25em
 
 
-    .paragraph > .title, ._float > .title
+    .paragraph > .title
       font-size: large
       margin-top: 2em
 
@@ -1725,7 +1725,9 @@ styles: # these are SASS templates
 
 
     ._float
-      margin: 3em
+
+      > .title
+        font-size: large
 
       > .content
         // height of icon
@@ -1738,9 +1740,6 @@ styles: # these are SASS templates
             right: 1em
             bottom: 1em
             left: 0
-
-      .nav
-        margin-right: -3em
 
 
     .figure >
@@ -1880,6 +1879,27 @@ styles: # these are SASS templates
       padding-right: 20px
 
 
+    ._float
+      margin: 1.5em
+
+      > .title
+        // center the text within the ui-widget-header background
+        padding-top: 0.5em
+        padding-left: 1em
+        padding-right: 1em
+
+      > .nav
+        position: relative
+        z-index: 1
+
+        // center the icons within the ui-widget-header background
+        top: 0.25em
+        right: 0.25em
+
+      > .content
+        margin: 1em
+
+
     .nav
       float: right
       clear: right
@@ -1891,8 +1911,8 @@ styles: # these are SASS templates
     // make navigation menu appear on the tab bar
     .ui-tabs > .ui-tabs-panel > .nav
       position: relative
-      margin-top: -3.375em
-      margin-right: -1em
+      margin-top: -3.4em
+      margin-right: -1.25em
 
 
     // prevent tabs on tab bar from ovelapping with the above navigation menu
@@ -2032,4 +2052,8 @@ styles: # these are SASS templates
 
     .part > .title > big, .chapter > .title > big
       padding-bottom: 0.5em
+
+
+    ._float
+      margin: 3em
 
