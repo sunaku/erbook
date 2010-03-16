@@ -277,41 +277,40 @@ code: |
         end
 
         ##
-        # Returns a hyperlink to this node containing its title.
+        # Returns a label for this node containing its title.
         #
-        def title_link title = nil
+        def title_label title = nil
           title || title_xhtml
         end
 
         ##
-        # Returns a hyperlink to this node containing its section number.
+        # Returns a label for this node containing its section number.
         #
-        def section_number_link
+        def section_number_label
           section_number
         end
 
         ##
-        # Returns a hyperlink to this node containing its ordinal number.
+        # Returns a label for this node containing its ordinal number.
         #
-        def ordinal_number_link
+        def ordinal_number_label
           [type_label, ordinal_number].compact.join(' ')
         end
 
         ##
-        # Returns a hyperlink to this node containing
+        # Returns a label for this node containing
         # its ocurrence number and its title.
         #
-        def ordinal_number_and_title_link #:nodoc:
-          "#{ordinal_number_link}.&nbsp;&nbsp;#{title_link}"
+        def ordinal_number_and_title_label #:nodoc:
+          %{<span class="section_number">#{ordinal_number_label}.&nbsp;&nbsp;</span>#{title_label}}
         end
 
         ##
-        # Returns a hyperlink to this
-        # node containing its section
-        # number and its title.
+        # Returns a label for this node containing
+        # its section number and its title.
         #
-        def section_number_and_title_link #:nodoc:
-          "#{section_number_link}&nbsp;&nbsp;#{title_link}"
+        def section_number_and_title_label #:nodoc:
+          %{<span class="section_number">#{section_number_label}&nbsp;&nbsp;</span>#{title_label}}
         end
 
         ##
@@ -331,7 +330,7 @@ code: |
             %{<div class="tabs"><ul>} +
 
             pc.map do |c|
-              %{<li><a href="##{c.here_frag}">#{c.title.to_s.to_xhtml}</a></li>}
+              %{<li><a href="##{c.here_frag}">#{c.section_number_and_title_label}</a></li>}
             end.join +
 
             %{</ul>}
@@ -502,9 +501,9 @@ nodes:
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <h1 class="title">
-            <%= @node.type_label %>&nbsp;<%= @node.section_number_link %>
+            <%= @node.type_label %>&nbsp;<%= @node.section_number_label %>
             <br/>
-            <big><%= @node.title_link %></big>
+            <big><%= @node.title_label %></big>
           </h1>
           <%= @node.content_xhtml_div %>
         </div>
@@ -520,7 +519,7 @@ nodes:
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
           <h<%= depth %> class="title">
-            <%= @node.section_number_and_title_link %>
+            <%= @node.section_number_and_title_label %>
           </h<%= depth %>>
           <%= @node.content_xhtml_div %>
         </div>
@@ -535,7 +534,7 @@ nodes:
         <%= @node.parent_tabs_begin %>
         <div class="<%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
-          <p class="title"><%= @node.title_link %></p>
+          <p class="title"><%= @node.title_label %></p>
           <%= @node.content_xhtml_div %>
         </div>
         <%= @node.parent_tabs_end %>
@@ -559,7 +558,7 @@ nodes:
         <%= @node.parent_tabs_begin %>
         <div class="_float ui-tabs ui-widget ui-widget-content ui-corner-all <%= @node.type %>" id="<%= @node.here_frag %>">
           <%= @node.navigation %>
-          <p class="title ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all"><%= @node.ordinal_number_and_title_link %></p>
+          <p class="title ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all"><%= @node.ordinal_number_and_title_label %></p>
           <% if ICON_BY_NAME.key? @node.type %>
             <% unless @node.content.join.empty? %>
               <div class="content ui-tabs-panel ui-widget-content ui-corner-bottom">
@@ -1927,6 +1926,11 @@ styles: # these are SASS templates
     // prevent tabs on tab bar from ovelapping with the above navigation menu
     .ui-tabs > .ui-tabs-nav > li:last-child
       margin-right: 9em
+
+
+    // hide the section number (prefixed before section title) in a tab label
+    .ui-tabs > .ui-tabs-nav > li > a > .section_number
+      display: none
 
 
     #_about > table td:first-child, #_about > .validations
