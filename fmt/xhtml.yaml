@@ -1787,8 +1787,8 @@ styles: # these are SASS templates
 
       // fit container to content; no overflow!
       display: inline-block
+      min-width: 95%
       margin: 0
-      min-width: 92.5%
 
 
     // output of the syntax coloring library
