@@ -1791,6 +1791,11 @@ styles: # these are SASS templates
       margin: 0
 
 
+    // prevent pre blocks from touching tabs containers
+    ins ~ div
+      margin-top: 1.5em
+
+
     // output of the syntax coloring library
     code.para
       cursor: text
