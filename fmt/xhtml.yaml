@@ -751,6 +751,10 @@ output: |
       /*]]>*/
       </style>
 
+      %# convert font-family values from YAML list into CSS list
+      % (fonts = @format['fonts']).each do |family, values|
+        % fonts[family] = values.map {|v| v.to_s.inspect }.push(family).join(', ')
+
       % @format['styles'].each do |style|
         % style.each_pair do |media, sass|
           <style type="text/css" media="<%= media %>">
@@ -1547,9 +1551,26 @@ javascript: |
 
 # definition of font families for use in the CSS styles
 fonts:
-  serif:      Constantia, "Book Antiqua", "URW Bookman L", serif
-  sans-serif: Calibri, Verdana, sans-serif
-  monospace:  Monaco, Consolas, "Lucida Console", monospace
+
+  serif:
+    - DejaVu Serif
+    - Bitstream Vera Serif
+    - Constantia
+    - Book Antiqua
+
+  sans-serif:
+    - DejaVu Sans
+    - Bitstream Vera Sans
+    - Calibri
+    - Verdana
+
+  monospace:
+    - DejaVu Sans Mono
+    - Bitstream Vera Sans Mono
+    - Menlo
+    - Consolas
+    - Lucida Console
+    - Fixedsys
 
 styles: # these are SASS templates
 - all: |
